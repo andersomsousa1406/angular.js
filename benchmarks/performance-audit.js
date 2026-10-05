@@ -89,6 +89,15 @@
     }, 1);
   });
 
+  [1000, 10000, 50000].forEach(function(count) {
+    measure('AST only: array of ' + count + ' identifiers', function() {
+      var values = [];
+      for (var i = 0; i < count; i++) values.push('v' + i);
+      var expression = '[' + values.join(',') + ']';
+      return {run: function() { parse.$$getAst(expression); }, clean: noop};
+    }, 1);
+  });
+
   ['live', 'one-time'].forEach(function(mode) {
     measure('stable digest: ngRepeat 1000 rows, ' + mode + ' binding', function() {
       var scope = root.$new();

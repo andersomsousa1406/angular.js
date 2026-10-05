@@ -6,6 +6,11 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse:** consume tokens with a cursor instead of shifting the remaining array;
+  clear token references after consumption and release storage after syntax errors.
+- **$rootScope:** release scope and watcher references held by used watch cancellation
+  functions while preserving repeated cancellation and digest ordering.
+
 - **$compile:** sanitize `source[srcset]` interpolation and `ng-attr-srcset`
   according to the configured media URL policy (CVE-2024-8373).
 - **$compile:** split srcset separators in linear time to prevent regular expression

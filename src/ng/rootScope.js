@@ -424,12 +424,17 @@ function $RootScopeProvider() {
         incrementWatchersCount(this, 1);
 
         return function deregisterWatch() {
-          var index = arrayRemove(array, watcher);
-          if (index >= 0) {
-            incrementWatchersCount(scope, -1);
-            if (index < array.$$digestWatchIndex) {
-              array.$$digestWatchIndex--;
+          if (watcher) {
+            var index = arrayRemove(array, watcher);
+            if (index >= 0) {
+              incrementWatchersCount(scope, -1);
+              if (index < array.$$digestWatchIndex) {
+                array.$$digestWatchIndex--;
+              }
             }
+            // A retained cancellation function must not keep the scope, its remaining
+            // watchers, or the last watched value alive after it has been used.
+            scope = array = watcher = null;
           }
           lastDirtyWatch = null;
         };

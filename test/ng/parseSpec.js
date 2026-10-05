@@ -267,6 +267,34 @@ describe('parser', function() {
       expect(createAst('')).toEqual({type: 'Program', body: []});
     });
 
+    it('should preserve token order in large expressions', function() {
+      var identifiers = [];
+      for (var i = 0; i < 1000; i++) identifiers.push('value' + i);
+      var elements = createAst('[' + identifiers.join(',') + ']').body[0].expression.elements;
+      expect(elements.length).toBe(identifiers.length);
+      forEach(elements, function(element, index) {
+        expect(element.name).toBe(identifiers[index]);
+      });
+    });
+
+    it('should release token storage and reset the cursor between parses', function() {
+      var lexer = new Lexer({csp: false});
+      var parser = new AST(lexer, {literals: {}});
+      expect(parser.ast('a').body[0].expression.name).toBe('a');
+      expect(lexer.tokens.length).toBe(0);
+      expect(parser.ast('b.c').body[0].expression.property.name).toBe('c');
+      expect(lexer.tokens.length).toBe(0);
+    });
+
+    it('should preserve syntax errors and release unconsumed tokens after failure', function() {
+      var lexer = new Lexer({csp: false});
+      var parser = new AST(lexer, {literals: {}});
+      expect(function() { parser.ast('a b'); }).toThrowMinErr('$parse', 'syntax',
+        'Syntax Error: Token \'b\' is an unexpected token at column 3 of the expression [a b] starting at [b].');
+      expect(lexer.tokens.length).toBe(0);
+      expect(parser.ast('c').body[0].expression.name).toBe('c');
+    });
+
 
     it('should understand identifiers', function() {
       expect(createAst('foo')).toEqual(

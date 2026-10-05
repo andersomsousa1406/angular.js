@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<title>AngularJS: retenção de memória</title>
+<h1>Retenção após remover watchers</h1>
+<p>Requer Chrome com --js-flags=--expose-gc --enable-precise-memory-info.
+Mantém funções de cancelamento após destruir 1.000 scopes com 5.000 valores cada.</p>
+<pre id="results">Executando...</pre>
+<script src="../build/angular.js"></script>
+<script src="memory-audit.js"></script>
+</html>

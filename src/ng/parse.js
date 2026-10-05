@@ -298,20 +298,26 @@ AST.prototype = {
   ast: function(text) {
     this.text = text;
     this.tokens = this.lexer.lex(text);
+    this.tokenIndex = 0;
 
-    var value = this.program();
+    try {
+      var value = this.program();
 
-    if (this.tokens.length !== 0) {
-      this.throwError('is an unexpected token', this.tokens[0]);
+      if (this.tokenIndex < this.tokens.length) {
+        this.throwError('is an unexpected token', this.tokens[this.tokenIndex]);
+      }
+
+      return value;
+    } finally {
+      // The lexer shares this array. Release its storage, including after syntax errors.
+      this.tokens.length = 0;
     }
-
-    return value;
   },
 
   program: function() {
     var body = [];
     while (true) {
-      if (this.tokens.length > 0 && !this.peek('}', ')', ';', ']'))
+      if (this.tokenIndex < this.tokens.length && !this.peek('}', ')', ';', ']'))
         body.push(this.expressionStatement());
       if (!this.expect(';')) {
         return { type: AST.Program, body: body};
@@ -558,7 +564,7 @@ AST.prototype = {
   },
 
   consume: function(e1) {
-    if (this.tokens.length === 0) {
+    if (this.tokenIndex >= this.tokens.length) {
       throw $parseMinErr('ueoe', 'Unexpected end of expression: {0}', this.text);
     }
 
@@ -570,10 +576,10 @@ AST.prototype = {
   },
 
   peekToken: function() {
-    if (this.tokens.length === 0) {
+    if (this.tokenIndex >= this.tokens.length) {
       throw $parseMinErr('ueoe', 'Unexpected end of expression: {0}', this.text);
     }
-    return this.tokens[0];
+    return this.tokens[this.tokenIndex];
   },
 
   peek: function(e1, e2, e3, e4) {
@@ -581,6 +587,7 @@ AST.prototype = {
   },
 
   peekAhead: function(i, e1, e2, e3, e4) {
+    i += this.tokenIndex;
     if (this.tokens.length > i) {
       var token = this.tokens[i];
       var t = token.text;
@@ -595,7 +602,9 @@ AST.prototype = {
   expect: function(e1, e2, e3, e4) {
     var token = this.peek(e1, e2, e3, e4);
     if (token) {
-      this.tokens.shift();
+      // Advancing a cursor avoids shifting every remaining token. Clear consumed
+      // entries so token objects can be collected as soon as they are no longer used.
+      this.tokens[this.tokenIndex++] = null;
       return token;
     }
     return false;

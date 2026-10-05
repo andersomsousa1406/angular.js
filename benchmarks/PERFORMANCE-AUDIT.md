@@ -61,6 +61,44 @@ depois, no mesmo navegador/máquina, e repetir processos para reduzir efeitos de
 As medições desta revisão foram repetidas em processos do Chrome; o custo alto de
 registro concentrado e de watches profundos apareceu em ambas as execuções.
 
-Nenhuma otimização foi aplicada ao runtime nesta auditoria. A primeira melhoria interna
-recomendada para um experimento é o registro de watchers, acompanhada de testes da
-ordem e das mutações durante o digest e comparação com esses benchmarks.
+## Otimizações internas validadas
+
+Após a auditoria inicial, foram implementadas duas mudanças sem alterar os resultados
+das expressões nem a ordem de execução dos watchers:
+
+- O parser consome tokens por cursor, limpa referências consumidas e esvazia o array
+  ao concluir a AST, inclusive em erros de sintaxe. Evita deslocar todos os tokens a
+  cada consumo. O benchmark agora inclui `$$getAst()` para medir lexer + AST separados
+  da geração de código e do cache.
+- Funções de cancelamento de watchers liberam suas referências ao scope, array de
+  watchers e watcher após o primeiro uso. Chamadas repetidas continuam válidas e o
+  reset de `lastDirtyWatch` continua ocorrendo em todas as chamadas.
+
+| Medição no Chrome 154 | Original | Otimizado |
+| --- | ---: | ---: |
+| Lexer + AST, array de 1.000 identificadores | 0,3 ms | 0,4 ms |
+| Lexer + AST, array de 10.000 identificadores | 3,8 ms | 3,5 ms |
+| Lexer + AST, array de 50.000 identificadores | 406,6 ms | 17,8 ms |
+| Heap retido por cancelamentos já usados | 20.462.456 bytes | 150.376 bytes |
+
+Não há ganho demonstrado em expressões pequenas: diferenças submilissegundo estão
+na faixa de variação. O parsing completo de 10 mil identificadores ficou perto de
+82 ms contra aproximadamente 87 ms na auditoria inicial; o ganho expressivo ocorre
+na etapa de tokens em entradas extremas, não em todo parsing cotidiano.
+
+A comparação da AST usou o mesmo build com o corpo do parser substituído pelo original
+de `HEAD` em uma cópia temporária, preservando as demais mudanças. Ambos os cenários
+usaram sete amostras após aquecimento. O benchmark Node isolado não foi usado para
+as conclusões, pois o motor legado apresentou custos distintos do Chrome.
+
+Para repetir a medição de memória, abrir `benchmarks/memory-audit.html` no Chrome
+iniciado com `--js-flags=--expose-gc --enable-precise-memory-info`. O cenário mantém
+1.000 funções de cancelamento após cancelar watchers e destruir seus scopes,
+cada um contendo um array de 5.000 valores. As duas medidas são deltas após GC,
+em processos separados. Representam retenção evitável nesse cenário, não uma redução
+de memória de toda aplicação.
+
+Validação: lint dos arquivos alterados e `yarn.cmd grunt test:unit --browsers=ChromeHeadless`
+passaram, com 26.448 execuções. Foram acrescentados testes de ordem de tokens, reutilização
+do parser após erros, limpeza de tokens e cancelamentos repetidos antes/depois de destruir
+scopes. A suíte existente cobre remoção e inclusão de watchers durante o digest.

@@ -677,6 +677,33 @@ describe('Scope', function() {
 
     describe('$watch deregistration', function() {
 
+      it('should allow repeated cancellation without removing other watchers', inject(function($rootScope) {
+        var child = $rootScope.$new();
+        var removed = jasmine.createSpy('removed');
+        var remaining = jasmine.createSpy('remaining');
+        var cancel = child.$watch('value', removed);
+        child.$watch('value', remaining);
+        cancel();
+        cancel();
+        expect(child.$$watchersCount).toBe(1);
+        expect($rootScope.$$watchersCount).toBe(1);
+        child.value = 1;
+        child.$digest();
+        expect(removed).not.toHaveBeenCalled();
+        expect(remaining).toHaveBeenCalledOnce();
+        child.$destroy();
+        expect(cancel).not.toThrow();
+      }));
+
+      it('should allow repeated cancellation after destroying the scope', inject(function($rootScope) {
+        var child = $rootScope.$new();
+        var cancel = child.$watch('value', function() {});
+        child.$destroy();
+        expect(cancel).not.toThrow();
+        expect(cancel).not.toThrow();
+        expect($rootScope.$$watchersCount).toBe(0);
+      }));
+
       it('should return a function that allows listeners to be deregistered', inject(
           function($rootScope) {
         var listener = jasmine.createSpy('watch listener'),

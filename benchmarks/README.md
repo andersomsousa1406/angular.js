@@ -8,3 +8,6 @@ The existing `grunt webserver` task can be used to serve the built benchmarks at
 For a local audit without Benchpress, run `yarn.cmd grunt build:angular` and open
 `benchmarks/performance-audit.html`. See [PERFORMANCE-AUDIT.md](PERFORMANCE-AUDIT.md)
 for measured results, methodology, limitations and optimization candidates.
+
+For retained-memory measurements, open `benchmarks/memory-audit.html` in Chrome
+started with `--js-flags=--expose-gc --enable-precise-memory-info`.
