@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$compile:** drain asynchronous template links with a cursor and clear consumed
+  references, preserving FIFO linking and additions during linking.
+
 - **build:** retain compiler debug information in all core builds, including
   `--production`, to preserve applications using `element.scope()` and `element.isolateScope()`.
 

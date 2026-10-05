@@ -189,3 +189,20 @@ Testes adicionais cobrem substituição do último watcher durante o digest, rem
 após compactação e recriação de um id de cache LRU destruído.
 Lint e `yarn.cmd grunt test:unit --browsers=ChromeHeadless` passaram na versão final,
 totalizando 26.480 execuções em sete suítes.
+
+
+## Fila de templates assincronos
+
+`$compile` passa a consumir os quatro campos de cada linking por cursor, sem
+`shift()` repetido. As entradas consumidas sao limpas antes do linking, incluindo
+scopes destruidos. Instancias adicionadas durante o linking continuam na mesma fila.
+O cursor pertence a compilacao, preservando entradas restantes se houver erro.
+
+No Chrome 154, a mediana de sete amostras apos aquecimento para processar 5.000
+clones aguardando um template em cache caiu de 21,6 ms para 15,8 ms. O tempo inclui
+linking e digest, mas exclui criar a fila e limpar clones. Carga sintetica; nao
+representa uma tela real. Comparacao com o build anterior salvo antes das alteracoes.
+Reproduzir com `queue-audit.html` apos gerar o core. O benchmark tambem mede rejeicoes.
+
+Validacao conjunta das filas: sete suites unitarias, 26.500 execucoes aprovadas.
+Novo teste cobre FIFO, scopes destruidos e clones adicionados durante linking.

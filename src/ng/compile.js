@@ -3672,6 +3672,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
     function compileTemplateUrl(directives, $compileNode, tAttrs,
         $rootElement, childTranscludeFn, preLinkFns, postLinkFns, previousCompileContext) {
       var linkQueue = [],
+          linkQueuePosition = 0,
           afterTemplateNodeLinkFn,
           afterTemplateChildLinkFn,
           beforeTemplateCompileNode = $compileNode[0],
@@ -3734,12 +3735,18 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
           });
           afterTemplateChildLinkFn = compileNodes($compileNode[0].childNodes, childTranscludeFn);
 
-          while (linkQueue.length) {
-            var scope = linkQueue.shift(),
-                beforeTemplateLinkNode = linkQueue.shift(),
-                linkRootElement = linkQueue.shift(),
-                boundTranscludeFn = linkQueue.shift(),
+          while (linkQueuePosition < linkQueue.length) {
+            var scope = linkQueue[linkQueuePosition],
+                beforeTemplateLinkNode = linkQueue[linkQueuePosition + 1],
+                linkRootElement = linkQueue[linkQueuePosition + 2],
+                boundTranscludeFn = linkQueue[linkQueuePosition + 3],
                 linkNode = $compileNode[0];
+
+            // Release consumed entries before linking, including destroyed scopes.
+            linkQueue[linkQueuePosition++] = null;
+            linkQueue[linkQueuePosition++] = null;
+            linkQueue[linkQueuePosition++] = null;
+            linkQueue[linkQueuePosition++] = null;
 
             if (scope.$$destroyed) continue;
 

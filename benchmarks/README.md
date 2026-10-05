@@ -11,3 +11,6 @@ for measured results, methodology, limitations and optimization candidates.
 
 For retained-memory measurements, open `benchmarks/memory-audit.html` in Chrome
 started with `--js-flags=--expose-gc --enable-precise-memory-info`.
+
+For template linking and promise rejection queues, open `benchmarks/queue-audit.html`
+after building the core. It checks task counts and reports seven-sample medians.

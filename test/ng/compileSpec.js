@@ -3,6 +3,37 @@
 /* eslint-disable no-script-url */
 
 describe('$compile', function() {
+  it('should link queued template clones in order including reentrant additions', function() {
+    var calls = [], template, pending = [], appended = false;
+    module(function($compileProvider) {
+      $compileProvider.directive('queuedAudit', function() {
+        return {templateUrl: 'queued-audit.html', link: function(scope) {
+          calls.push(scope.id);
+          if (!appended) {
+            appended = true;
+            var next = scope.$parent.$new();
+            next.id = 'added';
+            pending.push(template(next, noop));
+          }
+        }};
+      });
+    });
+    inject(function($compile, $rootScope, $httpBackend) {
+      $httpBackend.expectGET('queued-audit.html').respond('<span>{{id}}</span>');
+      template = $compile('<div queued-audit></div>');
+      for (var i = 0; i < 3; i++) {
+        var child = $rootScope.$new();
+        child.id = i;
+        pending.push(template(child, noop));
+        if (i === 1) child.$destroy();
+      }
+      $httpBackend.flush();
+      expect(calls).toEqual([0, 2, 'added']);
+      forEach(pending, function(clone) { clone.remove(); });
+      $rootScope.$destroy();
+    });
+  });
+
   var document = window.document;
 
   function isUnknownElement(el) {
