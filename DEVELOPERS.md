@@ -19,7 +19,8 @@ machine:
 * [Git](http://git-scm.com/): The [Github Guide to
   Installing Git][git-setup] is a good source of information.
 
-* [Node.js v8.x (LTS)](http://nodejs.org): We use Node to generate the documentation, run a
+* [Node.js v14.16.1](https://nodejs.org): Use the version pinned in `.nvmrc` and CI to reproduce
+  this legacy project's build environment. We use Node to generate the documentation, run a
   development web server, run tests, and generate distributable files. Depending on your system,
   you can install Node either from source or as a pre-packaged bundle.
 
@@ -27,8 +28,22 @@ machine:
   [nvm-windows](https://github.com/coreybutler/nvm-windows))
   to manage and install Node.js, which makes it easy to change the version of Node.js per project.
 
-* [Yarn](https://yarnpkg.com): We use Yarn to install our Node.js module dependencies
+* [Yarn Classic (1.x)](https://classic.yarnpkg.com): We use Yarn to install our Node.js module dependencies
   (rather than using npm). See the detailed [installation instructions][yarn-install].
+
+  On Windows with nvm-windows, prepare the environment from the repository directory:
+
+  ```powershell
+  nvm install 14.16.1
+  nvm use 14.16.1
+  npm install --global yarn@1.22.22
+  yarn.cmd install --frozen-lockfile --non-interactive
+  ```
+
+  Node 14 is no longer supported; this pin reproduces the legacy build while migration
+  to a supported Node version is evaluated separately.
+  Run `nvm use` in an Administrator terminal if Windows denies access to the Node symlink.
+  Use `yarn.cmd` when PowerShell's execution policy blocks `yarn.ps1`.
 
 * [Java](http://www.java.com): We minify JavaScript using
   [Closure Tools](https://developers.google.com/closure/), which require Java (version 7 or higher)

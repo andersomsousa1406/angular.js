@@ -362,12 +362,58 @@ describe('SCE', function() {
         expect(adjustMatcher(/^a.*b$/).exec('-a.b-')).toBeNull();
       });
 
+      it('should anchor every alternative without changing capture groups', function() {
+        var matcher = adjustMatcher(/(a)\1|b/);
+        expect(matcher.test('aa')).toBe(true);
+        expect(matcher.test('b')).toBe(true);
+        expect(matcher.test('aax')).toBe(false);
+        expect(matcher.test('xb')).toBe(false);
+      });
+
+      it('should reset regex flags', function() {
+        var matcher = adjustMatcher(/a|b/gim);
+        expect(matcher.test('A')).toBe(false);
+        expect(matcher.test('x\nb')).toBe(false);
+        expect(matcher.test('b')).toBe(true);
+        expect(matcher.test('b')).toBe(true);
+      });
+
       it('should should match * and **', function() {
         expect(adjustMatcher('*://*.example.com/**').exec('http://www.example.com/path')).not.toBeNull();
       });
     });
 
     describe('regex matcher', function() {
+      it('should reject partial matches in trusted alternatives', runTest(
+        {
+          trustedUrls: [/https:\/\/better\.com\/script\.js|https:\/\/good\.com\/script\.js/]
+        }, function($sce) {
+          angular.forEach(['https://better.com/script.js', 'https://good.com/script.js'], function(url) {
+            expect($sce.getTrustedResourceUrl(url)).toBe(url);
+          });
+          angular.forEach([
+            'https://better.com/script.js.evil',
+            'https://evil.com/script.js#https://good.com/script.js',
+            'data:text/javascript,alert(1)//https://good.com/script.js'
+          ], function(url) {
+            expect(function() { $sce.getTrustedResourceUrl(url); }).toThrowMinErr('$sce', 'insecurl');
+          });
+        }
+      ));
+
+      it('should match entire URLs in banned alternatives', runTest(
+        {
+          trustedUrls: ['**'],
+          bannedUrls: [/https:\/\/better\.com\/script\.js|https:\/\/good\.com\/script\.js/]
+        }, function($sce) {
+          angular.forEach(['https://better.com/script.js', 'https://good.com/script.js'], function(url) {
+            expect(function() { $sce.getTrustedResourceUrl(url); }).toThrowMinErr('$sce', 'insecurl');
+          });
+          var url = 'https://other.com/script.js#https://good.com/script.js';
+          expect($sce.getTrustedResourceUrl(url)).toBe(url);
+        }
+      ));
+
       it('should support custom regex', runTest(
         {
           trustedUrls: [/^http:\/\/example\.com\/.*/],
