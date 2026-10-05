@@ -11488,7 +11488,53 @@ describe('$compile', function() {
     });
   });
 
+  describe('source[srcset] sanitization', function() {
+    forEach(['srcset', 'ng-attr-srcset'], function(attribute) {
+      it('should sanitize every URL in ' + attribute + ' against the media policy', function() {
+        module(function($compileProvider) {
+          $compileProvider.imgSrcSanitizationTrustedUrlList(/^https:\/\/allowed\.example\//);
+        });
+        inject(function($compile, $rootScope) {
+          element = $compile('<source ' + attribute + '="{{urls}}">')($rootScope);
+          $rootScope.urls = 'https://allowed.example/a.png 1x, https://other.example/b.png 2x';
+          $rootScope.$digest();
+          expect(element.attr('srcset')).toBe(
+            'https://allowed.example/a.png 1x,unsafe:https://other.example/b.png 2x');
+
+          $rootScope.urls = 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=';
+          $rootScope.$digest();
+          expect(element.attr('srcset')).toMatch(
+            /^unsafe:data:image\/svg\+xml;base64 ,unsafe:.*\/PHN2Zz48L3N2Zz4=$/);
+        });
+      });
+    });
+  });
+
   describe('img[srcset] sanitization', function() {
+    forEach(['img', 'source'], function(tag) {
+      forEach(['srcset', 'ng-srcset', 'ng-prop-srcset'], function(attribute) {
+        it('should handle long malformed descriptors in ' + tag + '[' + attribute + ']',
+          inject(function($compile, $rootScope) {
+            var binding = attribute === 'ng-prop-srcset' ? 'testUrl' : '{{testUrl}}';
+            element = $compile('<' + tag + ' ' + attribute + '="' + binding + '">')($rootScope);
+            var uri = 'https://example.com/image.png';
+            var whitespace = new Array(50001).join(' ');
+            var digits = new Array(50001).join('1');
+            var testSet = [
+              [uri + whitespace + '1x!', uri],
+              [uri + ' ' + digits + 'x!', uri + ' ' + digits + 'x!'],
+              [uri + ' 1x' + whitespace + '!', uri]
+            ];
+            forEach(testSet, function(testCase) {
+              $rootScope.testUrl = testCase[0];
+              $rootScope.$digest();
+              expect(element.attr('srcset')).toBe(testCase[1]);
+            });
+          })
+        );
+      });
+    });
+
     it('should not error if srcset is undefined', function() {
       var linked = false;
       module(function() {

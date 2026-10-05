@@ -4,6 +4,13 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 **Visit [angular.io](https://angular.io) for the actively supported Angular.**
 
+## Fork: unreleased
+
+- **$compile:** sanitize `source[srcset]` interpolation and `ng-attr-srcset`
+  according to the configured media URL policy (CVE-2024-8373).
+- **$compile:** split srcset separators in linear time to prevent regular expression
+  denial of service from long malformed descriptors (CVE-2024-21490).
+
 <a name="1.8.3"></a>
 # 1.8.3 ultimate-farewell (2022-04-07)
 

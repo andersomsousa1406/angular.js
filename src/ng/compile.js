@@ -2078,6 +2078,55 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
     }
 
 
+    function splitSrcset(value) {
+      if (!/\s/.test(value)) {
+        return value.split(/(,)/);
+      }
+
+      // Match the legacy separators without retrying a regex at every whitespace
+      // character. Each whitespace/digit run is scanned at most twice (CVE-2024-21490).
+      var parts = [];
+      var start = 0;
+      var pos = 0;
+      while (pos < value.length) {
+        var end = pos;
+        if (/\s/.test(value.charAt(pos))) {
+          while (/\s/.test(value.charAt(end))) end++;
+          var whitespaceEnd = end;
+          while (/[0-9]/.test(value.charAt(end))) end++;
+          if (end > whitespaceEnd && /[xw]/.test(value.charAt(end))) {
+            end++;
+            while (/\s/.test(value.charAt(end))) end++;
+            if (value.charAt(end) === ',') {
+              end++;
+            } else {
+              end = whitespaceEnd;
+            }
+          } else {
+            end = whitespaceEnd;
+          }
+          if (end === whitespaceEnd) {
+            if (value.charAt(end) === ',') {
+              end++;
+            } else {
+              pos = end;
+              continue;
+            }
+          }
+        } else if (value.charAt(pos) === ',' && /\s/.test(value.charAt(pos + 1))) {
+          end++;
+          while (/\s/.test(value.charAt(end))) end++;
+        } else {
+          pos++;
+          continue;
+        }
+        parts.push(value.slice(start, pos), value.slice(pos, end));
+        start = pos = end;
+      }
+      parts.push(value.slice(start));
+      return parts;
+    }
+
     function sanitizeSrcset(value, invokeType) {
       if (!value) {
         return value;
@@ -2096,14 +2145,10 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
 
       var result = '';
 
-      // first check if there are spaces because it's not the same pattern
       var trimmedSrcset = trim(value);
-      //                (   999x   ,|   999w   ,|   ,|,   )
-      var srcPattern = /(\s+\d+x\s*,|\s+\d+w\s*,|\s+,|,\s+)/;
-      var pattern = /\s/.test(trimmedSrcset) ? srcPattern : /(,)/;
 
       // split srcset into tuple of uri and descriptor except for the last item
-      var rawUris = trimmedSrcset.split(pattern);
+      var rawUris = splitSrcset(trimmedSrcset);
 
       // for each tuples
       var nbrUrisWith2parts = Math.floor(rawUris.length / 2);
@@ -2264,8 +2309,8 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
 
         nodeName = nodeName_(this.$$element);
 
-        // Sanitize img[srcset] values.
-        if (nodeName === 'img' && key === 'srcset') {
+        // Sanitize img[srcset] and source[srcset] values (CVE-2024-8373).
+        if ((nodeName === 'img' || nodeName === 'source') && key === 'srcset') {
           this[key] = value = sanitizeSrcset(value, '$set(\'srcset\', value)');
         }
 
