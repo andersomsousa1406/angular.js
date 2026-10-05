@@ -5,6 +5,32 @@ describe('Scope', function() {
   beforeEach(module(provideLog));
 
 
+  forEach(['$emit', '$broadcast'], function(method) {
+    it('should compact consecutive cancellations before nested ' + method, inject(function($rootScope) {
+      var scope = $rootScope.$new(), calls = [], nested = false;
+      var cancelA = scope.$on('compact', noop);
+      var cancelB = scope.$on('compact', noop);
+      scope.$on('compact', function() {
+        calls.push(nested ? 'nested first' : 'first');
+        if (!nested) {
+          nested = true;
+          scope[method]('compact');
+          nested = false;
+        }
+      });
+      var cancelLast = scope.$on('compact', function() { calls.push('last'); });
+      cancelA();
+      cancelB();
+      scope[method]('compact');
+      expect(calls).toEqual(['first', 'nested first', 'last', 'last']);
+      cancelLast();
+      calls.length = 0;
+      scope[method]('compact');
+      expect(calls).toEqual(['first', 'nested first']);
+      scope.$destroy();
+    }));
+  });
+
   describe('$root', function() {
     it('should point to itself', inject(function($rootScope) {
       expect($rootScope.$root).toEqual($rootScope);

@@ -285,3 +285,33 @@ de alocacao/GC; tempos do modo completo nao devem ser atribuidos apenas ao HTTP.
 Nenhuma medicao de heap foi feita. Novo teste verifica getters e ordem de execucao;
 testes existentes de rejeicoes, recuperacao e requisicoes pendentes passaram.
 Validacao conjunta: 26.520 testes, repeticao final jqLite com 6.253, lint aprovado.
+
+
+## Compactacao de listeners em emit e broadcast
+
+A propagacao agrupa somente entradas removidas consecutivas ja encontradas na
+posicao atual e faz um unico `splice()` para esse trecho. Nao compactar antes do
+primeiro callback nem mudar o limite capturado do percurso. Dessa forma, eventos
+aninhados observam a mesma lista que anteriormente, sem metadados adicionais.
+Remocoes intercaladas ainda podem exigir multiplos deslocamentos.
+
+Benchmark com 20.000 listeners cancelados consecutivos seguidos por 5.000 ativos;
+somente o dispatch e medido, excluindo registros/cancelamentos. Sete amostras apos
+aquecimento em Chrome 154, duas rodadas invertendo a ordem dos builds:
+
+| Evento | Antes (duas rodadas) | Depois (duas rodadas) |
+| --- | ---: | ---: |
+| emit | 173,3 / 133,0 ms | 0,2 / 0,2 ms |
+| broadcast | 82,8 / 81,4 ms | 0,2 / 0,1 ms |
+
+Variacao entre processos significativa. Esta carga extrema favorece o agrupamento;
+nao representa o custo normal de emitir eventos, nem cancela listeners mais rapido.
+Benchmark `internal-audit.html` confere os 5.000 callbacks executados.
+
+300 sequencias deterministicas em processos isolados por iframe compararam o
+build anterior e candidato. Traces identicas para inclusoes, cancelamentos
+repetidos, erros, eventos aninhados, stopPropagation/preventDefault, scopes
+visitados, flags retornadas e estado final das listas. Harness e snapshots locais
+em `tmp/events-differential.html` (nao versionados). Testes novos cobrem trechos
+cancelados e reentrada nos dois metodos. Validacao conjunta: 26.520 testes em sete
+suites e 6.253 na repeticao final jqLite, lint e whitespace aprovados.

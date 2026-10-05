@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$rootScope:** remove consecutive empty event listener slots in one splice
+  during emit/broadcast, preserving nested dispatch and mutation ordering.
+
 - **$http:** collect request interceptor pairs with push and traverse in reverse;
   skip temporary interceptor arrays when no interceptors are configured.
 

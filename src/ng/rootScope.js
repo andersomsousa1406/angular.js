@@ -1377,7 +1377,7 @@ function $RootScopeProvider() {
               defaultPrevented: false
             },
             listenerArgs = concat([event], arguments, 1),
-            i, length;
+            i, length, removed;
 
         do {
           namedListeners = scope.$$listeners[name] || empty;
@@ -1386,9 +1386,11 @@ function $RootScopeProvider() {
 
             // if listeners were deregistered, defragment the array
             if (!namedListeners[i]) {
-              namedListeners.splice(i, 1);
+              removed = 1;
+              while (i + removed < length && !namedListeners[i + removed]) removed++;
+              namedListeners.splice(i, removed);
               i--;
-              length--;
+              length -= removed;
               continue;
             }
             try {
@@ -1449,7 +1451,7 @@ function $RootScopeProvider() {
         if (!target.$$listenerCount[name]) return event;
 
         var listenerArgs = concat([event], arguments, 1),
-            listeners, i, length;
+            listeners, i, length, removed;
 
         //down while you can, then up and next sibling or up and next sibling until back at root
         while ((current = next)) {
@@ -1458,9 +1460,11 @@ function $RootScopeProvider() {
           for (i = 0, length = listeners.length; i < length; i++) {
             // if listeners were deregistered, defragment the array
             if (!listeners[i]) {
-              listeners.splice(i, 1);
+              removed = 1;
+              while (i + removed < length && !listeners[i + removed]) removed++;
+              listeners.splice(i, removed);
               i--;
-              length--;
+              length -= removed;
               continue;
             }
 
