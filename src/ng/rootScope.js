@@ -834,6 +834,7 @@ function $RootScopeProvider() {
           for (var asyncQueuePosition = 0; asyncQueuePosition < asyncQueue.length; asyncQueuePosition++) {
             try {
               asyncTask = asyncQueue[asyncQueuePosition];
+              asyncQueue[asyncQueuePosition] = null;
               fn = asyncTask.fn;
               fn(asyncTask.scope, asyncTask.locals);
             } catch (e) {
@@ -917,7 +918,10 @@ function $RootScopeProvider() {
         // postDigestQueuePosition isn't local here because this loop can be reentered recursively.
         while (postDigestQueuePosition < postDigestQueue.length) {
           try {
-            postDigestQueue[postDigestQueuePosition++]();
+            var postDigestTask = postDigestQueue[postDigestQueuePosition];
+            postDigestQueue[postDigestQueuePosition++] = null;
+            postDigestTask.call(postDigestQueue);
+            postDigestTask = null;
           } catch (e) {
             $exceptionHandler(e);
           }

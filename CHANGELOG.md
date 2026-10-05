@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$rootScope:** clear consumed evalAsync and postDigest entries before executing
+  callbacks, preserving scheduling, reentrant processing and callback context.
+
 - **$compile:** drain asynchronous template links with a cursor and clear consumed
   references, preserving FIFO linking and additions during linking.
 

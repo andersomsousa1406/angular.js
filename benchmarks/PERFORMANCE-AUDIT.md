@@ -206,3 +206,20 @@ Reproduzir com `queue-audit.html` apos gerar o core. O benchmark tambem mede rej
 
 Validacao conjunta das filas: sete suites unitarias, 26.500 execucoes aprovadas.
 Novo teste cobre FIFO, scopes destruidos e clones adicionados durante linking.
+
+
+## Referencias consumidas de evalAsync e postDigest
+
+As filas deixam de manter tarefas ja consumidas enquanto os callbacks seguintes
+executam. Cada entrada vira `null` antes da chamada. O cursor compartilhado de
+postDigest, o contexto `this` original dos callbacks, erros e tarefas acrescentadas
+continuam preservados; a frequencia de digest nao muda.
+
+Os testes verificam a limpeza das entradas, novas tarefas e digest reentrante.
+A suite completa passou e a suite jqLite foi repetida apos reforcar a preservacao
+de `this`: 6.248 testes aprovados. Lint dos arquivos alterados aprovado com
+terminadores Windows. O lint global encontrou CRLF em arquivos nao alterados.
+Nao foi medido ganho de heap apos GC; esta mudanca reduz referencias na fila
+durante o processamento, nao garante reducao da memoria total da aplicacao.
+As filas privadas `$$asyncQueue` e `$$postDigestQueue` exibem entradas consumidas
+como `null` durante callbacks; aplicacoes nao devem depender dessas entradas internas.

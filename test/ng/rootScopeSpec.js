@@ -2522,6 +2522,32 @@ describe('Scope', function() {
   });
 
   describe('$$postDigest', function() {
+    it('should release consumed queue entries before reentrant callbacks', inject(function($rootScope) {
+      var calls = [];
+      $rootScope.$$postDigest(function() {
+        expect($rootScope.$$postDigestQueue[0]).toBe(null);
+        expect(this).toBe($rootScope.$$postDigestQueue);
+        calls.push('first');
+        $rootScope.$digest();
+      });
+      $rootScope.$$postDigest(function() { calls.push('second'); });
+      $rootScope.$digest();
+      expect(calls).toEqual(['first', 'second']);
+      expect($rootScope.$$postDigestQueue.length).toBe(0);
+    }));
+
+    it('should release evalAsync entries and process newly appended tasks', inject(function($rootScope) {
+      var calls = [];
+      $rootScope.$evalAsync(function() {
+        expect($rootScope.$$asyncQueue[0]).toBe(null);
+        calls.push('first');
+        $rootScope.$evalAsync(function() { calls.push('second'); });
+      });
+      $rootScope.$digest();
+      expect(calls).toEqual(['first', 'second']);
+      expect($rootScope.$$asyncQueue.length).toBe(0);
+    }));
+
     it('should process callbacks as a queue (FIFO) when the scope is digested', inject(function($rootScope) {
       var signature = '';
 
