@@ -677,6 +677,45 @@ describe('Scope', function() {
 
     describe('$watch deregistration', function() {
 
+      it('should evaluate a replacement for the last watcher before visiting child scopes', inject(function($rootScope) {
+        var calls = [];
+        var child = $rootScope.$new();
+        var cancel = $rootScope.$watch('value', function() {
+          calls.push('original');
+          cancel();
+          $rootScope.$watch('replacement', function() { calls.push('replacement'); });
+        });
+        child.$watch('value', function() { calls.push('child'); });
+        $rootScope.$digest();
+        expect(calls).toEqual(['original', 'replacement', 'child']);
+      }));
+
+      it('should preserve cancellation indexes and order after compacting removed entries', inject(function($rootScope) {
+        var calls = [];
+        var cancellations = [];
+        for (var i = 0; i < 80; i++) {
+          (function(index) {
+            cancellations.push($rootScope.$watch('value', function() { calls.push(index); }));
+          })(i);
+        }
+        for (i = 0; i < 80; i += 2) cancellations[i]();
+        cancellations[3]();
+        cancellations[3]();
+        $rootScope.$watch('value', function() { calls.push(80); });
+        $rootScope.$digest();
+        var expected = [];
+        for (i = 1; i < 80; i += 2) if (i !== 3) expected.push(i);
+        expected.push(80);
+        expect(calls).toEqual(expected);
+        expect($rootScope.$$watchersCount).toBe(40);
+        cancellations[79]();
+        calls.length = 0;
+        $rootScope.value = 1;
+        $rootScope.$digest();
+        expected.splice(expected.indexOf(79), 1);
+        expect(calls).toEqual(expected);
+      }));
+
       it('should allow repeated cancellation without removing other watchers', inject(function($rootScope) {
         var child = $rootScope.$new();
         var removed = jasmine.createSpy('removed');

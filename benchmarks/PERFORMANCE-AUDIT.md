@@ -144,3 +144,48 @@ totalizando 26.468 execuções. Novos testes cobrem callbacks duplicados/re-regi
 fallback sem WeakRef, cancelamento reentrante, recuperação de cancelamentos após
 exceção e tarefas enfileiradas após erro. Os testes existentes de `$emit`/`$broadcast`
 também passaram, incluindo remoção durante a propagação.
+
+## Registro/remoção de watchers e destruição de LRU
+
+- Watchers passam a ser acrescentados com `push()` e percorridos do início ao fim,
+  mantendo a ordem pública de registro. Um índice em cada watcher permite limpar
+  sua entrada sem `indexOf()` ou `splice()`. O índice faz parte do objeto desde sua
+  criação; não há um mapa adicional por watcher.
+- Entradas removidas são substituídas por `null`, liberando o watcher. As entradas
+  mortas no fim são retiradas imediatamente; outras são compactadas antes de iniciar
+  um percurso ou, fora do digest, quando ocupam pelo menos metade do array (sempre
+  nas listas pequenas). A compactação atualiza os índices dos sobreviventes.
+- Se a remoção encurta o fim do array durante um digest, o cursor é ajustado para
+  permitir executar watchers acrescentados em seguida no mesmo turno. O percurso
+  ativo não é deslocado por compactação.
+- `$cacheFactory.destroy()` também limpa `freshEnd` e `staleEnd`. Limpar somente
+  os mapas deixava os nós LRU e suas chaves vivos enquanto alguém guardava o cache.
+
+O índice acrescenta metadados por watcher, e pode haver espaços vazios temporários
+no array. A melhoria de memória medida neste conjunto é do cache LRU; não se afirma
+que todo scope use menos heap. `$$watchers` é armazenamento privado: agora sua ordem
+física é a de registro, e seu comprimento pode incluir entradas removidas até a
+compactação. Para contar watchers ativos, usar `$$watchersCount` (também interno).
+
+| Cenário no Chrome 154 | Original | Otimizado |
+| --- | ---: | ---: |
+| Registrar 50.000 watchers em um scope | 98,9 ms | 1,0 ms |
+| Cancelar 10.000 watchers reais por watchGroup | 19,8 ms | 0,5 ms |
+| Digest estável, 10.000 watchers simples | 0,047 ms | 0,043 ms |
+| Retenção de LRU destruído, 1.000 chaves longas | 5.074.844 bytes | 18.816 bytes |
+
+Comparação usando o mesmo build com rootScope/cacheFactory originais de `HEAD` em
+uma cópia temporária. Sete amostras após aquecimento para tempo; GC explícito para
+memória. Foram repetidas as medições e a comparação de traces na versão final.
+
+O benchmark de memória aceita `memory-audit.html?mode=lru`, mantendo o objeto do
+cache após destruí-lo. As chaves têm aproximadamente 5.000 caracteres cada; a retenção
+original era principalmente dessas chaves e da lista de nós, não dos valores do mapa.
+
+Além dos testes unitários, 300 sequências determinísticas de inclusão/remoção durante
+getters produziram traces idênticos no original e candidato: mesma ordem e quantidade
+de avaliações e listeners, incluindo watchers novos e visita a scopes filhos.
+Testes adicionais cobrem substituição do último watcher durante o digest, remoção
+após compactação e recriação de um id de cache LRU destruído.
+Lint e `yarn.cmd grunt test:unit --browsers=ChromeHeadless` passaram na versão final,
+totalizando 26.480 execuções em sete suítes.

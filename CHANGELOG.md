@@ -6,6 +6,11 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$rootScope:** append watchers in registration order and remove them by recorded
+  index; compact cleared entries outside traversal, preserving digest mutation ordering.
+- **$cacheFactory:** clear both LRU endpoints on destroy so retained cache objects
+  do not keep the linked list and its keys alive.
+
 - **$parse:** consume tokens with a cursor instead of shifting the remaining array;
   clear token references after consumption and release storage after syntax errors.
 - **$rootScope:** release scope and watcher references held by used watch cancellation

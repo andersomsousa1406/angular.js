@@ -13,9 +13,9 @@
  *   - Internal state needs to be stored on scope directly, which means that private state is
  *     exposed as $$____ properties
  *
- * Loop operations are optimized by using while(count--) { ... }
- *   - This means that in order to keep the same order of execution as addition we have to add
- *     items to the array at the beginning (unshift) instead of at the end (push)
+ * Watches are appended and traversed in registration order.
+ *   - Recorded indexes allow removal without searching or shifting the array.
+ *   - Null entries are compacted outside the active traversal.
  *
  * Child scopes are created and removed often
  *   - Using an array would be slow since inserts in the middle are expensive; so we use linked lists
@@ -102,6 +102,19 @@ function $RootScopeProvider() {
 
     function destroyChildScope($event) {
         $event.currentScope.$$destroyed = true;
+    }
+
+    function compactWatchers(watchers) {
+      var write = 0;
+      for (var read = 0; read < watchers.length; read++) {
+        var watcher = watchers[read];
+        if (watcher) {
+          watcher.$$index = write;
+          watchers[write++] = watcher;
+        }
+      }
+      watchers.length = write;
+      watchers.$$removed = 0;
     }
 
     function cleanUpScope($scope) {
@@ -408,7 +421,8 @@ function $RootScopeProvider() {
               last: initWatchVal,
               get: get,
               exp: prettyPrintExpression || watchExp,
-              eq: !!objectEquality
+              eq: !!objectEquality,
+              $$index: array ? array.length : 0
             };
 
         lastDirtyWatch = null;
@@ -416,20 +430,31 @@ function $RootScopeProvider() {
         if (!array) {
           array = scope.$$watchers = [];
           array.$$digestWatchIndex = -1;
+          array.$$removed = 0;
         }
-        // we use unshift since we use a while loop in $digest for speed.
-        // the while loop reads in reverse order.
-        array.unshift(watcher);
-        array.$$digestWatchIndex++;
+        // Append and digest in registration order; adding a watch is constant time.
+        array.push(watcher);
         incrementWatchersCount(this, 1);
 
         return function deregisterWatch() {
           if (watcher) {
-            var index = arrayRemove(array, watcher);
-            if (index >= 0) {
+            var index = watcher.$$index;
+            if (array[index] === watcher) {
+              array[index] = null;
+              array.$$removed++;
               incrementWatchersCount(scope, -1);
-              if (index < array.$$digestWatchIndex) {
-                array.$$digestWatchIndex--;
+              // Trim dead tail entries immediately. Compact other holes only outside
+              // an active digest, so removals cannot move its next watcher.
+              while (array.length && !array[array.length - 1]) {
+                array.pop();
+                array.$$removed--;
+              }
+              if ($rootScope.$$phase === '$digest' && array.$$digestWatchIndex > array.length) {
+                array.$$digestWatchIndex = array.length;
+              }
+              if (array.$$removed && $rootScope.$$phase !== '$digest' &&
+                  (array.length < 32 || array.$$removed * 2 >= array.length)) {
+                compactWatchers(array);
               }
             }
             // A retained cancellation function must not keep the scope, its remaining
@@ -822,10 +847,11 @@ function $RootScopeProvider() {
           do { // "traverse the scopes" loop
             if ((watchers = !current.$$suspended && current.$$watchers)) {
               // process our watches
-              watchers.$$digestWatchIndex = watchers.length;
-              while (watchers.$$digestWatchIndex--) {
+              if (watchers.$$removed) compactWatchers(watchers);
+              watchers.$$digestWatchIndex = 0;
+              while (watchers.$$digestWatchIndex < watchers.length) {
                 try {
-                  watch = watchers[watchers.$$digestWatchIndex];
+                  watch = watchers[watchers.$$digestWatchIndex++];
                   // Most common watches are on primitives, in which case we can short
                   // circuit it with === operator, only when === fails do we use .equals
                   if (watch) {

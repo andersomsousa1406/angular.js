@@ -7,6 +7,8 @@
 Mantém funções de cancelamento após destruir 1.000 scopes com 5.000 valores cada.</p>
 <p>Use <a href="?mode=events">?mode=events</a> para medir cancelamentos de eventos
 ou <a href="memory-audit.html">o modo padrão</a> para watchers.</p>
+<p>Use <a href="?mode=lru">?mode=lru</a> para medir a retenção de um cache LRU
+destruído com 1.000 chaves de aproximadamente 5.000 caracteres.</p>
 <pre id="results">Executando...</pre>
 <script src="../build/angular.js"></script>
 <script src="memory-audit.js"></script>

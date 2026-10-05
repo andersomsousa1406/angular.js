@@ -8,16 +8,25 @@
     output.textContent = 'Execute Chrome com GC exposto e métricas precisas de memória.';
     return;
   }
-  var root = angular.injector(['ng']).get('$rootScope');
-  var mode = window.location.search.indexOf('mode=events') !== -1 ? 'events' : 'watchers';
+  var injector = angular.injector(['ng']);
+  var root = injector.get('$rootScope');
+  var mode = window.location.search.indexOf('mode=lru') !== -1 ? 'lru' :
+    window.location.search.indexOf('mode=events') !== -1 ? 'events' : 'watchers';
   var callbacks = [];
   window.gc();
   var before = performance.memory.usedJSHeapSize;
-  for (var i = 0; i < 1000; i++) {
-    var scope = root.$new();
+  var scope, cancel, i, j;
+  if (mode === 'lru') {
+    var cache = injector.get('$cacheFactory')('memory-audit-lru', {capacity: 1000});
+    for (i = 0; i < 1000; i++) cache.put('key-' + i + '-' + new Array(5001).join('x'), i);
+    cache.destroy();
+    callbacks.push(cache);
+    cache = null;
+  } else for (i = 0; i < 1000; i++) {
+    scope = root.$new();
     scope.payload = new Array(5000);
-    for (var j = 0; j < scope.payload.length; j++) scope.payload[j] = j;
-    var cancel = mode === 'events' ? scope.$on('audit', angular.noop) : scope.$watch('payload');
+    for (j = 0; j < scope.payload.length; j++) scope.payload[j] = j;
+    cancel = mode === 'events' ? scope.$on('audit', angular.noop) : scope.$watch('payload');
     cancel();
     callbacks.push(cancel);
     scope.$destroy();
@@ -27,7 +36,7 @@
   window.setTimeout(function() {
     window.gc();
     var retained = performance.memory.usedJSHeapSize;
-    callbacks.forEach(function(callback) { callback(); });
+    if (mode !== 'lru') callbacks.forEach(function(callback) { callback(); });
     callbacks.length = 0;
     window.setTimeout(function() {
       window.gc();

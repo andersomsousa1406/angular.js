@@ -260,6 +260,7 @@ function $CacheFactoryProvider() {
           data = null;
           stats = null;
           lruHash = null;
+          freshEnd = staleEnd = null;
           delete caches[cacheId];
         },
 

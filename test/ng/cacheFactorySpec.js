@@ -173,6 +173,21 @@ describe('$cacheFactory', function() {
 
     describe('destroy', function() {
 
+      it('should remove a populated LRU cache and allow recreating its id', inject(function($cacheFactory) {
+        var lru = $cacheFactory('lru-destroy', {capacity: 2});
+        lru.put('first', 1);
+        lru.put('second', 2);
+        lru.get('first');
+        lru.destroy();
+        expect($cacheFactory.get('lru-destroy')).toBeUndefined();
+        expect(function() { lru.get('first'); }).toThrow();
+        expect(function() { lru.put('third', 3); }).toThrow();
+        var replacement = $cacheFactory('lru-destroy', {capacity: 2});
+        replacement.put('third', 3);
+        expect(replacement.get('third')).toBe(3);
+        expect(replacement.get('first')).toBeUndefined();
+      }));
+
       it('should make the cache unusable and remove references to it from $cacheFactory', inject(function($cacheFactory) {
         cache.put('foo', 'bar');
         cache.destroy();
