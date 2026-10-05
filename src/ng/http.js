@@ -1076,21 +1076,21 @@ function $HttpProvider() {
 
       $browser.$$incOutstandingRequestCount('$http');
 
-      var requestInterceptors = [];
-      var responseInterceptors = [];
+      var requestInterceptors = reversedInterceptors.length ? [] : null;
+      var responseInterceptors = reversedInterceptors.length ? [] : null;
       var promise = $q.resolve(config);
 
       // apply interceptors
       forEach(reversedInterceptors, function(interceptor) {
         if (interceptor.request || interceptor.requestError) {
-          requestInterceptors.unshift(interceptor.request, interceptor.requestError);
+          requestInterceptors.push(interceptor.request, interceptor.requestError);
         }
         if (interceptor.response || interceptor.responseError) {
           responseInterceptors.push(interceptor.response, interceptor.responseError);
         }
       });
 
-      promise = chainInterceptors(promise, requestInterceptors);
+      promise = chainInterceptors(promise, requestInterceptors, true);
       promise = promise.then(serverRequest);
       promise = chainInterceptors(promise, responseInterceptors);
       promise = promise.finally(completeOutstandingRequest);
@@ -1098,10 +1098,12 @@ function $HttpProvider() {
       return promise;
 
 
-      function chainInterceptors(promise, interceptors) {
-        for (var i = 0, ii = interceptors.length; i < ii;) {
-          var thenFn = interceptors[i++];
-          var rejectFn = interceptors[i++];
+      function chainInterceptors(promise, interceptors, reverse) {
+        if (!interceptors) return promise;
+        for (var i = 0, ii = interceptors.length; i < ii; i += 2) {
+          var index = reverse ? ii - i - 2 : i;
+          var thenFn = interceptors[index];
+          var rejectFn = interceptors[index + 1];
 
           promise = promise.then(thenFn, rejectFn);
         }

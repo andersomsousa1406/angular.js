@@ -36,6 +36,29 @@ describe('$http', function() {
   }));
 
 
+  it('should preserve interceptor getter access and execution order', function() {
+    var calls = [];
+    module(function($httpProvider) {
+      forEach(['first', 'second'], function(name) {
+        $httpProvider.interceptors.push(function() {
+          var interceptor = {};
+          Object.defineProperty(interceptor, 'request', {get: function() {
+            calls.push('read ' + name);
+            return function(config) { calls.push('run ' + name); return config; };
+          }});
+          return interceptor;
+        });
+      });
+    });
+    inject(function($http, $httpBackend) {
+      $httpBackend.expectGET('/order').respond('ok');
+      $http.get('/order');
+      expect(calls).toEqual(['read second', 'read second', 'read first', 'read first']);
+      $httpBackend.flush();
+      expect(calls.slice(4)).toEqual(['run first', 'run second']);
+    });
+  });
+
   describe('$httpProvider', function() {
     describe('interceptors', function() {
       it('should chain request, requestReject, response and responseReject interceptors', function() {

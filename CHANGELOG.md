@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$http:** collect request interceptor pairs with push and traverse in reverse;
+  skip temporary interceptor arrays when no interceptors are configured.
+
 - **$interpolate:** avoid the temporary values array for direct calls with one
   expression, retaining SCE checks, reentrant evaluation and watch delegation.
 

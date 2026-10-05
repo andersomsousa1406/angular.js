@@ -260,3 +260,28 @@ Validacao conjunta: 26.520 execucoes nas sete suites; apos finalizar o caminho
 escalar, jqLite repetido com 6.253 testes aprovados. Novos testes verificam
 reentrada e valores ausentes/validos sucessivos. Lint dos arquivos alterados com
 terminadores Windows e verificacao de whitespace aprovados.
+
+
+## Montagem dos interceptors HTTP
+
+Pares de interceptors de entrada usam `push()` e sao encadeados na ordem inversa,
+preservando ordem publica e ordem/quantidade de leituras de getters. A lista de
+resposta mantem sua ordem. Sem interceptors, as duas listas temporarias nao sao
+criadas. Nao alterar o timing dos callbacks nem agrupar respostas.
+
+Benchmark isolado `internal-audit.html?mode=http`, Chrome 154, sete amostras apos
+aquecimento, tempo de montar 1.000 requisicoes:
+
+| Interceptors por requisicao | Antes | Depois |
+| --- | ---: | ---: |
+| 0 | 2,3 ms | 1,8 ms |
+| 20 | 4,4 ms | 3,7 ms |
+| 200 | 43,8 ms | 29,6 ms |
+
+O backend sintetico retorna sucesso; o digest e respostas ficam fora do tempo
+medido, mas todos os 1.000 callbacks sao conferidos. Nao mede rede nem latencia
+real. Medir separado de eventos evita interferencia das grandes cargas anteriores
+de alocacao/GC; tempos do modo completo nao devem ser atribuidos apenas ao HTTP.
+Nenhuma medicao de heap foi feita. Novo teste verifica getters e ordem de execucao;
+testes existentes de rejeicoes, recuperacao e requisicoes pendentes passaram.
+Validacao conjunta: 26.520 testes, repeticao final jqLite com 6.253, lint aprovado.
