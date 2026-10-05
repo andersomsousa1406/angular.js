@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$q:** consume rejection checks with a shared cursor, clearing consumed states
+  while retaining ordering, interruption and scheduling of later checks.
+
 - **$rootScope:** clear consumed evalAsync and postDigest entries before executing
   callbacks, preserving scheduling, reentrant processing and callback context.
 

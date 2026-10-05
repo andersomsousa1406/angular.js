@@ -288,6 +288,7 @@ function qFactory(nextTick, exceptionHandler, errorOnUnhandledRejections) {
   var $qMinErr = minErr('$q', TypeError);
   var queueSize = 0;
   var checkQueue = [];
+  var checkQueuePosition = 0;
 
   /**
    * @ngdoc method
@@ -380,8 +381,9 @@ function qFactory(nextTick, exceptionHandler, errorOnUnhandledRejections) {
 
   function processChecks() {
     // eslint-disable-next-line no-unmodified-loop-condition
-    while (!queueSize && checkQueue.length) {
-      var toCheck = checkQueue.shift();
+    while (!queueSize && checkQueuePosition < checkQueue.length) {
+      var toCheck = checkQueue[checkQueuePosition];
+      checkQueue[checkQueuePosition++] = null;
       if (!isStateExceptionHandled(toCheck)) {
         markQStateExceptionHandled(toCheck);
         var errorMessage = 'Possibly unhandled rejection: ' + toDebugString(toCheck.value);
@@ -392,11 +394,14 @@ function qFactory(nextTick, exceptionHandler, errorOnUnhandledRejections) {
         }
       }
     }
+    if (checkQueuePosition === checkQueue.length) {
+      checkQueue.length = checkQueuePosition = 0;
+    }
   }
 
   function scheduleProcessQueue(state) {
     if (errorOnUnhandledRejections && !state.pending && state.status === 2 && !isStateExceptionHandled(state)) {
-      if (queueSize === 0 && checkQueue.length === 0) {
+      if (queueSize === 0 && checkQueuePosition === checkQueue.length) {
         nextTick(processChecks);
       }
       checkQueue.push(state);

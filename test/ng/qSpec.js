@@ -32,6 +32,41 @@
 */
 
 describe('q', function() {
+  it('should resume rejection checks after the handler schedules promise work', function() {
+    var ticks = [], calls = [];
+    var localQ = qFactory(function(task) { ticks.push(task); }, function(message) {
+      calls.push(message);
+      if (calls.length === 1) {
+        localQ.when('value').then(function() { calls.push('resolved'); });
+        localQ.reject('third');
+      }
+    }, true);
+    localQ.reject('first');
+    localQ.reject('second');
+    while (ticks.length) ticks.shift()();
+    expect(calls).toEqual([
+      'Possibly unhandled rejection: first', 'resolved',
+      'Possibly unhandled rejection: second', 'Possibly unhandled rejection: third'
+    ]);
+    localQ.reject('fourth');
+    while (ticks.length) ticks.shift()();
+    expect(calls[4]).toBe('Possibly unhandled rejection: fourth');
+  });
+
+  it('should consume a rejection before a throwing handler and allow later checks', function() {
+    var ticks = [], calls = [];
+    var localQ = qFactory(function(task) { ticks.push(task); }, function(message) {
+      calls.push(message);
+      if (calls.length === 1) throw new Error('handler');
+    }, true);
+    localQ.reject('first');
+    localQ.reject('second');
+    expect(function() { ticks.shift()(); }).toThrowError('handler');
+    localQ.when('value').then(noop);
+    while (ticks.length) ticks.shift()();
+    expect(calls).toEqual(['Possibly unhandled rejection: first', 'Possibly unhandled rejection: second']);
+  });
+
   var q, q_no_error, defer, deferred, promise, log, exceptionHandlerCalls;
 
   // The following private functions are used to help with logging for testing invocation of the

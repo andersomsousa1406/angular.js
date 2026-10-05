@@ -223,3 +223,20 @@ Nao foi medido ganho de heap apos GC; esta mudanca reduz referencias na fila
 durante o processamento, nao garante reducao da memoria total da aplicacao.
 As filas privadas `$$asyncQueue` e `$$postDigestQueue` exibem entradas consumidas
 como `null` durante callbacks; aplicacoes nao devem depender dessas entradas internas.
+
+
+## Fila de verificacao de rejeicoes de promises
+
+`$q` substitui `shift()` por cursor compartilhado e limpa cada estado consumido.
+A fila so e esvaziada ao terminar; se o handler criar trabalho de promises,
+interromper por excecao ou adicionar rejeicoes, a retomada preserva a ordem.
+O teste de fila vazia usa entradas restantes, para manter o agendamento original.
+
+Chrome 154: 50.000 rejeicoes, mediana de sete amostras apos aquecimento, 450,5 ms
+antes e 9,0 ms depois. O benchmark `queue-audit.html` usa `$q` real com handler
+que conta avisos sem registrar no console; mede o digest que processa a fila,
+excluindo a criacao das promises. Sao lotes sinteticos grandes, nao desempenho
+de requisicoes HTTP ou promises em geral. Testes novos cobrem retomada apos
+trabalho de promises criado pelo handler e apos handler que lanca excecao.
+Validacao conjunta: 26.500 testes nas sete suites, lint dos arquivos modificados
+com terminadores Windows e verificacao de whitespace aprovados.
