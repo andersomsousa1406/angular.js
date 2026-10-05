@@ -98,6 +98,28 @@
     }, 1);
   });
 
+  measure('flush applyAsync: 50000 tasks', function() {
+    for (var i = 0; i < 50000; i++) root.$applyAsync(noop);
+    return {run: function() { root.$digest(); }, clean: noop};
+  }, 1);
+
+  measure('watchGroup: cancel 10000 actual watchers', function() {
+    var scope = root.$new();
+    var expressions = [];
+    for (var i = 0; i < 10000; i++) expressions.push(noop);
+    var cancel = scope.$watchGroup(expressions, noop);
+    return {run: cancel, clean: function() { scope.$destroy(); }};
+  }, 1);
+
+  measure('watchGroup: cancel 50000 callbacks, isolated traversal', function() {
+    var scope = root.$new();
+    scope.$watch = function() { return noop; };
+    var expressions = [];
+    for (var i = 0; i < 50000; i++) expressions.push(noop);
+    var cancel = scope.$watchGroup(expressions, noop);
+    return {run: cancel, clean: function() { scope.$destroy(); }};
+  }, 1);
+
   ['live', 'one-time'].forEach(function(mode) {
     measure('stable digest: ngRepeat 1000 rows, ' + mode + ' binding', function() {
       var scope = root.$new();

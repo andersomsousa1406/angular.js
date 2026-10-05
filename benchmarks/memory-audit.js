@@ -9,6 +9,7 @@
     return;
   }
   var root = angular.injector(['ng']).get('$rootScope');
+  var mode = window.location.search.indexOf('mode=events') !== -1 ? 'events' : 'watchers';
   var callbacks = [];
   window.gc();
   var before = performance.memory.usedJSHeapSize;
@@ -16,7 +17,7 @@
     var scope = root.$new();
     scope.payload = new Array(5000);
     for (var j = 0; j < scope.payload.length; j++) scope.payload[j] = j;
-    var cancel = scope.$watch('payload');
+    var cancel = mode === 'events' ? scope.$on('audit', angular.noop) : scope.$watch('payload');
     cancel();
     callbacks.push(cancel);
     scope.$destroy();
@@ -32,6 +33,7 @@
       window.gc();
       output.textContent = JSON.stringify({
         angularVersion: angular.version.full,
+        mode: mode,
         beforeBytes: before,
         retainedBytes: retained,
         retainedDeltaBytes: retained - before,

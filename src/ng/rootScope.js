@@ -469,6 +469,7 @@ function $RootScopeProvider() {
         var oldValues = new Array(watchExpressions.length);
         var newValues = new Array(watchExpressions.length);
         var deregisterFns = [];
+        var deregisterFnsPosition = 0;
         var self = this;
         var changeReactionScheduled = false;
         var firstRun = true;
@@ -522,9 +523,13 @@ function $RootScopeProvider() {
         }
 
         return function deregisterWatchGroup() {
-          while (deregisterFns.length) {
-            deregisterFns.shift()();
+          while (deregisterFnsPosition < deregisterFns.length) {
+            var deregister = deregisterFns[deregisterFnsPosition];
+            deregisterFns[deregisterFnsPosition++] = null;
+            deregister();
           }
+          deregisterFns.length = 0;
+          deregisterFnsPosition = 0;
         };
       },
 
@@ -1275,14 +1280,31 @@ function $RootScopeProvider() {
         } while ((current = current.$parent));
 
         var self = this;
+        var weakReferences;
         return function() {
-          var indexOfListener = namedListeners.indexOf(listener);
+          var scope = weakReferences ? weakReferences.scope.deref() : self;
+          var listeners = weakReferences ? weakReferences.listeners.deref() : namedListeners;
+          var callback = weakReferences ? weakReferences.listener.deref() : listener;
+          if (weakReferences && (!scope || !listeners || !callback)) return;
+          var indexOfListener = listeners.indexOf(callback);
           if (indexOfListener !== -1) {
             // Use delete in the hope of the browser deallocating the memory for the array entry,
             // while not shifting the array indexes of other listeners.
             // See issue https://github.com/angular/angular.js/issues/16135
-            delete namedListeners[indexOfListener];
-            decrementListenerCount(self, 1, name);
+            delete listeners[indexOfListener];
+            decrementListenerCount(scope, 1, name);
+            // Preserve repeated cancellation of duplicate/re-registered listeners.
+            // Live scopes and registrations keep the targets reachable. Used cancellation
+            // functions alone need not retain them on browsers with WeakRef support.
+            if (!weakReferences && isFunction(window.WeakRef) &&
+                (isFunction(callback) || isObject(callback))) {
+              weakReferences = {
+                scope: new window.WeakRef(scope),
+                listeners: new window.WeakRef(listeners),
+                listener: new window.WeakRef(callback)
+              };
+              self = namedListeners = listener = null;
+            }
           }
         };
       },
@@ -1443,6 +1465,7 @@ function $RootScopeProvider() {
     var asyncQueue = $rootScope.$$asyncQueue = [];
     var postDigestQueue = $rootScope.$$postDigestQueue = [];
     var applyAsyncQueue = $rootScope.$$applyAsyncQueue = [];
+    var applyAsyncQueuePosition = 0;
 
     var postDigestQueuePosition = 0;
 
@@ -1484,13 +1507,17 @@ function $RootScopeProvider() {
     function initWatchVal() {}
 
     function flushApplyAsync() {
-      while (applyAsyncQueue.length) {
+      while (applyAsyncQueuePosition < applyAsyncQueue.length) {
         try {
-          applyAsyncQueue.shift()();
+          var expression = applyAsyncQueue[applyAsyncQueuePosition];
+          applyAsyncQueue[applyAsyncQueuePosition++] = null;
+          expression();
         } catch (e) {
           $exceptionHandler(e);
         }
       }
+      applyAsyncQueue.length = 0;
+      applyAsyncQueuePosition = 0;
       applyAsyncId = null;
     }
 

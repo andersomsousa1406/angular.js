@@ -1594,6 +1594,35 @@ describe('Scope', function() {
     });
 
 
+    it('should preserve watchGroup cancellation order during reentrant cancellation', function() {
+      var calls = [];
+      var cancel;
+      spyOn(scope, '$watch').and.callFake(function(expression) {
+        return function() {
+          calls.push(expression);
+          if (expression === 'a') cancel();
+        };
+      });
+      cancel = scope.$watchGroup(['a', 'b', 'c'], noop);
+      cancel();
+      cancel();
+      expect(calls).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should resume watchGroup cancellation after an unregister function throws', function() {
+      var calls = [];
+      spyOn(scope, '$watch').and.callFake(function(expression) {
+        return function() {
+          calls.push(expression);
+          if (expression === 'a') throw new Error('cancel failed');
+        };
+      });
+      var cancel = scope.$watchGroup(['a', 'b', 'c'], noop);
+      expect(cancel).toThrowError('cancel failed');
+      expect(cancel).not.toThrow();
+      expect(calls).toEqual(['a', 'b', 'c']);
+    });
+
     it('should not call watch action fn when watchGroup was deregistered', function() {
       var deregisterMany = scope.$watchGroup(['a', 'b'], function(values, oldValues) {
         log(oldValues + ' >>> ' + values);
@@ -2357,6 +2386,25 @@ describe('Scope', function() {
     }));
 
 
+    it('should drain appended work after errors and reset for the next batch',
+      inject(function($rootScope, $browser, $exceptionHandler) {
+        var calls = [];
+        $rootScope.$applyAsync(function() {
+          calls.push('a');
+          $rootScope.$applyAsync(function() { calls.push('c'); });
+          throw new Error('task failed');
+        });
+        $rootScope.$applyAsync(function() { calls.push('b'); });
+        $browser.defer.flush();
+        expect(calls).toEqual(['a', 'b', 'c']);
+        expect($exceptionHandler.errors.length).toBe(1);
+        expect($rootScope.$$applyAsyncQueue.length).toBe(0);
+        $rootScope.$applyAsync(function() { calls.push('d'); });
+        $browser.defer.flush();
+        expect(calls).toEqual(['a', 'b', 'c', 'd']);
+      })
+    );
+
     it('should evaluate in the context of specific $scope', inject(function($rootScope, $browser) {
       var scope = $rootScope.$new();
       scope.$applyAsync('x = "CODE ORANGE"');
@@ -2564,6 +2612,38 @@ describe('Scope', function() {
 
 
       describe('deregistration', function() {
+
+        it('should preserve repeated removal of duplicate and re-registered callbacks', inject(function($rootScope) {
+          var listener = jasmine.createSpy('listener');
+          var cancel = $rootScope.$on('abc', listener);
+          $rootScope.$on('abc', listener);
+          cancel();
+          $rootScope.$emit('abc');
+          expect(listener).toHaveBeenCalledOnce();
+          listener.calls.reset();
+          cancel();
+          $rootScope.$on('abc', listener);
+          cancel();
+          $rootScope.$broadcast('abc');
+          expect(listener).not.toHaveBeenCalled();
+          expect($rootScope.$$listenerCount.abc).toBeUndefined();
+        }));
+
+        it('should retain cancellation behavior without WeakRef support', inject(function($rootScope) {
+          var originalWeakRef = window.WeakRef;
+          window.WeakRef = undefined;
+          try {
+            var listener = jasmine.createSpy('listener');
+            var cancel = $rootScope.$on('abc', listener);
+            cancel();
+            $rootScope.$on('abc', listener);
+            cancel();
+            $rootScope.$emit('abc');
+            expect(listener).not.toHaveBeenCalled();
+          } finally {
+            window.WeakRef = originalWeakRef;
+          }
+        }));
 
         it('should return a function that deregisters the listener', inject(function($rootScope) {
           var log = '',

@@ -102,3 +102,45 @@ Validação: lint dos arquivos alterados e `yarn.cmd grunt test:unit --browsers=
 passaram, com 26.448 execuções. Foram acrescentados testes de ordem de tokens, reutilização
 do parser após erros, limpeza de tokens e cancelamentos repetidos antes/depois de destruir
 scopes. A suíte existente cobre remoção e inclusão de watchers durante o digest.
+
+## Cancelamentos de eventos e filas internas
+
+Foram otimizados três caminhos adicionais em `src/ng/rootScope.js`:
+
+- `$on`: depois de remover um listener, a função de cancelamento passa a usar
+  referências fracas ao scope, à lista e ao callback quando o navegador suporta
+  `WeakRef`. Registros ativos mantêm as referências fortes necessárias. Callbacks
+  duplicados e registrados novamente continuam podendo ser removidos por chamadas
+  repetidas, conforme o comportamento anterior. Sem `WeakRef`, o caminho original
+  é preservado e esta redução de retenção não se aplica. A primeira remoção acrescenta
+  a criação de três referências fracas; a melhoria é de retenção de memória, não uma
+  promessa de acelerar o cancelamento de cada evento.
+- `$applyAsync`: um cursor compartilhado substitui `shift()`. Cada entrada consumida
+  é limpa antes da chamada; tarefas adicionadas durante o processamento entram no
+  mesmo turno. O cursor e o array são reiniciados ao terminar.
+- `$watchGroup`: o cursor dos cancelamentos também é compartilhado, para preservar
+  chamadas reentrantes e permitir continuar após um cancelamento que lança exceção.
+  As funções consumidas são liberadas e o array é esvaziado ao concluir.
+
+| Cenário no Chrome 154 | Original | Otimizado |
+| --- | ---: | ---: |
+| Retenção de 1.000 cancelamentos de eventos, scopes destruídos | 20.511.232 bytes | 204.236 bytes |
+| Processar fila de 50.000 tarefas de applyAsync | 96,7 ms | 0,4 ms |
+| Cancelar 10.000 watchers reais por watchGroup | 7,3 ms | 7,3 ms |
+| Percorrer 50.000 callbacks de cancelamento, isolado | 97,0 ms | 0,2 ms |
+
+O percurso isolado usa um `$watch` substituído apenas no scope do benchmark por uma
+função que retorna `noop`, para retirar o custo de busca/remoção dos watchers. Não é
+representativo do cancelamento completo. Com watchers reais, a busca por `indexOf()`
+continua dominando, e não houve ganho mensurável nessa carga.
+
+Comparação antes/depois com cópia temporária do build contendo o rootScope original
+de `HEAD`; demais componentes iguais. Medianas de sete amostras para tempo, após
+aquecimento. O modo `memory-audit.html?mode=events` mede o heap após GC, mantendo as
+funções de cancelamento já usadas. Os ganhos representam cargas sintéticas grandes.
+
+Validação: lint aprovado e `test:unit` com ChromeHeadless passou nas sete suítes,
+totalizando 26.468 execuções. Novos testes cobrem callbacks duplicados/re-registrados,
+fallback sem WeakRef, cancelamento reentrante, recuperação de cancelamentos após
+exceção e tarefas enfileiradas após erro. Os testes existentes de `$emit`/`$broadcast`
+também passaram, incluindo remoção durante a propagação.

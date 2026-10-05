@@ -10,6 +10,11 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
   clear token references after consumption and release storage after syntax errors.
 - **$rootScope:** release scope and watcher references held by used watch cancellation
   functions while preserving repeated cancellation and digest ordering.
+- **$rootScope:** use weak references after event listener cancellation where supported,
+  preserving duplicate and re-registered callback cancellation; retain the legacy path
+  on browsers without WeakRef.
+- **$rootScope:** consume applyAsync tasks and watchGroup cancellation functions with
+  shared cursors, preserving FIFO order, appended tasks, reentrancy and exception handling.
 
 - **$compile:** sanitize `source[srcset]` interpolation and `ng-attr-srcset`
   according to the configured media URL policy (CVE-2024-8373).
