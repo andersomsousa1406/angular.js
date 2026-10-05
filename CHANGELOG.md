@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **build:** support `--production` for core builds, disabling compiler debug
+  information by default while retaining application and bootstrap overrides.
+
 - **$rootScope:** append watchers in registration order and remove them by recorded
   index; compact cleared entries outside traversal, preserving digest mutation ordering.
 - **$cacheFactory:** clear both LRU endpoints on destroy so retained cache objects

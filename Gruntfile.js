@@ -197,6 +197,7 @@ module.exports = function(grunt) {
     build: {
       angular: {
         dest: 'build/angular.js',
+        debugInfoEnabled: grunt.option('production') !== true,
         src: util.wrap([files['angularSrc']], 'angular'),
         styles: {
           css: ['css/angular.css'],
