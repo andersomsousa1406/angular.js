@@ -330,9 +330,20 @@ function $InterpolateProvider() {
         return extend(function interpolationFn(context) {
             var i = 0;
             var ii = expressions.length;
-            var values = new Array(ii);
+            var values = ii === 1 ? null : new Array(ii);
 
             try {
+              if (ii === 1) {
+                var value = parseFns[0](context);
+                if (allOrNothing && isUndefined(value)) return;
+                concat[expressionPositions[0]] = value;
+                if (contextAllowsConcatenation) {
+                  return $sce.getTrusted(trustedContext, singleExpression ? concat[0] : concat.join(''));
+                } else if (trustedContext && concat.length > 1) {
+                  $interpolateMinErr.throwNoconcat(text);
+                }
+                return concat.join('');
+              }
               for (; i < ii; i++) {
                 values[i] = parseFns[i](context);
               }

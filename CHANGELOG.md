@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$interpolate:** avoid the temporary values array for direct calls with one
+  expression, retaining SCE checks, reentrant evaluation and watch delegation.
+
 - **$q:** consume rejection checks with a shared cursor, clearing consumed states
   while retaining ordering, interruption and scheduling of later checks.
 

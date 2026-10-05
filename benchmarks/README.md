@@ -14,3 +14,7 @@ started with `--js-flags=--expose-gc --enable-precise-memory-info`.
 
 For template linking and promise rejection queues, open `benchmarks/queue-audit.html`
 after building the core. It checks task counts and reports seven-sample medians.
+
+For direct interpolation, HTTP interceptor setup and event listener compaction,
+open `benchmarks/internal-audit.html` after building the core. Synthetic cases
+check outputs and callback counts; results are seven-sample medians after warmup.

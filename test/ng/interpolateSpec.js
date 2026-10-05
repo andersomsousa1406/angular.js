@@ -3,6 +3,24 @@
 /* eslint-disable no-script-url */
 
 describe('$interpolate', function() {
+  it('should keep outer single-expression values during reentrant evaluation', inject(function($interpolate) {
+    var interpolate = $interpolate('before {{value()}} after');
+    var nested;
+    var outer = interpolate({value: function() {
+      nested = interpolate({value: function() { return 'inner'; }});
+      return 'outer';
+    }});
+    expect(nested).toBe('before inner after');
+    expect(outer).toBe('before outer after');
+  }));
+
+  it('should keep all-or-nothing single-expression state after missing values', inject(function($interpolate) {
+    var interpolate = $interpolate('before {{value}} after', false, null, true);
+    expect(interpolate({value: 'first'})).toBe('before first after');
+    expect(interpolate({})).toBeUndefined();
+    expect(interpolate({value: 'last'})).toBe('before last after');
+  }));
+
 
   it('should return the interpolation object when there are no bindings and textOnly is undefined',
       inject(function($interpolate) {

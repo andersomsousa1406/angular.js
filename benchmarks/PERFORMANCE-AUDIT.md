@@ -240,3 +240,23 @@ de requisicoes HTTP ou promises em geral. Testes novos cobrem retomada apos
 trabalho de promises criado pelo handler e apos handler que lanca excecao.
 Validacao conjunta: 26.500 testes nas sete suites, lint dos arquivos modificados
 com terminadores Windows e verificacao de whitespace aprovados.
+
+
+## Interpolacao direta com uma expressao
+
+A chamada direta de `$interpolate` usa um valor escalar local quando existe uma
+expressao, inclusive com prefixo/sufixo. Evita o array temporario sem acrescentar
+closure persistente. Avalia o getter antes de atualizar o buffer, preservando
+reentrada, allOrNothing, stringificacao, erros e verificacoes de SCE. O delegate
+de watchers e o percurso de multiplas expressoes permanecem os anteriores.
+
+Benchmark `internal-audit.html`, Chrome 154, sete amostras apos aquecimento,
+500.000 chamadas diretas: duas rodadas com ordem dos builds invertida mediram
+25,5/27,2 ms antes e 22,9/22,7 ms depois. Multiplas expressoes: 41,4/50,7 ms antes
+e 42,3/50,9 ms depois; nao houve ganho consistente nesse controle. Tempos variam
+entre processos. Nao representa todos os bindings e nao mede heap apos GC.
+
+Validacao conjunta: 26.520 execucoes nas sete suites; apos finalizar o caminho
+escalar, jqLite repetido com 6.253 testes aprovados. Novos testes verificam
+reentrada e valores ausentes/validos sucessivos. Lint dos arquivos alterados com
+terminadores Windows e verificacao de whitespace aprovados.
