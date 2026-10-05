@@ -42,15 +42,10 @@ angular.reloadWithDebugInfo();
 
 The page should reload and the debug information should now be available.
 
-This fork also supports a production build with debug information disabled by default:
-
-```sh
-yarn grunt build:angular --production
-```
-
-Use the resulting `build/angular.js` in the application. Building without `--production`
-keeps the original debug default. Minification alone does not select this mode.
-The application can still explicitly configure `$compileProvider.debugInfoEnabled(true)`.
+This fork keeps debug information enabled by default in all core builds, including
+builds invoked with `--production`, so application code using `element.scope()` or
+`element.isolateScope()` continues to work. Minification does not change this default.
+If your application uses these APIs, keep `$compileProvider.debugInfoEnabled(true)`.
 
 For more see the docs pages on {@link ng.$compileProvider#debugInfoEnabled `$compileProvider`}
 and {@link angular.reloadWithDebugInfo `angular.reloadWithDebugInfo`}.

@@ -102,23 +102,14 @@ artifacts.
 * `docs/` — A directory that contains a standalone version of the docs
   (same as served in `docs.angularjs.org`).
 
-### Production core build
+### Compiler debug information
 
-To generate the core with compiler debug information disabled by default:
+Core builds keep compiler debug information enabled, including builds invoked with
+`--production`, to preserve application code that uses `element.scope()` and
+`element.isolateScope()`. Minification does not change this default.
 
-```powershell
-yarn.cmd grunt build:angular --production
-```
-
-The output is `build/angular.js` (and `build/angular-csp.css`). A build without
-`--production` keeps debug information enabled. The flag also applies to the core
-when using `grunt package --production`; minification alone does not disable debug.
-
-Production builds omit binding/scope metadata and debug CSS classes on DOM elements.
-Application bindings and updates still work, but tooling or application code relying
-on `element.scope()`, `element.isolateScope()`, or debug classes must be adjusted.
-An application can override the default with `$compileProvider.debugInfoEnabled(true)`;
-`angular.reloadWithDebugInfo()` remains available for troubleshooting.
+Applications that depend on these APIs should keep `$compileProvider.debugInfoEnabled(true)`.
+Only disable debug explicitly after removing those dependencies.
 
 ### <a name="local-server"></a> Running a Local Development Web Server
 

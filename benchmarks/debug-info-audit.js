@@ -3,7 +3,7 @@
 /* global document */
 
 (function() {
-  var expected = window.location.search.indexOf('expect=true') !== -1;
+  var expected = window.location.search.indexOf('expect=false') === -1;
   var checks = [];
   var defaultEnabled;
   function check(name, passed) { checks.push({name: name, passed: !!passed}); }
