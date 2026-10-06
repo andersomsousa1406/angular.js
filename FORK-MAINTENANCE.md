@@ -234,3 +234,20 @@ harnesses estao em benchmarks/PERFORMANCE-AUDIT.md.
 26.718 execucoes aprovadas; lint dos arquivos alterados, whitespace e builds
 core/ngAnimate aprovados. Cada melhoria tem commit independente. Debug habilitado
 e agendamento do digest preservados. Detalhes em benchmarks/PERFORMANCE-AUDIT.md.
+
+## Cleanup one-time, callbacks done e classes (2026-10-06)
+
+- Bindings :: agendam apenas um cleanup pendente, verificando o valor final e
+  permitindo retry no digest seguinte. Testes CSP/compilado cobrem undefined.
+- Runners marcam conclusao e destacam callbacks antes de executa-los, evitando
+  resolucao recursiva. Executam os restantes mesmo apos falha e propagam o primeiro
+  erro. done registrado durante a resolucao observa conclusao imediatamente;
+  erros posteriores nao substituem o primeiro. Hosts nao foram modificados.
+- jqLite usa lookup temporario em adicoes grandes de classes regulares. Mantem
+  ordem e semantica de whitespace, duplicatas e tokens vazios. 10.000 comparacoes
+  tiveram resultado e quantidade de escritas iguais. O lookup usa memoria
+  temporaria em troca de menos buscas; nao afirmar economia de heap nesse caminho.
+
+26.734 execucoes aprovadas; lint, whitespace e core build aprovados. Benchmark
+isolado de classes e limites documentados em benchmarks/PERFORMANCE-AUDIT.md.
+Debug e frequencia de digest preservados; tres commits separados.

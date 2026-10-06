@@ -502,11 +502,17 @@ function jqLiteAddClass(element, cssClasses) {
     var existingClasses = (' ' + (element.getAttribute('class') || '') + ' ')
                             .replace(/[\n\t]/g, ' ');
     var newClasses = existingClasses;
+    var classLookup;
+    if (cssClasses.length > 512 && !/\s/.test(cssClasses.replace(/ /g, ''))) {
+      classLookup = createMap();
+      forEach(existingClasses.split(' '), function(name) { classLookup[name] = true; });
+    }
 
     forEach(cssClasses.split(' '), function(cssClass) {
       cssClass = trim(cssClass);
-      if (newClasses.indexOf(' ' + cssClass + ' ') === -1) {
+      if (classLookup && cssClass ? !classLookup[cssClass] : newClasses.indexOf(' ' + cssClass + ' ') === -1) {
         newClasses += cssClass + ' ';
+        if (classLookup) classLookup[cssClass] = true;
       }
     });
 

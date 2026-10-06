@@ -1065,6 +1065,14 @@ describe('jqLite', function() {
 
 
     describe('addClass', function() {
+      it('should preserve class order and duplicates in large additions', function() {
+        var node = jqLite('<div class="first"></div>');
+        var classes = [];
+        for (var i = 0; i < 100; i++) classes.push('class' + i);
+        node.addClass(classes.join(' ') + ' first ' + classes.join(' '));
+        expect(node.attr('class')).toBe('first ' + classes.join(' '));
+        node.remove();
+      });
       it('should allow adding of class', function() {
         var selector = jqLite([a, b]);
         expect(selector.addClass('abc')).toEqual(selector);

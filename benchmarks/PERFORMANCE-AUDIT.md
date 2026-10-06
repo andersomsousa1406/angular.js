@@ -513,3 +513,29 @@ done registrado durante a resolucao agora observa o runner concluido e executa
 imediatamente, como done registrado depois. A fila de callbacks antiga nao e
 retida em caso de falha. Testes combinam reentrada, erro e callbacks restantes;
 suites existentes verificam promises, end/cancel e runners combinados.
+
+## Adicoes grandes de classes jqLite (2026-10-06)
+
+Adicoes com mais de 512 caracteres, sem whitespace alem de espacos normais,
+usam lookup de prototipo nulo para evitar buscas repetidas na string crescente.
+O limiar foi aumentado apos medir custo adicional em listas menores. Ordem,
+duplicatas, espacos existentes e tokens vazios continuam com a semantica anterior;
+entradas pequenas ou com whitespace especial mantem o algoritmo antigo.
+
+Prepare uma copia da fonte anterior e execute
+`node benchmarks/class-add-audit.js caminho/para/jqLite-anterior.js`.
+O argumento omitido usa tmp/jqlite-class-before.js, que nao e versionado. O
+harness compara 10.000 casos (incluindo caminhos rapido/lento, __proto__,
+constructor, whitespace e duplicatas) e mede 100 chamadas por amostra. Node 14,
+sete amostras apos aquecimento, medianas finais:
+
+| Classes por chamada | Antes (ms) | Depois (ms) |
+| --- | ---: | ---: |
+| 50 | 2,432 | 2,431 |
+| 500 | 81,866 | 25,509 |
+| 2.000 | 1.762,451 | 177,002 |
+
+DOM e simulado: sem renderizacao e sem afirmar ganho geral de FPS ou consumo de
+heap. O lookup temporario consome memoria para reduzir buscas em listas grandes;
+esta melhoria nao promete menor memoria nesse caminho. Suites finais aprovadas,
+lint dos arquivos alterados, whitespace e build core aprovados.

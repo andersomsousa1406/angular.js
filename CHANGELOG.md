@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **jqLite:** use a null-prototype lookup for large regular class additions,
+  preserving order and retaining the previous path for small or unusual inputs.
+
 - **$$AnimateRunner:** finalize resolution despite done-callback errors, prevent
   recursive resolution and rethrow the first error after remaining callbacks run.
 
