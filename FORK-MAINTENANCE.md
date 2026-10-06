@@ -112,3 +112,22 @@ sem @: 10,0 ms antes e 0,6 ms depois. Carga sintetica, nao latencia de telas rea
 foi ignorada no Windows). O conjunto nao implica eliminacao de todas as CVEs.
 
 Fonte: https://www.herodevs.com/vulnerability-directory/cve-2025-4690
+
+
+## Injector: remocao de comentarios na anotacao implicita
+
+Uma funcao valida pode conter muitos marcadores `/*a` sem fechamento dentro de
+uma string. A remocao de comentarios anterior tentava repetidamente encontrar
+`*/` ausente. O novo leitor usa indexOf para saltar aos delimitadores e lembra
+quando nao ha nenhum fechamento restante. Preserva a semantica textual antiga,
+inclusive tratar marcadores em strings como o regex original; nao e um parser JS.
+Funcoes sem barras retornam diretamente. Arrays e anotacoes explicitas nao mudam.
+
+100.000 entradas deterministicas de comentarios produziram texto igual ao regex
+anterior. Testes conferem dependencias com comentarios de linha/bloco e com
+20.000 marcadores sem fechamento. Chrome 154, 4.000 marcadores na funcao,
+mediana de tres amostras: 62,8 ms antes e aproximadamente 0,1 ms depois.
+Nenhum ganho foi demonstrado para toda criacao de injectors ou aplicacao.
+Suites conjuntas: 26.621 testes aprovados; lint e whitespace aprovados.
+
+Fonte de triagem: https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9

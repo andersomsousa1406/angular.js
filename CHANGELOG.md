@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$injector:** strip comments with a linear scanner, retaining annotation results
+  without repeatedly searching for absent block-comment terminators.
+
 - **linky:** scan link starts without retrying every email suffix (CVE-2025-4690),
   preserving schemes, email addresses and trailing punctuation.
 

@@ -67,7 +67,34 @@ var ARROW_ARG = /^([^(]+?)=>/;
 var FN_ARGS = /^[^(]*\(\s*([^)]*)\)/m;
 var FN_ARG_SPLIT = /,/;
 var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
-var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+function stripComments(text) {
+  if (text.indexOf('/') === -1) return text;
+  var parts = [], start = 0, position = 0, noBlockEnd = false;
+  while ((position = text.indexOf('/', position)) !== -1) {
+    if (text.charAt(position) === '/') {
+      var next = text.charAt(position + 1), end = -1;
+      if (next === '/') {
+        end = position + 2;
+        while (end < text.length && !/[\r\n\u2028\u2029]/.test(text.charAt(end))) end++;
+      } else if (next === '*' && !noBlockEnd) {
+        end = text.indexOf('*/', position + 2);
+        if (end === -1) {
+          noBlockEnd = true;
+        } else {
+          end += 2;
+        }
+      }
+      if (end !== -1) {
+        parts.push(text.substring(start, position));
+        start = position = end;
+        continue;
+      }
+    }
+    position++;
+  }
+  parts.push(text.substring(start));
+  return parts.join('');
+}
 var $injectorMinErr = minErr('$injector');
 
 function stringifyFn(fn) {
@@ -75,7 +102,7 @@ function stringifyFn(fn) {
 }
 
 function extractArgs(fn) {
-  var fnText = stringifyFn(fn).replace(STRIP_COMMENTS, ''),
+  var fnText = stripComments(stringifyFn(fn)),
       args = fnText.match(ARROW_ARG) || fnText.match(FN_ARGS);
   return args;
 }

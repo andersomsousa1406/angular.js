@@ -1,5 +1,20 @@
 'use strict';
 
+describe('implicit annotation comment scanning', function() {
+  it('should preserve dependencies with many unmatched block comment markers in a string', function() {
+    // Generate a valid function containing a large unmatched-comment string literal.
+    // eslint-disable-next-line no-new-func
+    var fn = new Function('dependency', 'var text = "' + new Array(20001).join('/*a') + '"; return dependency;');
+    expect(angular.injector([]).annotate(fn)).toEqual(['dependency']);
+  });
+
+  it('should preserve line and block comment removal around argument names', function() {
+    var fn = function(/* block */ first, // line
+        second) { return first + second; };
+    expect(angular.injector([]).annotate(fn)).toEqual(['first', 'second']);
+  });
+});
+
 describe('injector.modules', function() {
     it('should expose the loaded module info on the instance injector', function() {
       var test1 = angular.module('test1', ['test2']).info({ version: '1.1' });
