@@ -789,3 +789,19 @@ Chrome 154, quatro pares e 15 amostras: 100 escritas alternando 500 valores
 selecionados em 1.000 opcoes 93,20 -> 75,75 ms (18,7% menos tempo).
 Controle de 32 opcoes 23,10 -> 22,05 ms. Build, 26.806 execucoes unitarias,
 lint e comparacao de estados finais aprovados. Ver CORE-ROUND3-AUDIT.md.
+
+## Interpolacao direta com duas expressoes (2026-10-06)
+
+Literais de prefixo/separador/sufixo preparados uma vez. Avaliacao direta de
+duas expressoes sem trustedContext guarda ambos os resultados em variaveis
+locais e concatena quando sao strings. Evita um array de valores e join por
+avaliacao comum. Outros tipos mantem compute, incluindo falhas/undefined,
+allOrNothing e SCE. Ambas as expressoes continuam sendo avaliadas em ordem.
+Teste cobre reentrancia e segunda expressao avaliada apesar de valor ausente.
+O caminho dos watchers nao foi alterado; nao afirmar ganho de digest/rendering.
+
+Chrome 154: 500.000 avaliacoes diretas com duas expressoes
+146,55 -> 80,10 ms (45,3% menos tempo), quatro pares e 15 amostras.
+Controles de uma/tres expressoes variaram 30,95 -> 30,60 e 173,80 -> 165,95 ms.
+Build, 26.806 execucoes unitarias, lint e comparacao de saidas aprovados.
+Nenhuma reducao numerica de heap medida. Ver CORE-ROUND3-AUDIT.md.

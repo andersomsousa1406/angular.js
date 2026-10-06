@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$interpolate:** concatenate two already converted strings directly during
+  unprivileged evaluation, avoiding a temporary values array and join.
+
 - **ngOptions:** index large multiple selections by option identity, preserving
   duplicate model entries and using the original search for small selections.
 

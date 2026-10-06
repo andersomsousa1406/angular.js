@@ -3,6 +3,19 @@
 /* eslint-disable no-script-url */
 
 describe('$interpolate', function() {
+  it('should preserve both values and literals when two expressions reenter', inject(function($interpolate) {
+    var fn = $interpolate('before {{first()}} / {{second()}} after');
+    var inner = {first: function() { return 'inner'; }, second: function() { return 'two'; }};
+    var outer = {first: function() {
+      expect(fn(inner)).toBe('before inner / two after');
+      return 'outer';
+    }, second: function() { return 'last'; }};
+    expect(fn(outer)).toBe('before outer / last after');
+    var calls = 0;
+    var strict = $interpolate('{{missing}}/{{second()}}', false, null, true);
+    expect(strict({second: function() { calls++; return 'evaluated'; }})).toBeUndefined();
+    expect(calls).toBe(1);
+  }));
   it('should keep outer single-expression values during reentrant evaluation', inject(function($interpolate) {
     var interpolate = $interpolate('before {{value()}} after');
     var nested;

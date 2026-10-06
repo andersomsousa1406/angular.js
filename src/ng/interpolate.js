@@ -295,6 +295,13 @@ function $InterpolateProvider() {
       // (we don't modify the expression if the input consists of only a single trusted input)
       var interceptor = contextAllowsConcatenation && singleExpression ? undefined : parseStringifyInterceptor;
       parseFns = expressions.map(function(exp) { return $parse(exp, interceptor); });
+      var twoExpressions = expressions.length === 2 && !trustedContext;
+      var prefix, separator, suffix;
+      if (twoExpressions) {
+        prefix = concat.slice(0, expressionPositions[0]).join('');
+        separator = concat.slice(expressionPositions[0] + 1, expressionPositions[1]).join('');
+        suffix = concat.slice(expressionPositions[1] + 1).join('');
+      }
 
       // Concatenating expressions makes it hard to reason about whether some combination of
       // concatenated values are unsafe to use and could easily lead to XSS.  By requiring that a
@@ -330,7 +337,7 @@ function $InterpolateProvider() {
         return extend(function interpolationFn(context) {
             var i = 0;
             var ii = expressions.length;
-            var values = ii === 1 ? null : new Array(ii);
+            var values;
 
             try {
               if (ii === 1) {
@@ -344,6 +351,15 @@ function $InterpolateProvider() {
                 }
                 return singleExpression && typeof concat[0] === 'string' ? concat[0] : concat.join('');
               }
+              if (twoExpressions) {
+                var first = parseFns[0](context);
+                var second = parseFns[1](context);
+                if (typeof first === 'string' && typeof second === 'string') {
+                  return prefix + first + separator + second + suffix;
+                }
+                return compute([first, second]);
+              }
+              values = new Array(ii);
               for (; i < ii; i++) {
                 values[i] = parseFns[i](context);
               }
