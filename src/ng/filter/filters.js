@@ -630,8 +630,8 @@ function dateFilter($locale) {
     while (format) {
       match = DATE_FORMATS_SPLIT.exec(format);
       if (match) {
-        parts = concat(parts, match, 1);
-        format = parts.pop();
+        parts.push(match[1]);
+        format = match[2];
       } else {
         parts.push(format);
         format = null;

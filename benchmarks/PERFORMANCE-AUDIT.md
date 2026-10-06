@@ -824,3 +824,18 @@ toda aplicacao. Um snapshot de array evitado por dispatch grande sem mutacao;
 nenhuma economia numerica de heap medida. Build, 26.806 execucoes unitarias,
 lint e contagens diferenciais de callbacks aprovados. Procedimento e resultados
 por rodada em CORE-ROUND3-AUDIT.md e core-round3-audit-results.json.
+
+## date: extracao de tokens sem copias repetidas (2026-10-06)
+
+DATE_FORMATS_SPLIT retorna o token e o restante do formato. Adicionar somente
+o token ao array local e ler o restante diretamente evita concat/slice/pop
+e a recopia dos tokens anteriores em cada iteracao. Locale, alias de formatos,
+timezone, datas invalidas e formatacao dos tokens mantem os caminhos existentes.
+
+Chrome 154, quatro pares alternados e 15 amostras de 10.000 formatacoes:
+yyyy-MM-dd 64,50 -> 41,65 ms; formato longo com timezone 198,20 -> 121,30 ms;
+mediumDate 70,80 -> 44,40 ms. Reducao de tempo de 35,4% a 38,8% nesses casos.
+Comparacao diferencial de 444 datas/formatos/timezones e um alias de locale
+alterado teve resultados iguais. Build, 26.814 execucoes unitarias e lint
+aprovados. Nao foi medida economia numerica de heap ou latencia de uma tela.
+Procedimento completo em CORE-ROUND4-AUDIT.md.

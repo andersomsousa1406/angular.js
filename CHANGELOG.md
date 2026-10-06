@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **date:** append format tokens directly without copying previously collected
+  tokens on every match, preserving dynamic locale formats and timezone handling.
+
 - **jqLite:** preserve native-event listener snapshots with copy on mutation
   for lists of at least 32 listeners, including reentrant dispatch and errors.
 
