@@ -107,10 +107,19 @@ function classDirective(name, selector) {
     if (!tokens2 || !tokens2.length) return tokens1;
 
     var values = [];
+    var lookup;
+    if (tokens1.length * tokens2.length > 4096) {
+      lookup = createMap();
+      for (var k = 0; k < tokens2.length; k++) lookup[tokens2[k]] = true;
+    }
 
     outer:
     for (var i = 0; i < tokens1.length; i++) {
       var token = tokens1[i];
+      if (lookup) {
+        if (!lookup[token]) values.push(token);
+        continue;
+      }
       for (var j = 0; j < tokens2.length; j++) {
         if (token === tokens2[j]) continue outer;
       }

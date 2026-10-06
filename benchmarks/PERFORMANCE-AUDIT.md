@@ -631,3 +631,20 @@ produziram os mesmos objetos. Node 14, sete amostras apos aquecimento, 100
 chamadas: 10 headers, 0,715 -> 0,565 ms; 1.000 headers, 67,959 -> 65,636 ms.
 Medicoes isolam o leitor; nao representam latencia HTTP. Array intermediario
 removido, mas nenhuma economia numerica de heap foi medida nesta rodada.
+
+## Diferencas de classes ngClass (2026-10-06)
+
+arrayDifference usa lookup quando o produto dos tamanhos supera 4.096; casos
+menores mantem as comparacoes anteriores. Listas internas sao strings produzidas
+por split, e o mapa sem prototipo suporta __proto__/constructor e tokens vazios.
+Ordem e duplicatas da primeira lista permanecem iguais.
+
+`node benchmarks/class-header-audit.js [ngClass-anterior.js] [http-anterior.js]`
+usa baselines em tmp quando omitidos; esses arquivos nao sao versionados.
+10.000 casos diferenciais preservaram saidas. Node 14, sete amostras aquecidas,
+100 diferencas de listas com 1.000 tokens: mediana final 650,999 -> 18,545 ms.
+O benchmark isola o helper, sem DOM ou renderizacao. Lookup usa memoria
+temporaria em troca de reduzir buscas; nao afirmar reducao de heap neste item.
+Regressoes verificam transicoes grandes, duplicatas e nomes semelhantes aos
+de Object.prototype sem alterar o tratamento existente do pipeline de classes.
+Validacao conjunta: 26.766 execucoes aprovadas; lint e whitespace aprovados.

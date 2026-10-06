@@ -2,6 +2,45 @@
 
 describe('ngClass', function() {
   var element;
+  it('should handle large transitions with duplicate and prototype-like class names', inject(function($rootScope, $compile) {
+    var first = [];
+    var second = [];
+    for (var i = 0; i < 100; i++) {
+      first.push('first' + i);
+      second.push('second' + i);
+    }
+    first.push('__proto__', 'constructor', 'shared', 'shared');
+    second.push('__proto__', 'constructor', 'shared');
+    element = $compile('<div ng-class="classes"></div>')($rootScope);
+    $rootScope.classes = first.join(' ');
+    $rootScope.$digest();
+    $rootScope.classes = second.join(' ');
+    $rootScope.$digest();
+    expect(element.hasClass('first0')).toBe(false);
+    expect(element.hasClass('second99')).toBe(true);
+    // Preserve the existing animation class pipeline's treatment of this name.
+    expect(element.hasClass('__proto__')).toBe(false);
+    expect(element.hasClass('constructor')).toBe(true);
+    expect(element.hasClass('shared')).toBe(true);
+  }));
+
+  it('should read object class getters in snapshot key order', inject(function($rootScope, $compile) {
+    var calls = [];
+    $rootScope.classes = {};
+    ['first', 'second', 'third'].forEach(function(name, index) {
+      Object.defineProperty($rootScope.classes, name, {enumerable: true, get: function() {
+        calls.push(name);
+        return index !== 1;
+      }});
+    });
+    element = $compile('<div ng-class="classes"></div>')($rootScope);
+    $rootScope.$digest();
+    expect(element.hasClass('first')).toBe(true);
+    expect(element.hasClass('second')).toBe(false);
+    expect(element.hasClass('third')).toBe(true);
+    expect(calls.length % 3).toBe(0);
+    for (var i = 0; i < calls.length; i += 3) expect(calls.slice(i, i + 3)).toEqual(['first', 'second', 'third']);
+  }));
 
   beforeEach(module(function($compileProvider) {
     $compileProvider.debugInfoEnabled(false);

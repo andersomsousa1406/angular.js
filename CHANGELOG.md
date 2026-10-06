@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngClass:** use a null-prototype lookup for large class differences while
+  preserving token order and duplicates.
+
 - **$http:** scan raw headers by line position without a temporary split array,
   preserving repeated fields, whitespace and incomplete-line handling.
 
