@@ -1,0 +1,313 @@
+{
+  "date": "2026-10-06",
+  "browser": "Chrome 154 / Windows",
+  "forkCommit": "96e85519f",
+  "rounds": 4,
+  "checks": {
+    "snapshotsEqual": true,
+    "allTestsPassed": true,
+    "noErrors": true
+  },
+  "versions": {
+    "old": {
+      "label": "Producao 1.6.9",
+      "version": "1.6.9",
+      "testsPassed": 53,
+      "testsTotal": 53,
+      "modules": [
+        "ng",
+        "ngAnimate",
+        "ngResource",
+        "ngSanitize"
+      ],
+      "hashes": {
+        "angular.min.js": "a517e698e5a04e4f7b3314c5b00d1821dadcd1f6778fc9c3acd9b01cb833c26c",
+        "angular-animate.min.js": "8e6202b1330a469a61ccdeebbd1cb3a20d0ecdfc8d106f68da5b85e9b67a1cd5",
+        "angular-resource.min.js": "e4d7e454d47295f0da42cb4b7a0a77be22996626cf4963d4840fdfdc2fe81916",
+        "angular-sanitize.js": "fe27de9994d11038abd4691cee4ec4df880ec7410e7466c106458b651f81f805"
+      },
+      "tableHTMLMs": 0.5500000715255737,
+      "steadyDigestMs": 11.549999952316284,
+      "dirtyDigest500Ms": 31.449999928474426,
+      "recompileMs": 57.799999952316284,
+      "retainedHeapBytes": 8750320,
+      "heapGrowthBytes": 334762,
+      "watchersStable": true,
+      "watchers": [
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ]
+      ],
+      "globalEventsStable": true,
+      "memorySeries": {
+        "baselineBytes": 8405168,
+        "batches": [
+          {
+            "batch": 0,
+            "usedSize": 8774320,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 1,
+            "usedSize": 8843888,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 2,
+            "usedSize": 8875608,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 3,
+            "usedSize": 8910064,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 4,
+            "usedSize": 8949612,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          }
+        ],
+        "extraHeapAfter100RecompilesBytes": 544444
+      }
+    },
+    "official": {
+      "label": "Oficial 1.8.3",
+      "version": "1.8.3",
+      "testsPassed": 53,
+      "testsTotal": 53,
+      "modules": [
+        "ng",
+        "ngAnimate",
+        "ngResource",
+        "ngSanitize"
+      ],
+      "hashes": {
+        "angular.min.js": "396dc1a03d6cc02e9c51a80246e0db53c5c8df9bd07287e3b51bce4a29dab355",
+        "angular-animate.min.js": "8e6202b1330a469a61ccdeebbd1cb3a20d0ecdfc8d106f68da5b85e9b67a1cd5",
+        "angular-resource.min.js": "6486e67e18cca4dd013d50806e6a5b52b8b20d77270c453587f19513fcd7c7a1",
+        "angular-sanitize.js": "c84c65250afe5a1265f36a7e16c6010652e55c2ae3a779c351fb68536c42bf64"
+      },
+      "tableHTMLMs": 0.6500000953674316,
+      "steadyDigestMs": 12.150000095367432,
+      "dirtyDigest500Ms": 32.89999997615814,
+      "recompileMs": 56.09999990463257,
+      "retainedHeapBytes": 8792856,
+      "heapGrowthBytes": 334712,
+      "watchersStable": true,
+      "watchers": [
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ]
+      ],
+      "globalEventsStable": true,
+      "memorySeries": {
+        "baselineBytes": 8475800,
+        "batches": [
+          {
+            "batch": 0,
+            "usedSize": 8795724,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 1,
+            "usedSize": 8869068,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 2,
+            "usedSize": 8911360,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 3,
+            "usedSize": 8937372,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 4,
+            "usedSize": 8993104,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          }
+        ],
+        "extraHeapAfter100RecompilesBytes": 517304
+      }
+    },
+    "new": {
+      "label": "Fork 1.8.4 / 96e85519f",
+      "version": "1.8.4",
+      "testsPassed": 53,
+      "testsTotal": 53,
+      "modules": [
+        "ng",
+        "ngAnimate",
+        "ngResource",
+        "ngSanitize"
+      ],
+      "hashes": {
+        "angular.min.js": "ed5aba77bf7c536f4816c27f228b041b688cfffcaa9cb8b4d6392d00366a9dca",
+        "angular-animate.min.js": "e7649ebb3a1c8703bee5f0e81a41a880055363f751436d09e0dfe68a44d08078",
+        "angular-resource.min.js": "c60bcd72ffa2b7c99d628d8dc5c2a3ae45f49778f3b38b4f3e4318fb93823f47",
+        "angular-sanitize.js": "8ab158fecc7d5353e0f2828e0591f3ee1c2c96c8fa8c5a06490f9437ff6347e6"
+      },
+      "tableHTMLMs": 0.3500000238418579,
+      "steadyDigestMs": 11.800000071525574,
+      "dirtyDigest500Ms": 31.300000071525574,
+      "recompileMs": 54.049999952316284,
+      "retainedHeapBytes": 8848564,
+      "heapGrowthBytes": 326402,
+      "watchersStable": true,
+      "watchers": [
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ],
+        [
+          799,
+          799
+        ]
+      ],
+      "globalEventsStable": true,
+      "memorySeries": {
+        "baselineBytes": 8519064,
+        "batches": [
+          {
+            "batch": 0,
+            "usedSize": 8841380,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 1,
+            "usedSize": 8896396,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 2,
+            "usedSize": 8950452,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 3,
+            "usedSize": 8976144,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          },
+          {
+            "batch": 4,
+            "usedSize": 8993012,
+            "watchers": [
+              799,
+              799
+            ],
+            "eventsStable": true,
+            "errors": []
+          }
+        ],
+        "extraHeapAfter100RecompilesBytes": 473948
+      }
+    }
+  }
+}
