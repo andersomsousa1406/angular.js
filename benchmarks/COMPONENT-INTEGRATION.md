@@ -26,3 +26,20 @@ outras correções documentadas nesta auditoria.
 Os bundles globais do sistema precisam da compilação habitual para consumir
 os fontes corrigidos; nenhum arquivo de public/assets ou public/build foi
 editado. Nenhum commit SVN ou deploy foi realizado.
+
+## DataTables: regeneração a partir dos fontes modulares
+
+O bundle alternativo de DataTables tinha funções renomeadas cujas chamadas
+internas ainda usavam os nomes originais. A resolução de opções com promessas
+falhava nas duas versões de AngularJS; os sete fontes modulares funcionavam.
+
+Regenerado o bundle desses mesmos fontes com UglifyJS 3.17.0 já instalado no
+projeto externo. O builder `gulp/build-angular-datatables.js` torna a geração
+repetível. Renomeação de parâmetros está desativada para preservar a injeção
+implícita de dependências do AngularJS; não foram instaladas bibliotecas.
+O arquivo compilado foi gerado pelo builder, sem edição manual.
+
+Validação: a página principal usa o bundle regenerado, carregando 40 registros
+fictícios por promessa, filtrando 10 registros e ordenando numericamente.
+53/53 verificações por versão, sem falha de função ausente. O resultado gerado
+no projeto externo é idêntico à cópia validada no laboratório.
