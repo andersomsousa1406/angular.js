@@ -1,0 +1,23 @@
+--- a/componentes/TabelaJS.js
++++ b/componentes/TabelaJS.js
+@@ -24,2 +24,4 @@
+ 	function TabelaJS($rootScope, $parse, $q, $compile, gcCollection, $ajax, $timeout, $sce, TabelaHTML, gScope, Confirmacao, $interval, safeCompiler, MemoryCleaner) {
++
++        var fixedWidthDate = /^\d{4}-\d{2}-\d{2}$/;
+ 
+@@ -568,3 +570,6 @@
+ 								if((valor+'').includes('-')){
+-									var data = (valor+'').split('-').reverse().join('/');
++									var data = (typeof valor === 'string' && valor.length === 10 &&
++									valor.charAt(4) === '-' && valor.charAt(7) === '-' && fixedWidthDate.test(valor)) ?
++									valor.slice(8) + '/' + valor.slice(5, 7) + '/' + valor.slice(0, 4) :
++									(valor+'').split('-').reverse().join('/');
+ 								}else if(valor+''.includes('.')){
+@@ -581,3 +586,6 @@
+ 								if((valor+'').includes('-')){
+-									var data = (valor+'').split('-').reverse().join('/');
++									var data = (typeof valor === 'string' && valor.length === 10 &&
++									valor.charAt(4) === '-' && valor.charAt(7) === '-' && fixedWidthDate.test(valor)) ?
++									valor.slice(8) + '/' + valor.slice(5, 7) + '/' + valor.slice(0, 4) :
++									(valor+'').split('-').reverse().join('/');
+ 								}else if(valor+''.includes('.')){
