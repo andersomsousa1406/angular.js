@@ -904,6 +904,7 @@ function $RootScopeProvider() {
           // `break traverseScopesLoop;` takes us to here
 
           if ((dirty || asyncQueue.length) && !(ttl--)) {
+            lastDirtyWatch = null;
             clearPhase();
             throw $rootScopeMinErr('infdig',
                 '{0} $digest() iterations reached. Aborting!\n' +
@@ -913,6 +914,8 @@ function $RootScopeProvider() {
 
         } while (dirty || asyncQueue.length);
 
+        // The shortcut is only needed during traversal, not between digests.
+        lastDirtyWatch = null;
         clearPhase();
 
         // postDigestQueuePosition isn't local here because this loop can be reentered recursively.

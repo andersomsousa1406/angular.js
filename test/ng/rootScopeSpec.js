@@ -1,6 +1,24 @@
 'use strict';
 
 describe('Scope', function() {
+  it('should stabilize remaining watchers when a listener destroys a child scope', inject(function($rootScope) {
+    var child = $rootScope.$new();
+    var calls = [];
+    $rootScope.$watch(function() { return 1; }, function() {
+      calls.push('destroy');
+      child.$destroy();
+      $rootScope.value = 2;
+    });
+    $rootScope.$watch('value', function(value) { calls.push(value); });
+    $rootScope.value = 1;
+    $rootScope.$digest();
+    expect(calls).toEqual(['destroy', 2]);
+    calls.length = 0;
+    $rootScope.value = 3;
+    $rootScope.$digest();
+    expect(calls).toEqual([3]);
+  }));
+
 
   beforeEach(module(provideLog));
 
