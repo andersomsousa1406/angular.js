@@ -647,11 +647,14 @@ function $RootScopeProvider() {
           if (isUndefined(newValue)) return;
 
           if (!isObject(newValue)) { // if primitive
+            if (oldValue === internalArray) internalArray.length = 0;
+            if (oldValue === internalObject) internalObject = {};
             if (oldValue !== newValue) {
               oldValue = newValue;
               changeDetected++;
             }
           } else if (isArrayLike(newValue)) {
+            if (oldValue === internalObject) internalObject = {};
             if (oldValue !== internalArray) {
               // we are transitioning from something which was not an array into array.
               oldValue = internalArray;
@@ -679,6 +682,7 @@ function $RootScopeProvider() {
               }
             }
           } else {
+            if (oldValue === internalArray) internalArray.length = 0;
             if (oldValue !== internalObject) {
               // we are transitioning from something which was not an object into object.
               oldValue = internalObject = {};

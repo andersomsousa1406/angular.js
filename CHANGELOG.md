@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$watchCollection:** release inactive array/object copies after transitions
+  to another defined value type while preserving listener oldCollection values.
+
 - **jqLite:** use a null-prototype lookup for large regular class additions,
   preserving order and retaining the previous path for small or unusual inputs.
 

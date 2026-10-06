@@ -1,6 +1,22 @@
 'use strict';
 
 describe('Scope', function() {
+  it('should preserve old collection values across array, primitive and object transitions', inject(function($rootScope) {
+    var calls = [];
+    $rootScope.value = [{id: 1}];
+    $rootScope.$watchCollection('value', function(value, old) { calls.push([angular.copy(value), angular.copy(old)]); });
+    $rootScope.$digest();
+    $rootScope.value = 2;
+    $rootScope.$digest();
+    $rootScope.value = {item: 3};
+    $rootScope.$digest();
+    $rootScope.value = [4];
+    $rootScope.$digest();
+    expect(calls).toEqual([
+      [[{id: 1}], [{id: 1}]], [2, [{id: 1}]], [{item: 3}, 2], [[4], {item: 3}]
+    ]);
+  }));
+
   they('should continue digest after a watcher $prop destroys the active scope', ['get', 'listener'], function(method) {
     inject(function($rootScope) {
       var child = $rootScope.$new();

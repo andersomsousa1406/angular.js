@@ -539,3 +539,23 @@ DOM e simulado: sem renderizacao e sem afirmar ganho geral de FPS ou consumo de
 heap. O lookup temporario consome memoria para reduzir buscas em listas grandes;
 esta melhoria nao promete menor memoria nesse caminho. Suites finais aprovadas,
 lint dos arquivos alterados, whitespace e build core aprovados.
+
+## Copias inativas de watchCollection (2026-10-06)
+
+Ao mudar entre array, objeto e valor primitivo definido, o armazenamento do tipo
+anterior e limpo. veryOldValue continua independente, preservando o snapshot
+entregue a listeners que solicitam o valor anterior. O caminho undefined continua
+com seu tratamento anterior para bindings one-time; nao alegar liberacao nesse
+caminho antes de outro valor definido ou cancelamento do watcher.
+
+`collection-memory-audit.html`, Chrome 154 com GC explicito, watcher vivo e
+listener sem oldValue; coleção com 1.000.000 valores, depois substituida por null:
+
+| Origem | Antes (bytes) | Depois (bytes) |
+| --- | ---: | ---: |
+| Array | 4.015.999 | 16.507 |
+| Objeto com array em payload | 4.010.695 | 10.595 |
+
+Estes deltas incluem infraestrutura; nao medem toda aplicacao. Testes verificam
+snapshots anteriores e notificacoes em transicoes array -> primitivo -> objeto
+-> array. Validacao desta etapa: 26.742 execucoes aprovadas.
