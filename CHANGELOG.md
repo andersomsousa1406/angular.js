@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **orderBy:** fill multiple-criterion values with a loop instead of creating
+  a map callback for each item, preserving evaluation order and stable ties.
+
 - **filter:** cache the last normalized string expectation within one filter
   call, preserving changing criteria, negation and custom comparators.
 

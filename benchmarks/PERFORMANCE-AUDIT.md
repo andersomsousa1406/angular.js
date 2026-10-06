@@ -736,3 +736,18 @@ por campo 34,85 -> 33,15 ms; negacao 98,85 -> 90,85 ms. Tempos variam entre
 rodadas. Nao extrapolar para telas completas nem afirmar economia de heap.
 Build, 26.786 execucoes unitarias e lint aprovados. Harness e resultados
 completos em CORE-NEXT-AUDIT.md e core-next-audit-results.json.
+
+## orderBy: varios criterios (2026-10-06)
+
+O vetor de valores de criterios continua independente por item. Um loop
+substitui o callback de map criado para cada item, mantendo os slots esparsos,
+ordem de avaliacao, comparadores e desempates. Teste cobre ordenacao reentrante
+e a sequencia de chamadas dos criterios. Implementacao inicial em ce8caff66;
+este registro documenta sua validacao, sem reescrever aquele commit.
+
+Chrome 154, quatro pares, 15 amostras e 5.000 registros: 20 ordenacoes por
+tres criterios de texto 230,20 -> 221,55 ms (3,8% menos tempo); 50 ordenacoes
+por tres criterios numericos 66,45 -> 61,05 ms (8,1%). Controle de um criterio,
+cujo caminho nao mudou: 36,00 -> 35,35 ms. Nao foi medido ganho de heap.
+Build, 26.786 execucoes unitarias, lint e comparacao das listas completas de
+IDs aprovados. Procedimento e resultados em CORE-NEXT-AUDIT.md.
