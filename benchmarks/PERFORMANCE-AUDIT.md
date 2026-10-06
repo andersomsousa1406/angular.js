@@ -751,3 +751,27 @@ por tres criterios numericos 66,45 -> 61,05 ms (8,1%). Controle de um criterio,
 cujo caminho nao mudou: 36,00 -> 35,35 ms. Nao foi medido ganho de heap.
 Build, 26.786 execucoes unitarias, lint e comparacao das listas completas de
 IDs aprovados. Procedimento e resultados em CORE-NEXT-AUDIT.md.
+
+## Parser CSP: chamadas pequenas (2026-10-06)
+
+Caminhos escolhidos na preparacao da expressao para zero e dois argumentos.
+Zero argumentos evita o loop vazio. Dois argumentos usam um array literal
+novo, sem loop/push; nenhum vetor e compartilhado entre chamadas. Mantidos
+apply personalizado, receiver, avaliacao em ordem, ausencia do callee e retorno
+de contexto. O caminho original foi restaurado para outras quantidades de
+argumentos, apos a pre-alocacao generica inicial apresentar tempos mistos.
+
+Chrome 154, quatro pares e 15 amostras de 200.000 avaliacoes:
+dois argumentos 37,00 -> 26,65 ms (28,0% menos tempo); filtro com dois
+argumentos 45,60 -> 30,55 ms (33,0%); zero argumentos 9,40 -> 8,90 ms.
+Controles com caminho original, um argumento 30,50 -> 31,95 ms e oito
+argumentos 80,10 -> 86,75 ms, ficaram mais lentos nesta rodada. Nao afirmar
+ganho geral no CSP ou ausencia de regressao de timing. Nenhuma economia de
+heap foi medida. O resultado demonstrado e especifico das chamadas pequenas.
+
+Build e 26.786 execucoes unitarias passaram. Assertions adicionais sobre arrays
+independentes em apply personalizado para zero/dois argumentos passaram em
+nova rodada jqLite de 6.317 testes. Lint do core e runner Node aprovado;
+saidas diferenciais completas identicas. O runner agora espera a pagina
+terminar de carregar, em vez de assumir um atraso fixo de 300 ms.
+Ver CORE-NEXT-AUDIT.md e core-next-audit-results.json para todos os controles.

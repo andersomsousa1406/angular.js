@@ -1932,6 +1932,31 @@ describe('parser', function() {
         expect(calls).toEqual(['first', 'first', 'second', 'second']);
       }));
 
+      if (cspEnabled) {
+        it('should preserve custom apply and separate argument arrays in CSP calls', inject(function($parse) {
+          var arrays = [];
+          scope.receiver = {fn: function() { throw new Error('Use custom apply'); }};
+          scope.receiver.fn.apply = function(receiver, args) {
+            expect(receiver).toBe(scope.receiver);
+            arrays.push(args);
+            return args.join(',');
+          };
+          var expression = $parse('receiver.fn(a,b,c,d)');
+          scope.a = 1; scope.b = 2; scope.c = 3; scope.d = 4;
+          expect(expression(scope)).toBe('1,2,3,4');
+          scope.a = 5;
+          expect(expression(scope)).toBe('5,2,3,4');
+          expect(arrays[0]).toEqual([1, 2, 3, 4]);
+          expect(arrays[1]).not.toBe(arrays[0]);
+          expect($parse('receiver.fn()')(scope)).toBe('');
+          expect($parse('receiver.fn()')(scope)).toBe('');
+          expect(arrays[3]).not.toBe(arrays[2]);
+          expect($parse('receiver.fn(1,2)')(scope)).toBe('1,2');
+          expect($parse('receiver.fn(1,2)')(scope)).toBe('1,2');
+          expect(arrays[5]).not.toBe(arrays[4]);
+        }));
+      }
+
       it('should parse unary', function() {
         expect(scope.$eval('+1')).toEqual(+1);
         expect(scope.$eval('-1')).toEqual(-1);

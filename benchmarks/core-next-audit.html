@@ -9,6 +9,7 @@ document.write('<script src="' +
 </script>
 <script>
 window.run = function() {
+  if (!angular.$$csp().noUnsafeEval) throw new Error('CSP interpreter is required for this audit');
   var injector = angular.injector(['ng']);
   var filter = injector.get('$filter')('filter');
   var orderBy = injector.get('$filter')('orderBy');
@@ -37,6 +38,9 @@ window.run = function() {
   bench('filterField', 30, function() { return filter(rows, {name: 'NAME 12'}); });
   bench('filterNegated', 30, function() { return filter(rows, '!GROUP 12'); });
   bench('sortMultiple', 20, function() { return orderBy(rows, ['group', '-rank', 'name']); });
+  var numericPredicates = [function() { return 0; }, function() { return 0; },
+    function(row) { return row.id; }];
+  bench('sortNumeric', 50, function() { return orderBy(rows, numericPredicates); });
   bench('sortSingleControl', 20, function() { return orderBy(rows, 'name'); });
   var scope = {a: 1, b: 2, c: 3, d: 4, receiver: {fn: function() {
     var sum = 0;

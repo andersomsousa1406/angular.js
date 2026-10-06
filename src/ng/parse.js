@@ -1386,11 +1386,35 @@ ASTInterpreter.prototype = {
       });
       if (ast.filter) right = this.$filter(ast.callee.name);
       if (!ast.filter) right = this.recurse(ast.callee, true);
+      if (!ast.filter && args.length === 0) {
+        return function(scope, locals, assign, inputs) {
+          var rhs = right(scope, locals, assign, inputs);
+          var value = rhs.value != null ? rhs.value.apply(rhs.context, []) : undefined;
+          return context ? {value: value} : value;
+        };
+      }
+      if (args.length === 2) {
+        return ast.filter ?
+          function(scope, locals, assign, inputs) {
+            var values = [args[0](scope, locals, assign, inputs), args[1](scope, locals, assign, inputs)];
+            var value = right.apply(undefined, values, inputs);
+            return context ? {context: undefined, name: undefined, value: value} : value;
+          } :
+          function(scope, locals, assign, inputs) {
+            var rhs = right(scope, locals, assign, inputs);
+            var value;
+            if (rhs.value != null) {
+              var values = [args[0](scope, locals, assign, inputs), args[1](scope, locals, assign, inputs)];
+              value = rhs.value.apply(rhs.context, values);
+            }
+            return context ? {value: value} : value;
+          };
+      }
       return ast.filter ?
         function(scope, locals, assign, inputs) {
-          var values = new Array(args.length);
+          var values = [];
           for (var i = 0; i < args.length; ++i) {
-            values[i] = args[i](scope, locals, assign, inputs);
+            values.push(args[i](scope, locals, assign, inputs));
           }
           var value = right.apply(undefined, values, inputs);
           return context ? {context: undefined, name: undefined, value: value} : value;
@@ -1399,9 +1423,9 @@ ASTInterpreter.prototype = {
           var rhs = right(scope, locals, assign, inputs);
           var value;
           if (rhs.value != null) {
-            var values = new Array(args.length);
+            var values = [];
             for (var i = 0; i < args.length; ++i) {
-              values[i] = args[i](scope, locals, assign, inputs);
+              values.push(args[i](scope, locals, assign, inputs));
             }
             value = rhs.value.apply(rhs.context, values);
           }

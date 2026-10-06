@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse (CSP):** specialize calls with zero or two arguments, preserving
+  receivers, custom apply methods and separate arrays during reentrant calls.
+
 - **orderBy:** fill multiple-criterion values with a loop instead of creating
   a map callback for each item, preserving evaluation order and stable ties.
 
