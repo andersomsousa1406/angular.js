@@ -2554,6 +2554,16 @@ describe('$http param serializers', function() {
   });
 
   describe('default array serialization', function() {
+    it('should preserve special keys, sparse arrays and reentrant value conversion', function() {
+      var values = new Array(3);
+      values[1] = {toJSON: function() {
+        expect(defSer({'inner key': ['a', 'b']})).toBe('inner+key=a&inner+key=b');
+        return 'nested';
+      }};
+      values[2] = 'a+b & c';
+      expect(defSer({'empty\ud800': [], 'space &+': values})).toBe(
+          'space+%26%2B=%22nested%22&space+%26%2B=a%2Bb+%26+c');
+    });
 
     it('should serialize arrays by repeating param name', function() {
       expect(defSer({a: 'b', foo: ['bar', 'baz']})).toEqual('a=b&foo=bar&foo=baz');

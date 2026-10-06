@@ -953,3 +953,15 @@ de objetos preservando IDs 4,50 -> 4,05 ms (10%); rotacao 36,05 -> 35,25 ms
 (2,2%, sem ganho consistente). Lista de 50, rotacao 2,85 -> 2,90 ms.
 Mapas e array de ordem continuam alocados; nenhuma reducao de heap medida.
 Build/lint, 26.838 execucoes unitarias e outputs iguais. CORE-ROUND6-AUDIT.md.
+
+## Parametros HTTP: chave codificada uma vez por array (2026-10-06)
+
+Guardar encodeUriQuery(key) no primeiro valor presente do array. Evitar
+codificacoes repetidas sem cache persistente, preservando ordem e conversoes
+dos valores. Arrays vazios/esparsos nao passam a codificar chaves sem valores.
+Teste cobre especiais, surrogate invalido em chave vazia, holes e reentrada.
+Chrome 154, quatro pares e 15 amostras de 1.000 chamadas: arrays de 10 valores
+9,60 -> 5,05 ms (47,4%); de 100 valores 94,60 -> 44,30 ms (53,2%).
+Controle escalar 0,90 -> 0,90 ms. Array unitario tem outliers, sem ganho
+atribuivel a reutilizacao. Build/lint, 26.854 execucoes unitarias e saidas iguais.
+Nenhuma reducao numerica de heap medida. Ver CORE-ROUND7-AUDIT.md.

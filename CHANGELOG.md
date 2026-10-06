@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$httpParamSerializer:** reuse the encoded string key across array entries,
+  preserving lazy encoding for empty/sparse arrays and the scalar path.
+
 - **ngRepeat:** reconcile retained blocks without deleting previous-map entries,
   preserving duplicate recovery, DOM identity, removals and animations.
 
