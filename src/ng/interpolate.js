@@ -318,6 +318,9 @@ function $InterpolateProvider() {
 
       if (!mustHaveExpression || expressions.length) {
         var compute = function(values) {
+          if (twoExpressions && typeof values[0] === 'string' && typeof values[1] === 'string') {
+            return prefix + values[0] + separator + values[1] + suffix;
+          }
           for (var i = 0, ii = expressions.length; i < ii; i++) {
             if (allOrNothing && isUndefined(values[i])) return;
             concat[expressionPositions[i]] = values[i];

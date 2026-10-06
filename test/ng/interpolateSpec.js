@@ -3,6 +3,23 @@
 /* eslint-disable no-script-url */
 
 describe('$interpolate', function() {
+  it('should keep two-expression watcher transitions and previous values', inject(function($interpolate, $rootScope) {
+    var scope = $rootScope.$new();
+    var calls = [];
+    scope.a = 'one';
+    scope.b = 'two';
+    scope.$watch($interpolate('x{{a}}/{{b}}z', false, null, true), function(value, old) {
+      calls.push([value, old]);
+    });
+    scope.$digest();
+    scope.a = undefined;
+    scope.$digest();
+    scope.a = 'three';
+    scope.b = 4;
+    scope.$digest();
+    expect(calls).toEqual([['xone/twoz', 'xone/twoz'], [undefined, 'xone/twoz'], ['xthree/4z', undefined]]);
+    scope.$destroy();
+  }));
   it('should preserve both values and literals when two expressions reenter', inject(function($interpolate) {
     var fn = $interpolate('before {{first()}} / {{second()}} after');
     var inner = {first: function() { return 'inner'; }, second: function() { return 'two'; }};

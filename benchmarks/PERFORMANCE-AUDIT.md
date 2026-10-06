@@ -918,3 +918,13 @@ essas variacoes nao demonstram ganho causado pelo cursor. Apenas o caminho sem
 + evita o array de pares; nenhuma reducao numerica de heap foi medida.
 Build, 26.826 execucoes unitarias, lint e saidas diferenciais aprovados.
 Harness, resultados e limites em CORE-ROUND5-AUDIT.md.
+
+## Interpolacao com duas expressoes observadas (2026-10-06)
+
+compute usa concatenacao direta para duas strings sem trustedContext, incluindo
+o caminho de $watchGroup. Transicoes undefined/numeros, allOrNothing e contextos
+SCE mantem o caminho anterior. Teste verifica valores novos e anteriores.
+Chrome 154: 100 digests com 1.000 watchers alterados, 27,45 -> 23,55 ms (14,2%).
+Controle estavel: 4,20 -> 4,35 ms, sem ganho demonstrado. Quatro pares alternados,
+15 amostras, saidas iguais, build/lint e 26.838 execucoes unitarias aprovados.
+Nao afirmar ganho total de tela nem reducao numerica de heap. CORE-ROUND6-AUDIT.md.

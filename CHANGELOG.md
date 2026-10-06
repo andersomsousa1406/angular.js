@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$interpolate:** concatenate two string values directly in watcher evaluation,
+  preserving missing-value transitions, previous listener values and SCE paths.
+
 - **URL parsing:** scan string query pairs by position when no raw plus needs
   conversion, avoiding the split array and redundant replacements.
 
