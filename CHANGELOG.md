@@ -4,6 +4,12 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 **Visit [angular.io](https://angular.io) for the actively supported Angular.**
 
+## Fork: unreleased
+
+- **$interpolate:** return an already converted primitive string directly for
+  an expression without surrounding text, avoiding redundant array joining in
+  direct evaluation and watched interpolation. Preserve SCE and conversion rules.
+
 ## Fork: 1.8.4 (2026-10-06)
 
 - **ngClass:** compact object class keys in place, avoiding a second temporary

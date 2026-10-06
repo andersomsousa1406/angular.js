@@ -324,7 +324,7 @@ function $InterpolateProvider() {
             $interpolateMinErr.throwNoconcat(text);
           }
           // In an unprivileged context or only one part: just concatenate and return.
-          return concat.join('');
+          return singleExpression && typeof concat[0] === 'string' ? concat[0] : concat.join('');
         };
 
         return extend(function interpolationFn(context) {
@@ -342,7 +342,7 @@ function $InterpolateProvider() {
                 } else if (trustedContext && concat.length > 1) {
                   $interpolateMinErr.throwNoconcat(text);
                 }
-                return concat.join('');
+                return singleExpression && typeof concat[0] === 'string' ? concat[0] : concat.join('');
               }
               for (; i < ii; i++) {
                 values[i] = parseFns[i](context);

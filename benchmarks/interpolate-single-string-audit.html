@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Single-expression interpolation audit</title>
+<script>
+  document.write('<script src="' +
+    (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+    '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var interpolate = injector.get('$interpolate');
+  var root = injector.get('$rootScope');
+  var results = {};
+  var fn = interpolate('{{value}}');
+  var mixed = interpolate('hello {{value}}!');
+  var scope = {value: 'hello'};
+  var sink;
+
+  function bench(name, n, action) {
+    // Warm both the callback and core code before recording samples.
+    var warmup = n === 300 ? 20000 : 3000000;
+    for (var j = 0; j < warmup; j++) sink = action(j);
+    var samples = [];
+    for (var k = 0; k < 21; k++) {
+      var start = performance.now();
+      for (var i = 0; i < n; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {
+      n: n,
+      medianMs: samples.slice().sort(function(a, b) { return a - b; })[10],
+      samples: samples
+    };
+  }
+
+  bench('singleString', 500000, function() { return fn(scope); });
+  scope.value = 42;
+  bench('singleNumber', 500000, function() { return fn(scope); });
+  bench('mixed', 500000, function() { return mixed(scope); });
+  root.value = 'hello';
+  for (var i = 0; i < 1000; i++) root.$watch(interpolate('{{value}}'), angular.noop);
+  root.$digest();
+  bench('dirtyDigest', 300, function(i) {
+    root.value = 'value-' + i;
+    root.$digest();
+    return root.value;
+  });
+  var values = [null, undefined, 0, false, 42, 'hello', ['x'], {a: 1}, NaN];
+  results.outputs = values.map(function(value) { return fn({value: value}); });
+  results.sink = sink;
+  root.$destroy();
+  return results;
+};
+</script>

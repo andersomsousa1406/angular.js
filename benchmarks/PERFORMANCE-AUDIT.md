@@ -676,3 +676,47 @@ Uma alocacao de array removida por conversao. Tempos Node foram mistos para
 1.000 conversoes de 1.000 chaves: primeira rodada 261,497 -> 223,633 ms; rodada
 final 219,541 -> 222,011 ms. Nao afirmar ganho geral de velocidade nem economia
 numerica de heap; o resultado demonstrado e a remocao do array intermediario.
+
+## Interpolacao de uma expressao sem texto adicional (2026-10-06)
+
+Para `{{value}}`, depois da conversao existente e das verificacoes de SCE,
+retornar a unica string primitiva pronta evita `concat.join('')`. Aplicado a
+avaliacao direta e ao compute usado pelos watchers. Prefixos, sufixos, multiplas
+expressoes e valores que ainda nao sao strings conservam join. Debug e o
+agendamento de digest continuam habilitados como antes.
+
+Comparacao Chrome 154 no Windows: mesma biblioteca 1.8.4 em ambas as variantes,
+com apenas os dois retornos modificados no candidato. Quatro pares com ordem
+alternada, aquecimento de 3.000.000 avaliacoes diretas ou 20.000 digests e 21
+amostras por caso. A tabela mostra a mediana das quatro medianas, em ms.
+Rodada final executada sem a suite de testes concorrente.
+
+| Cenario | Antes | Depois | Reducao de tempo |
+| --- | ---: | ---: | ---: |
+| 500.000 avaliacoes, string | 11,65 | 3,45 | 70,4% |
+| 500.000 avaliacoes, numero | 17,00 | 8,65 | 49,1% |
+| 500.000 avaliacoes com prefixo/sufixo (controle) | 31,75 | 28,60 | 9,9% |
+| 300 digests alterados, 1.000 bindings | 39,55 | 29,75 | 24,8% |
+
+O controle nao recebe o atalho; sua variacao ilustra ruido de medicao e efeitos
+do JIT. Nao extrapolar percentuais para uma aplicacao completa. Nao foi medida
+economia de heap nesta alteracao. Comparacao de nove tipos de valores teve
+saidas identicas. Build e todas as 26.766 execucoes de testes passaram, incluindo
+interpolacao observada, SCE, one-time bindings e allOrNothing; lint do core passou.
+
+Repeticao pelo runner versionado: string 11,35 -> 3,40 ms; numero
+16,20 -> 8,40 ms; controle 29,25 -> 28,85 ms; digests 39,10 -> 25,45 ms.
+Saidas iguais e lint Node do runner aprovado. Variacao entre repeticoes reforca
+que o ganho medido depende do cenario e das condicoes do navegador.
+
+Reproducao: em uma pasta temporaria ignorada, colocar os builds comparaveis como
+`baseline.js` e `candidate.js` ao lado de uma copia de
+`benchmarks/interpolate-single-string-audit.html`. Servir por HTTP e abrir uma
+instancia dedicada do Chrome com remote debugging (padrao do runner: 9229).
+Definir `AUDIT_BASE_URL` para o HTML servido, sem query, e `AUDIT_OUTPUT` para
+um arquivo JSON numa pasta existente. Executar
+`node benchmarks/interpolate-single-string-audit.js`.
+`CDP_PORT` permite mudar a porta. O runner navega a primeira pagina dessa
+instancia; usar um perfil exclusivo de testes. Para isolar esta melhoria,
+criar baseline a partir do mesmo candidato substituindo os dois retornos novos
+por `return concat.join('');`, sem outras diferencas entre os arquivos.
