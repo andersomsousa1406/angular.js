@@ -186,11 +186,23 @@ var $$AnimateRunnerFactoryProvider = /** @this */ function() {
 
       _resolve: function(response) {
         if (this._state !== DONE_COMPLETE_STATE) {
-          forEach(this._doneCallbacks, function(fn) {
-            fn(response);
-          });
-          this._doneCallbacks.length = 0;
+          var callbacks = this._doneCallbacks;
+          this._doneCallbacks = [];
           this._state = DONE_COMPLETE_STATE;
+          var firstError;
+          var failed = false;
+          for (var i = 0; i < callbacks.length; i++) {
+            var fn = callbacks[i];
+            callbacks[i] = null;
+            try {
+              fn(response);
+            } catch (error) {
+              if (!failed) firstError = error;
+              failed = true;
+            }
+          }
+          this._doneCallbacks.length = 0;
+          if (failed) throw firstError;
         }
       }
     };

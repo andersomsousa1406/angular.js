@@ -499,3 +499,17 @@ tentativa no digest seguinte. Nao muda o agendamento ou a frequencia de digest.
 
 Validacao conjunta desta rodada: 26.734 execucoes aprovadas nas sete suites;
 lint dos arquivos alterados e git diff --check aprovados.
+
+## Resolucao de callbacks done de animacao (2026-10-06)
+
+O runner destaca a lista pendente e marca conclusao antes de executar callbacks.
+Isso impede resolucao recursiva da mesma lista por end/cancel dentro de done.
+Callbacks consumidos sao liberados; os restantes recebem o status e executam
+mesmo se um anterior falhar. Ao final, o primeiro valor lancado e propagado sem
+conversao, inclusive undefined ou valores falsy; erros posteriores nao substituem
+esse primeiro erro. Nao captura falhas dos metodos host.
+
+done registrado durante a resolucao agora observa o runner concluido e executa
+imediatamente, como done registrado depois. A fila de callbacks antiga nao e
+retida em caso de falha. Testes combinam reentrada, erro e callbacks restantes;
+suites existentes verificam promises, end/cancel e runners combinados.

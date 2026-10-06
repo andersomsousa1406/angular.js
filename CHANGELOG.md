@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$$AnimateRunner:** finalize resolution despite done-callback errors, prevent
+  recursive resolution and rethrow the first error after remaining callbacks run.
+
 - **$parse:** schedule one post-digest cleanup per one-time watcher while still
   checking its final value and allowing retry in later digests.
 

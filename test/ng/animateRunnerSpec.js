@@ -58,6 +58,18 @@ describe('$$animateAsyncRun', function() {
 });
 
 describe('$$AnimateRunner', function() {
+  it('should finish remaining callbacks after an error and avoid reentrant resolution', inject(function($$AnimateRunner) {
+    var runner = new $$AnimateRunner();
+    var error = new Error('failed');
+    var calls = [];
+    runner.done(function() { calls.push('first'); runner.end(); throw error; });
+    runner.done(function(status) { calls.push(status); });
+    expect(function() { runner.end(); }).toThrow(error);
+    expect(calls).toEqual(['first', true]);
+    expect(runner._doneCallbacks.length).toBe(0);
+    runner.end();
+    expect(calls).toEqual(['first', true]);
+  }));
   they('should trigger the host $prop function',
     ['end', 'cancel', 'pause', 'resume'], function(method) {
 
