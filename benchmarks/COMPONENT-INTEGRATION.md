@@ -43,3 +43,34 @@ Validação: a página principal usa o bundle regenerado, carregando 40 registro
 fictícios por promessa, filtrando 10 registros e ordenando numericamente.
 53/53 verificações por versão, sem falha de função ausente. O resultado gerado
 no projeto externo é idêntico à cópia validada no laboratório.
+
+## ngCheckVisibility: retenção de tabelas após recompilação
+
+O snapshot mostrou tabelas removidas retidas pela cadeia
+`Window -> jQuery.ready.then -> callbacks -> element -> DOM da tabela`.
+Cada compilação registrava um novo callback de ready na diretiva de
+visibilidade, mesmo depois de o documento já estar pronto.
+
+A diretiva agora usa DOMContentLoaded apenas durante o carregamento, inicia
+o watcher por `$evalAsync`, cancela listener/watcher na destruição e libera
+a referência ao elemento. Não altera a frequência do digest nem desativa
+debug. A correção fica nos auxiliares externos, sem mudança no core do fork.
+
+Na mesma medição após aquecimento, mais 20 recompilações acrescentaram:
+
+| Runtime | Antes da correção | Com a correção |
+|---|---:|---:|
+| AngularJS 1.6.9 | 9,05 MiB | 0,31 MiB |
+| Fork 1.8.4 | 8,39 MiB | 0,31 MiB |
+
+Watchers permaneceram em 799. No snapshot corrigido, tabelas destacadas
+ficaram em 3 antes/depois, correspondendo a templates de ngIf das consultas;
+as instâncias antigas da tabela não se acumularam pela cadeia de ready.
+O crescimento residual inclui caches/aquecimento e não prova ausência de
+todos os vazamentos no sistema. Heap via DevTools, GC forçado, console
+limpo e BackForwardCache desativado; métricas completas no laboratório.
+
+Regressões: mostrar/ocultar, destruição antes de DOMContentLoaded,
+inicialização única após o evento e contagem de watchers após destruir.
+53/53 verificações por runtime (106 execuções), sem erros, mesmos estados
+finais e fontes aplicados com hashes iguais às cópias testadas.
