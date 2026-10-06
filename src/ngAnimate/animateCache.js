@@ -12,14 +12,22 @@ var $$AnimateCacheProvider = function() {
       cacheKey: function(node, method, addClass, removeClass) {
         var parentNode = node.parentNode;
         var parentID = parentNode[KEY] || (parentNode[KEY] = ++parentCounter);
-        var parts = [parentID, method, node.getAttribute('class')];
+        var className = node.getAttribute('class');
+        if (typeof parentID !== 'number' || !isString(method) || (className != null && !isString(className)) ||
+            (addClass && !isString(addClass)) || (removeClass && !isString(removeClass))) {
+          var parts = [parentID, method, className];
+          if (addClass) parts.push(addClass);
+          if (removeClass) parts.push(removeClass);
+          return parts.join(' ');
+        }
+        var key = parentID + ' ' + method + ' ' + (className || '');
         if (addClass) {
-          parts.push(addClass);
+          key += ' ' + addClass;
         }
         if (removeClass) {
-          parts.push(removeClass);
+          key += ' ' + removeClass;
         }
-        return parts.join(' ');
+        return key;
       },
 
       containsCachedAnimationWithoutDuration: function(key) {

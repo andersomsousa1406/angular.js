@@ -3,6 +3,19 @@
 describe('ngAnimate $$animateCache', function() {
   beforeEach(module('ngAnimate'));
 
+  it('should preserve empty fields and conversion of non-string arguments', inject(function($$animateCache) {
+    var parent = jqLite('<div></div>');
+    var elm = jqLite('<div></div>');
+    parent.append(elm);
+    var node = getDomNode(elm);
+    expect($$animateCache.cacheKey(node, 'enter')).toBe('1 enter ');
+    expect($$animateCache.cacheKey(node, undefined, 'red')).toBe('1   red');
+    expect($$animateCache.cacheKey(node, 'enter', 0, false)).toBe('1 enter ');
+    var method = {toString: function() { return 'event'; }};
+    var added = {toString: function() { return 'added'; }};
+    expect($$animateCache.cacheKey(node, method, added)).toBe('1 event  added');
+  }));
+
   it('should store the details in a lookup', inject(function($$animateCache) {
     var data = { 'hello': 'there' };
     $$animateCache.put('key', data, true);

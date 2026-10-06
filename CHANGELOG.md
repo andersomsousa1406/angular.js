@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngAnimate:** construct common animation cache keys without temporary arrays,
+  preserving legacy conversion for non-string arguments.
+
 - **$$animateAsyncRun:** resume pending callbacks on a new frame after an error,
   clearing consumed references while preserving the original exception.
 

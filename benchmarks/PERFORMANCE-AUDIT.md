@@ -475,3 +475,16 @@ apos falha. O teste remove o RAF antes de executa-lo, como o navegador, pois o
 mock $$rAF.flush nao retira a funcao da fila quando ela lanca uma excecao.
 Correcao funcional de recuperacao e liberacao de referencias consumidas, sem
 alegar ganho de heap numerico para esse caminho ou corrigir todos os runners.
+
+## Chaves do cache de animacoes (2026-10-06)
+
+O caminho comum (ID numerico e strings) constroi a chave sem array temporario ou
+join. Argumentos fora desse caminho continuam usando array/join, preservando
+conversoes, campos ausentes e valores opcionais falsy.
+
+`cache-key-audit.html`: Chrome 154, sete amostras apos aquecimento, 100.000
+chamadas por amostra: 11,7 -> 6,6 ms. Checksums das chaves consumidas iguais:
+19.120.000. O benchmark inclui leitura da classe no DOM, sem renderizacao ou
+execucao completa de animacoes. Nao demonstrar ganho geral de FPS ou economia
+numerica de memoria; a alocacao de array no caminho comum foi removida.
+Testes de conversao e suites de bundles isolados aprovados.

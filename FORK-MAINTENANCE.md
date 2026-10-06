@@ -216,3 +216,21 @@ Validacao: 26.689 execucoes aprovadas, suites de modulos repetidas apos ajuste d
 teste de drenagem; lint, whitespace e builds core/ngAnimate aprovados. Debug
 permanece habilitado e a frequencia de digest nao muda. Medicoes, limites e
 harnesses estao em benchmarks/PERFORMANCE-AUDIT.md.
+
+## Inputs do parser e filas auxiliares de animacao (2026-10-06)
+
+- Analise de dependencias binarias evita copias repetidas da lista crescente.
+  Uma estrutura intermediaria e materializada somente nos limites necessarios.
+  10.000 ASTs diferenciais preservaram ordem, duplicatas, constantes e pureza;
+  testes cobrem CSP e compilacao de funcoes. Metadata temporaria de 1.000 inputs
+  no harness Node/GC: 4.187.696 -> 195.032 bytes; nao e memoria do cache permanente.
+- $$animateAsyncRun libera slots consumidos e recupera trabalho pendente em um
+  novo frame apos excecao. Preserva propagacao do erro e reentrada sem erro no
+  mesmo frame; nao altera todos os caminhos de erro dentro de runners.
+- Chaves de $$animateCache usam construcao direta no caminho de strings, com
+  array/join de fallback para outros argumentos. Chrome, 100.000 chamadas:
+  11,7 -> 6,6 ms; nao mede renderizacao.
+
+26.718 execucoes aprovadas; lint dos arquivos alterados, whitespace e builds
+core/ngAnimate aprovados. Cada melhoria tem commit independente. Debug habilitado
+e agendamento do digest preservados. Detalhes em benchmarks/PERFORMANCE-AUDIT.md.
