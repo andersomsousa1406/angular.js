@@ -29,6 +29,35 @@ describe('angular', function() {
   });
 
   describe('copy', function() {
+    it('should preserve large graph aliases, cycles, destinations and legacy fallback', function() {
+      var source = {items: []};
+      for (var i = 0; i < 200; i++) source.items.push({index: i});
+      source.self = source;
+      source.alias = source.items[0];
+      source.items[199].first = source.items[0];
+      function verify(result) {
+        expect(result.self).toBe(result);
+        expect(result.alias).toBe(result.items[0]);
+        expect(result.items[199].first).toBe(result.items[0]);
+        expect(result.items[0]).not.toBe(source.items[0]);
+      }
+      verify(copy(source));
+      var destination = {obsolete: true, $$hashKey: 'keep'};
+      expect(copy(source, destination)).toBe(destination);
+      verify(destination);
+      expect(destination.obsolete).toBeUndefined();
+      expect(destination.$$hashKey).toBe('keep');
+      var weakMap = window.WeakMap;
+      try {
+        window.WeakMap = undefined;
+        verify(copy(source));
+      } finally {
+        window.WeakMap = weakMap;
+      }
+      var limited = copy(source, undefined, 2);
+      expect(limited.items[0]).toBe('...');
+      expect(limited.self).toBe(limited);
+    });
     it('should return same object', function() {
       var obj = {};
       var arr = [];

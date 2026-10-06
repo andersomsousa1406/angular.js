@@ -871,6 +871,7 @@ function arrayRemove(array, value) {
 function copy(source, destination, maxDepth) {
   var stackSource = [];
   var stackDest = [];
+  var identityMap;
   maxDepth = isValidObjectMaxDepth(maxDepth) ? maxDepth : NaN;
 
   if (destination) {
@@ -941,9 +942,19 @@ function copy(source, destination, maxDepth) {
     }
 
     // Already copied values
-    var index = stackSource.indexOf(source);
-    if (index !== -1) {
-      return stackDest[index];
+    if (!identityMap && stackSource.length === 128 && typeof window.WeakMap === 'function') {
+      identityMap = new window.WeakMap();
+      for (var i = 0; i < stackSource.length; i++) {
+        identityMap.set(stackSource[i], stackDest[i]);
+      }
+      stackSource.length = stackDest.length = 0;
+    }
+    if (identityMap) {
+      var copied = identityMap.get(source);
+      if (copied !== undefined) return copied;
+    } else {
+      var index = stackSource.indexOf(source);
+      if (index !== -1) return stackDest[index];
     }
 
     if (isWindow(source) || isScope(source)) {
@@ -959,8 +970,12 @@ function copy(source, destination, maxDepth) {
       needsRecurse = true;
     }
 
-    stackSource.push(source);
-    stackDest.push(destination);
+    if (identityMap) {
+      identityMap.set(source, destination);
+    } else {
+      stackSource.push(source);
+      stackDest.push(destination);
+    }
 
     return needsRecurse
       ? copyRecurse(source, destination, maxDepth)

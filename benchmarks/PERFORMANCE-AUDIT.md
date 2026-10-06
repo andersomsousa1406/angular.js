@@ -989,3 +989,14 @@ cancelados, 0,75 -> 0,80 ms: sem ganho consistente de tempo, um array evitado.
 Controle tres expressoes 3,35 -> 3,30 ms. Nao extrapolar para digests normais
 nem afirmar bytes de heap economizados. Build/lint, 26.854 execucoes unitarias
 e outputs iguais. Ver CORE-ROUND7-AUDIT.md.
+
+## angular.copy: indice por identidade em grafos grandes (2026-10-06)
+
+Ao atingir 128 registros, migrar pares para WeakMap quando disponivel e liberar
+as listas de pares. Registrar copias antes da recursao preserva ciclos/aliases.
+Sem WeakMap e para copias pequenas, manter indexOf. Teste verifica 200 objetos,
+destino/hashKey, profundidade e fallback. Chrome 154: 20 copias de 2.000 objetos
+32,70 -> 20,50 ms (37,3%); controles 16 objetos 8,00 -> 8,20 e 256 objetos
+12,70 -> 12,80 ms, sem ganho demonstrado. Quatro pares, 15 amostras, outputs
+iguais. Build/lint e 26.870 execucoes unitarias aprovados. WeakMap tem overhead;
+nenhuma economia numerica de heap medida. Ver CORE-ROUND8-AUDIT.md.

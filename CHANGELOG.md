@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **angular.copy:** index large object graphs by identity when WeakMap is
+  available, preserving cycles, aliases and the legacy linear-search fallback.
+
 - **$watchGroup:** allocate previous-value and deregistration buffers only on
   paths that need them, preserving listener arrays and callback scheduling.
 
