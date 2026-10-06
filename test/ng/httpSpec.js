@@ -720,6 +720,20 @@ describe('$http', function() {
         $httpBackend.flush();
       });
 
+      it('should index large header sets while preserving overrides and function removal', function() {
+        var headers = {accept: function() { return null; }};
+        for (var i = 0; i < 20; i++) headers['X-Custom-' + i] = 'value' + i;
+        $http.defaults.headers.common['X-Default'] = 'default';
+        headers['x-default'] = function() { return 'override'; };
+        $httpBackend.expect('GET', '/url', undefined, function(actual) {
+          return !('Accept' in actual) && !('accept' in actual) &&
+              actual['x-default'] === 'override' && !('X-Default' in actual) &&
+              actual['X-Custom-19'] === 'value19';
+        }).respond('');
+        $http.get('/url', {headers: headers});
+        $httpBackend.flush();
+      });
+
       it('should delete default headers if custom header function returns null', function() {
 
         $httpBackend.expect('POST', '/url', 'messageBody', function(headers) {

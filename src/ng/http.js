@@ -1144,19 +1144,34 @@ function $HttpProvider() {
             defHeaderName, lowercaseDefHeaderName, reqHeaderName;
 
         defHeaders = extend({}, defHeaders.common, defHeaders[lowercase(config.method)]);
+        var requestHeaderNames;
+        var headerComparisons = 0;
 
         // using for-in instead of forEach to avoid unnecessary iteration after header has been found
         defaultHeadersIteration:
         for (defHeaderName in defHeaders) {
           lowercaseDefHeaderName = lowercase(defHeaderName);
+          if (requestHeaderNames) {
+            if (requestHeaderNames[lowercaseDefHeaderName]) continue;
+            reqHeaders[defHeaderName] = defHeaders[defHeaderName];
+            requestHeaderNames[lowercaseDefHeaderName] = true;
+            continue;
+          }
 
           for (reqHeaderName in reqHeaders) {
+            if (++headerComparisons === 65) {
+              requestHeaderNames = createMap();
+              for (var indexedName in reqHeaders) requestHeaderNames[lowercase(indexedName)] = true;
+              if (requestHeaderNames[lowercaseDefHeaderName]) continue defaultHeadersIteration;
+              break;
+            }
             if (lowercase(reqHeaderName) === lowercaseDefHeaderName) {
               continue defaultHeadersIteration;
             }
           }
 
           reqHeaders[defHeaderName] = defHeaders[defHeaderName];
+          if (requestHeaderNames) requestHeaderNames[lowercaseDefHeaderName] = true;
         }
 
         // execute if header value is a function for merged headers

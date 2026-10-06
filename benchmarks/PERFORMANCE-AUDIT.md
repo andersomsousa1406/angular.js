@@ -648,3 +648,18 @@ temporaria em troca de reduzir buscas; nao afirmar reducao de heap neste item.
 Regressoes verificam transicoes grandes, duplicatas e nomes semelhantes aos
 de Object.prototype sem alterar o tratamento existente do pipeline de classes.
 Validacao conjunta: 26.766 execucoes aprovadas; lint e whitespace aprovados.
+
+## Indice de nomes de headers HTTP (2026-10-06)
+
+mergeHeaders mantem o loop anterior ate acumular 64 comparacoes. Entao cria
+indice de nomes atuais em minusculas, incluindo defaults ja inseridos. O mapa
+e atualizado com cada novo default, preservando colisoes de nomes com casing
+distinto. Funcoes de headers continuam executando apos a combinacao, na mesma
+ordem; retorno null continua removendo o campo sem reintroduzir o default.
+
+O indice por contagem antecipada foi substituido apos medir custo adicional no
+caso pequeno. No harness Node final, 1.000 merges de 50 headers:
+654,471 -> 214,098 ms; tres headers: 7,956 -> 6,537 ms. Tempos pequenos variaram
+entre rodadas; nao afirmar ganho universal. 10.000 objetos combinados tiveram
+resultados iguais. Nao mede latencia HTTP ou rendering, e o indice usa memoria
+temporaria. Teste de headers com funcoes, casing e conjuntos grandes aprovado.

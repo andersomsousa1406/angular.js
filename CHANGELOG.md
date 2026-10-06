@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$http:** index case-insensitive request header names after repeated searches,
+  preserving overrides and header-function execution.
+
 - **ngClass:** use a null-prototype lookup for large class differences while
   preserving token order and duplicates.
 
