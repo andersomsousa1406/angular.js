@@ -268,3 +268,17 @@ Debug e frequencia de digest preservados; tres commits separados.
 Validacao: 26.742 execucoes aprovadas, lint dos arquivos alterados, whitespace
 e builds atualizados. Dois commits de otimizacao e um de investigacao/regressao;
 nenhum debounce ou alteracao do debug. Medicoes e limites em PERFORMANCE-AUDIT.
+
+## Ordenacao, ngOptions e headers (2026-10-06)
+
+- orderBy com um criterio evita um array por item. Criterios multiplos e esparsos
+  mantem seu caminho; comparadores recebem os mesmos metadados e desempates.
+  10.000 comparacoes verificaram resultados, getters e traces de comparadores.
+- ngOptions prealocado e escrita por indice foram medidos e descartados por
+  ausencia de ganho. Runtime mantido; benchmark e resultados negativos registrados.
+- Headers HTTP sao lidos por cursor, mantendo a interpretacao anterior e evitando
+  split de todas as linhas. 10.000 entradas diferenciais tiveram resultados iguais.
+
+26.754 execucoes aprovadas, lint e whitespace aprovados; builds atualizados.
+Dois commits de otimizacao e um de investigacao. Debug e agendamento do digest
+preservados. Tempos, harnesses e limites em benchmarks/PERFORMANCE-AUDIT.md.

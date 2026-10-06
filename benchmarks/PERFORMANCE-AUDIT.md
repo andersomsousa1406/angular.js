@@ -618,3 +618,16 @@ Fonte ngOptions restaurada; nenhuma otimizacao de runtime aplicada neste item.
 O benchmark versionado usa label, disable when e track by com 100/1.000/5.000
 options e permite investigar outros casos. Resultados nao medem renderizacao
 nem toda tela, e nao demonstram ausencia de outras oportunidades de melhoria.
+
+## Leitura de headers HTTP por cursor (2026-10-06)
+
+parseHeaders percorre posicoes de newline sem criar a lista completa de linhas
+com split. Mantem primeiro colon, trim de CRLF, repeticoes, linhas incompletas,
+campos vazios e newline final. O caminho de headers como objeto continua igual.
+
+`node benchmarks/headers-audit.js caminho/http-anterior.js`; argumento omitido
+usa tmp/headers-before-source.js, nao versionado. 10.000 strings diferenciais
+produziram os mesmos objetos. Node 14, sete amostras apos aquecimento, 100
+chamadas: 10 headers, 0,715 -> 0,565 ms; 1.000 headers, 67,959 -> 65,636 ms.
+Medicoes isolam o leitor; nao representam latencia HTTP. Array intermediario
+removido, mas nenhuma economia numerica de heap foi medida nesta rodada.

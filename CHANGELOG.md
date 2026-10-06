@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$http:** scan raw headers by line position without a temporary split array,
+  preserving repeated fields, whitespace and incomplete-line handling.
+
 - **orderBy:** avoid per-item predicate arrays when using one populated sort
   criterion, preserving comparator inputs and stable reverse tie breaking.
 

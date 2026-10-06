@@ -567,6 +567,13 @@ describe('$http', function() {
 
     describe('response headers parser', function() {
       /* global parseHeaders: false */
+      it('should preserve repeated headers, CRLF and incomplete lines', function() {
+        var parsed = parseHeaders('X-Test: one\r\nignored\n\n x-test : two:three\r\nEmpty:\n');
+        expect(parsed['x-test']).toBe('one, two:three');
+        expect(parsed.empty).toBe('');
+        expect(parsed.ignored).toBeUndefined();
+        expect(Object.keys(parsed).length).toBe(2);
+      });
 
       it('should parse basic', function() {
         var parsed = parseHeaders(
