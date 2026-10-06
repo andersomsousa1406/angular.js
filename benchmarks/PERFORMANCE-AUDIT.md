@@ -976,3 +976,16 @@ Chrome 154, quatro pares e 15 amostras de 200.000 chamadas: tres statements
 Beneficio restrito ao interpretador CSP com varias instrucoes. Um callback de
 iteracao evitado por avaliacao, sem medicao numerica de heap. Build/lint,
 26.854 execucoes unitarias e saidas iguais. Ver CORE-ROUND7-AUDIT.md.
+
+## watchGroup: buffers sob demanda em grupos pequenos (2026-10-06)
+
+Grupo vazio evita oldValues/deregisterFns e grupo unitario evita deregisterFns.
+Array newValues continua sendo entregue ao listener; grupo unitario conserva
+oldValues e suas identidades. Nao alterar scheduling ou cancelamento. Teste
+cobre callback vazio cancelado, valores antigos, identidades e cancelamento.
+Chrome 154, quatro pares, 15 amostras: 20.000 registros vazios cancelados em
+200 lotes com digest, 1,45 -> 1,10 ms (24,1%). Grupo unitario, 10.000 registros
+cancelados, 0,75 -> 0,80 ms: sem ganho consistente de tempo, um array evitado.
+Controle tres expressoes 3,35 -> 3,30 ms. Nao extrapolar para digests normais
+nem afirmar bytes de heap economizados. Build/lint, 26.854 execucoes unitarias
+e outputs iguais. Ver CORE-ROUND7-AUDIT.md.

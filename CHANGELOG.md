@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$watchGroup:** allocate previous-value and deregistration buffers only on
+  paths that need them, preserving listener arrays and callback scheduling.
+
 - **$parse (CSP):** evaluate multiple statements with a direct loop, avoiding
   a per-evaluation callback while preserving order, locals and exceptions.
 

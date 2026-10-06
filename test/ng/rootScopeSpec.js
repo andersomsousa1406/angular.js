@@ -1676,6 +1676,38 @@ describe('Scope', function() {
       expect(newValues).toBe(oldValues);
     });
 
+    it('should keep small-group array identities and cancellation timing', function() {
+      var emptyCalls = 0;
+      var cancelEmpty = scope.$watchGroup([], function() { emptyCalls++; });
+      cancelEmpty();
+      scope.$digest();
+      expect(emptyCalls).toBe(0);
+      var values, oldValues, calls = 0;
+      scope.a = 1;
+      var cancel = scope.$watchGroup(['a'], function(n, o) {
+        calls++;
+        if (calls === 1) {
+          expect(n).toBe(o);
+          values = n;
+        } else {
+          expect(n).toBe(values);
+          expect(o).not.toBe(n);
+          oldValues = o;
+          expect(o[0]).toBe(calls - 1);
+        }
+      });
+      scope.$digest();
+      scope.a = 2;
+      scope.$digest();
+      scope.a = 3;
+      scope.$digest();
+      expect(oldValues[0]).toBe(2);
+      cancel();
+      scope.a = 4;
+      scope.$digest();
+      expect(calls).toBe(3);
+    });
+
 
     it('should pass same group instance on first call (single expression)', function() {
       var newValues;

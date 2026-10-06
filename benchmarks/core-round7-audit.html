@@ -1,0 +1,69 @@
+<!doctype html>
+<html ng-csp="no-unsafe-eval">
+<meta charset="utf-8">
+<title>Parameter serialization, CSP statements and small watch groups</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var root = injector.get('$rootScope'), parse = injector.get('$parse');
+  var serialize = injector.get('$httpParamSerializer');
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  [1, 10, 100].forEach(function(size) {
+    var params = {'space &+ key': []};
+    for (var i = 0; i < size; i++) params['space &+ key'].push('value ' + i);
+    bench('serializeArray' + size, 1000, function() { return serialize(params); });
+    outputs.push(serialize(params));
+  });
+  bench('serializeScalar', 1000, function() { return serialize({'space &+ key': 'value'}); });
+  var sparse = new Array(5); sparse[2] = 'a+b'; sparse[4] = null;
+  outputs.push(serialize({'bad\ud800': [], sparse: sparse, date: new Date(0), flag: true}));
+  var ctx = {a: 2, b: 3};
+  var multi = parse('a + b; a * b; a - b');
+  var single = parse('a + b');
+  bench('cspStatements', 200000, function() { return multi(ctx); });
+  bench('cspSingle', 200000, function() { return single(ctx); });
+  outputs.push(multi(ctx), multi(ctx, {a: 5, b: 1}), single(ctx));
+  [0, 1, 3].forEach(function(size) {
+    var scope = root.$new(), expressions = ['a', 'b', 'c'].slice(0, size);
+    scope.a = 1; scope.b = 2; scope.c = 3;
+    bench('watchGroupRegister' + size, size ? 10000 : 200, function() {
+      if (!size) {
+        for (var i = 0; i < 100; i++) scope.$watchGroup(expressions, angular.noop)();
+        scope.$digest();
+      } else {
+        scope.$watchGroup(expressions, angular.noop)();
+      }
+    });
+    var observed = [], previousNew, previousOld;
+    var cancel = scope.$watchGroup(expressions, function(n, o) {
+      observed.push([n.slice(), o.slice(), n === o, !previousNew || previousNew === n,
+        !previousOld || previousOld === o]);
+      previousNew = n; previousOld = o;
+    });
+    scope.$digest(); scope.a = 4; scope.$digest(); scope.a = 5; scope.$digest();
+    cancel(); scope.a = 6; scope.$digest();
+    outputs.push(observed, scope.$$watchersCount);
+    scope.$destroy();
+  });
+  results.outputs = outputs;
+  return results;
+};
+</script>
+</html>

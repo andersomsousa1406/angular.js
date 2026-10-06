@@ -492,9 +492,9 @@ function $RootScopeProvider() {
        * @returns {function()} Returns a de-registration function for all listeners.
        */
       $watchGroup: function(watchExpressions, listener) {
-        var oldValues = new Array(watchExpressions.length);
+        var oldValues;
         var newValues = new Array(watchExpressions.length);
-        var deregisterFns = [];
+        var deregisterFns;
         var deregisterFnsPosition = 0;
         var self = this;
         var changeReactionScheduled = false;
@@ -511,6 +511,7 @@ function $RootScopeProvider() {
           };
         }
 
+        oldValues = new Array(watchExpressions.length);
         if (watchExpressions.length === 1) {
           // Special case size of one
           return this.$watch(watchExpressions[0], function watchGroupAction(value, oldValue, scope) {
@@ -520,6 +521,7 @@ function $RootScopeProvider() {
           });
         }
 
+        deregisterFns = [];
         forEach(watchExpressions, function(expr, i) {
           var unwatchFn = self.$watch(expr, function watchGroupSubAction(value) {
             newValues[i] = value;
