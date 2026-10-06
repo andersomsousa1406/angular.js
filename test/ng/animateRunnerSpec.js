@@ -1,6 +1,34 @@
 'use strict';
 
 describe('$$animateAsyncRun', function() {
+  it('should propagate an error and resume remaining callbacks on a new frame', inject(function($$animateAsyncRun, $$rAF) {
+    var trigger = $$animateAsyncRun();
+    var calls = [];
+    var error = new Error('callback failed');
+    trigger(function() { calls.push('failed'); throw error; });
+    trigger(function() { calls.push('remaining'); });
+    var frame = $$rAF.queue.shift();
+    expect(frame).toThrow(error);
+    expect(calls).toEqual(['failed']);
+    var later = $$animateAsyncRun();
+    later(function() { calls.push('later'); });
+    $$rAF.flush();
+    expect(calls).toEqual(['failed', 'remaining', 'later']);
+    expect($$rAF.queue.length).toBe(0);
+  }));
+
+  it('should execute callbacks added during a flush in the same frame', inject(function($$animateAsyncRun, $$rAF) {
+    var trigger = $$animateAsyncRun();
+    var calls = [];
+    trigger(function() {
+      calls.push('first');
+      $$animateAsyncRun()(function() { calls.push('nested'); });
+    });
+    $$rAF.flush();
+    expect(calls).toEqual(['first', 'nested']);
+    expect($$rAF.queue.length).toBe(0);
+  }));
+
   it('should fire the callback only when one or more RAFs have passed',
     inject(function($$animateAsyncRun, $$rAF) {
 

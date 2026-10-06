@@ -8,10 +8,21 @@ var $$AnimateAsyncRunFactoryProvider = /** @this */ function() {
       waitQueue.push(fn);
       if (waitQueue.length > 1) return;
       $$rAF(function() {
-        for (var i = 0; i < waitQueue.length; i++) {
-          waitQueue[i]();
+        var i = 0;
+        try {
+          while (i < waitQueue.length) {
+            var callback = waitQueue[i];
+            waitQueue[i++] = null;
+            callback();
+          }
+        } finally {
+          waitQueue = waitQueue.slice(i);
+          if (waitQueue.length) {
+            var remaining = waitQueue;
+            waitQueue = [];
+            for (var j = 0; j < remaining.length; j++) waitForTick(remaining[j]);
+          }
         }
-        waitQueue = [];
       });
     }
 

@@ -460,3 +460,18 @@ $parse, nem velocidade de digest ou de compilacao completa de uma tela.
 binarias longas e containers/computed keys nos modos CSP e compilado.
 Validacao conjunta: 26.718 execucoes aprovadas; lint dos arquivos alterados e
 git diff --check aprovados.
+
+## Recuperacao da fila $$animateAsyncRun (2026-10-06)
+
+Uma excecao interrompia o flush antes de esvaziar a fila. Como novas chamadas
+so agendavam RAF quando a fila tinha um item, o estado retido tambem impedia
+progresso futuro. O finally agora remove callbacks consumidos e agenda os
+restantes em outro frame; a excecao original continua propagando para o chamador
+do RAF. Nao introduzir captura silenciosa ou novo exceptionHandler.
+
+O caminho sem erro continua incluindo callbacks adicionados durante o flush no
+mesmo frame. Testes verificam reentrada, erro, trabalho pendente e trabalho novo
+apos falha. O teste remove o RAF antes de executa-lo, como o navegador, pois o
+mock $$rAF.flush nao retira a funcao da fila quando ela lanca uma excecao.
+Correcao funcional de recuperacao e liberacao de referencias consumidas, sem
+alegar ganho de heap numerico para esse caminho ou corrigir todos os runners.

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$$animateAsyncRun:** resume pending callbacks on a new frame after an error,
+  clearing consumed references while preserving the original exception.
+
 - **$parse:** collect binary-expression watch dependencies without copying the
   growing input list at every node; preserve input order and duplicates.
 
