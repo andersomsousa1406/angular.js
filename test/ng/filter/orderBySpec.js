@@ -8,6 +8,18 @@ describe('Filter: orderBy', function() {
 
 
   describe('(Arrays)', function() {
+    it('should keep sparse predicates valid when sorting a single value', function() {
+      expect(orderBy([3], new Array(1))).toEqual([3]);
+    });
+
+    it('should evaluate a single predicate once per item and preserve reverse tie breaking', function() {
+      var calls = [];
+      var values = [{id: 1, key: 2}, {id: 2, key: 1}, {id: 3, key: 2}];
+      var result = orderBy(values, function(value) { calls.push(value.id); return value.key; }, true);
+      expect(calls).toEqual([1, 2, 3]);
+      expect(result).toEqual([values[2], values[0], values[1]]);
+      expect(values[0].id).toBe(1);
+    });
     it('should throw an exception if no array-like object is provided', function() {
       expect(function() { orderBy({}); }).
         toThrowMinErr('orderBy', 'notarray', 'Expected array but received: {}');

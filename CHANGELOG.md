@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **orderBy:** avoid per-item predicate arrays when using one populated sort
+  criterion, preserving comparator inputs and stable reverse tie breaking.
+
 - **$watchCollection:** allocate array/object comparison buffers on demand,
   avoiding unused buffers for scalar watchers.
 

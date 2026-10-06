@@ -572,6 +572,7 @@ function orderByFilter($parse) {
     if (sortPredicate.length === 0) { sortPredicate = ['+']; }
 
     var predicates = processPredicates(sortPredicate);
+    var singlePredicate = predicates.length === 1 && 0 in predicates;
 
     var descending = reverseOrder ? -1 : 1;
 
@@ -581,11 +582,19 @@ function orderByFilter($parse) {
     // The next three lines are a version of a Swartzian Transform idiom from Perl
     // (sometimes called the Decorate-Sort-Undecorate idiom)
     // See https://en.wikipedia.org/wiki/Schwartzian_transform
-    var compareValues = Array.prototype.map.call(array, getComparisonObject);
-    compareValues.sort(doComparison);
+    var compareValues = Array.prototype.map.call(array, singlePredicate ? getSingleComparisonObject : getComparisonObject);
+    compareValues.sort(singlePredicate ? doSingleComparison : doComparison);
     array = compareValues.map(function(item) { return item.value; });
 
     return array;
+
+    function getSingleComparisonObject(value, index) {
+      return {
+        value: value,
+        tieBreaker: {value: index, type: 'number', index: index},
+        predicateValues: getPredicateValue(predicates[0].get(value), index)
+      };
+    }
 
     function getComparisonObject(value, index) {
       // NOTE: We are adding an extra `tieBreaker` value based on the element's index.
@@ -598,6 +607,12 @@ function orderByFilter($parse) {
           return getPredicateValue(predicate.get(value), index);
         })
       };
+    }
+
+    function doSingleComparison(v1, v2) {
+      var result = compare(v1.predicateValues, v2.predicateValues);
+      if (result) return result * predicates[0].descending * descending;
+      return (compare(v1.tieBreaker, v2.tieBreaker) || defaultCompare(v1.tieBreaker, v2.tieBreaker)) * descending;
     }
 
     function doComparison(v1, v2) {

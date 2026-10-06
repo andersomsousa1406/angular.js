@@ -588,3 +588,20 @@ Uma execucao por versao, com GC explicito; nao extrapolar para toda aplicacao.
 Reverificacao das transicoes: array -> null reteve 16.911 bytes, objeto -> null
 10.595 bytes. Testes de transicoes e todas as suites existentes passaram:
 26.742 execucoes. Lint e whitespace aprovados.
+
+## orderBy com um criterio (2026-10-06)
+
+O caminho de um criterio armazena diretamente o valor de comparacao, eliminando
+um array por item. Metadados do comparador e tieBreaker permanecem iguais.
+Criterios multiplos e arrays de criterios esparsos usam o algoritmo anterior.
+
+`options-sort-audit.html`, Chrome 154, sete amostras apos aquecimento: ordenar
+10.000 objetos por uma chave, mediana final 2,97 -> 2,61 ms. Rodadas anteriores
+tambem mostraram ganho nesse caso. Tempos do controle de dois criterios variaram
+(ultima rodada 3,78 -> 4,27 ms), sem alegar ganho nesse caminho, cujo algoritmo
+permanece igual. Nao medir heap numericamente nem extrapolar para renderizacao.
+
+10.000 comparacoes diferenciais preservaram resultados, ordem de getters e
+traces de comparadores (ties, reverse, tipos mistos, NaN, um/dois criterios).
+Regressoes verificam criterio esparso, uma avaliacao por item e ties reversos.
+Validacao conjunta: 26.754 execucoes aprovadas; lint e whitespace aprovados.
