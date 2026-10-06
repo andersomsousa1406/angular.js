@@ -8,6 +8,21 @@ describe('Filter: orderBy', function() {
 
 
   describe('(Arrays)', function() {
+    it('should keep tie objects for custom comparators and stable indices for default sorting', function() {
+      var items = [{id: 1, key: 'same'}, {id: 2, key: 'same'}, {id: 3, key: 'same'}];
+      var ties = [];
+      expect(orderBy(items, 'key')).toEqual(items);
+      expect(orderBy(items, ['key', 'key'], true)).toEqual(items.slice().reverse());
+      expect(orderBy(items, 'key', false, function(a, b) {
+        if (a.type === 'number') {
+          ties.push(a);
+          expect(a.value).toBe(a.index);
+          expect(b.value).toBe(b.index);
+        }
+        return 0;
+      })).toEqual(items);
+      expect(ties.length).toBeGreaterThan(0);
+    });
     it('should evaluate multiple predicates in item order and allow reentrant sorting', function() {
       var calls = [];
       var values = [{id: 1, a: 2, b: 0}, {id: 2, a: 1, b: 2}, {id: 3, a: 1, b: 1}];

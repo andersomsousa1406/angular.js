@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **orderBy:** use numeric tie indices for the default comparator, avoiding one
+  temporary object per item while preserving custom comparator tie objects.
+
 - **$interpolate:** concatenate two string values directly in watcher evaluation,
   preserving missing-value transitions, previous listener values and SCE paths.
 

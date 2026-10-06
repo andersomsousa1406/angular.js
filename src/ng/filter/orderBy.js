@@ -578,6 +578,7 @@ function orderByFilter($parse) {
 
     // Define the `compare()` function. Use a default comparator if none is specified.
     var compare = isFunction(compareFn) ? compareFn : defaultCompare;
+    var defaultComparator = compare === defaultCompare;
 
     // The next three lines are a version of a Swartzian Transform idiom from Perl
     // (sometimes called the Decorate-Sort-Undecorate idiom)
@@ -591,7 +592,7 @@ function orderByFilter($parse) {
     function getSingleComparisonObject(value, index) {
       return {
         value: value,
-        tieBreaker: {value: index, type: 'number', index: index},
+        tieBreaker: defaultComparator ? index : {value: index, type: 'number', index: index},
         predicateValues: getPredicateValue(predicates[0].get(value), index)
       };
     }
@@ -609,7 +610,7 @@ function orderByFilter($parse) {
       // distinguish between two elements.
       return {
         value: value,
-        tieBreaker: {value: index, type: 'number', index: index},
+        tieBreaker: defaultComparator ? index : {value: index, type: 'number', index: index},
         predicateValues: predicateValues
       };
     }
@@ -617,7 +618,7 @@ function orderByFilter($parse) {
     function doSingleComparison(v1, v2) {
       var result = compare(v1.predicateValues, v2.predicateValues);
       if (result) return result * predicates[0].descending * descending;
-      return (compare(v1.tieBreaker, v2.tieBreaker) || defaultCompare(v1.tieBreaker, v2.tieBreaker)) * descending;
+      return compareTieBreakers(v1, v2);
     }
 
     function doComparison(v1, v2) {
@@ -628,6 +629,13 @@ function orderByFilter($parse) {
         }
       }
 
+      return compareTieBreakers(v1, v2);
+    }
+
+    function compareTieBreakers(v1, v2) {
+      if (defaultComparator) {
+        return (v1.tieBreaker === v2.tieBreaker ? 0 : v1.tieBreaker < v2.tieBreaker ? -1 : 1) * descending;
+      }
       return (compare(v1.tieBreaker, v2.tieBreaker) || defaultCompare(v1.tieBreaker, v2.tieBreaker)) * descending;
     }
   };

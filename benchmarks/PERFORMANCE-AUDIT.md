@@ -928,3 +928,15 @@ Chrome 154: 100 digests com 1.000 watchers alterados, 27,45 -> 23,55 ms (14,2%).
 Controle estavel: 4,20 -> 4,35 ms, sem ganho demonstrado. Quatro pares alternados,
 15 amostras, saidas iguais, build/lint e 26.838 execucoes unitarias aprovados.
 Nao afirmar ganho total de tela nem reducao numerica de heap. CORE-ROUND6-AUDIT.md.
+
+## orderBy: desempate padrao sem objeto adicional (2026-10-06)
+
+Com defaultCompare, tieBreaker guarda o indice como numero e compara indices
+diretamente, respeitando reverse. Comparadores customizados recebem os mesmos
+objetos value/type/index e fallback original. Um objeto evitado por item no
+caminho padrao; bytes/heap nao medidos. Teste verifica ties custom e multiplos
+criterios invertidos. Chrome 154, quatro pares e 15 amostras: 100 sorts de 1.000
+itens, um criterio 14,60 -> 14,40 ms; dois criterios 26,00 -> 26,45 ms.
+Nenhum ganho consistente de tempo demonstrado. Mantido por reduzir alocacoes;
+controle custom 19,10 -> 18,15 ms mostra variacao fora do caminho otimizado.
+Build/lint, 26.838 execucoes unitarias e saidas iguais. CORE-ROUND6-AUDIT.md.
