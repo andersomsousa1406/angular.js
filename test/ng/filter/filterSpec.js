@@ -7,6 +7,37 @@ describe('Filter: filter', function() {
     filter = $filter('filter');
   }));
 
+  it('should preserve sparse nested-array iteration, mutation and early matching', function() {
+    var values = new Array(4), calls = [];
+    values[1] = 'first';
+    values[2] = 'match';
+    values[3] = 'last';
+    expect(filter([values], 'match', function(actual, expected) {
+      calls.push(actual);
+      if (actual === 'first') values.push('added');
+      return actual === expected;
+    })).toEqual([values]);
+    expect(calls).toEqual(['first', 'match']);
+    calls.length = 0;
+    expect(filter([values], 'missing', function(actual) { calls.push(actual); return false; })).toEqual([]);
+    expect(calls).toEqual(['first', 'match', 'last', 'added']);
+  });
+
+  it('should retain custom some receivers and read the method only once', function() {
+    var values = ['value'], reads = 0;
+    Object.defineProperty(values, 'some', {get: function() {
+      reads++;
+      var method = function(predicate) {
+        expect(this).toBe(values);
+        return predicate('custom');
+      };
+      method.call = function() { throw new Error('custom call must not run'); };
+      return method;
+    }});
+    expect(filter([values], 'custom')).toEqual([values]);
+    expect(reads).toBe(1);
+  });
+
 
   it('should filter by string', function() {
     var items = ['MIsKO', {name: 'shyam'}, ['adam'], 1234];

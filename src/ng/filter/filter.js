@@ -1,5 +1,7 @@
 'use strict';
 
+var filterArraySome = Array.prototype.some;
+
 /**
  * @ngdoc filter
  * @name filter
@@ -232,7 +234,16 @@ function deepCompare(actual, expected, comparator, anyPropertyKey, matchAgainstA
   } else if (isArray(actual)) {
     // In case `actual` is an array, consider it a match
     // if ANY of it's items matches `expected`
-    return actual.some(function(item) {
+    var someMethod = actual.some;
+    if (someMethod === filterArraySome) {
+      for (var i = 0, length = actual.length; i < length; i++) {
+        if (i in actual && deepCompare(actual[i], expected, comparator, anyPropertyKey, matchAgainstAnyProp)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return Function.prototype.call.call(someMethod, actual, function(item) {
       return deepCompare(item, expected, comparator, anyPropertyKey, matchAgainstAnyProp);
     });
   }

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **filter:** scan nested arrays directly for the standard some method, preserving
+  sparse slots, mutation, early matches and custom method behavior.
+
 - **angular.copy:** index large object graphs by identity when WeakMap is
   available, preserving cycles, aliases and the legacy linear-search fallback.
 

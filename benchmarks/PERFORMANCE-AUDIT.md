@@ -1000,3 +1000,14 @@ destino/hashKey, profundidade e fallback. Chrome 154: 20 copias de 2.000 objetos
 12,70 -> 12,80 ms, sem ganho demonstrado. Quatro pares, 15 amostras, outputs
 iguais. Build/lint e 26.870 execucoes unitarias aprovados. WeakMap tem overhead;
 nenhuma economia numerica de heap medida. Ver CORE-ROUND8-AUDIT.md.
+
+## filter: arrays aninhados sem callback de some padrao (2026-10-06)
+
+Capturar metodo some uma vez. Para some padrao, loop com length capturado e
+i in actual, preservando slots herdados/esparsos, mutacao e primeira resposta
+positiva. Custom some recebe callback/receptor, ignorando sua propriedade call.
+Testes verificam esses casos. Chrome 154: 1.000 filtros de 100 arrays aninhados,
+match final 72,75 -> 64,00 ms (12%); sem match 63,50 -> 52,65 ms (17,1%).
+Controle plano 14,75 -> 14,40 ms mostra variacao fora do caminho alvo.
+Quatro pares/15 amostras, outputs iguais. Build/lint e 26.870 execucoes unitarias
+aprovados. Nao medir heap ou ganho total de tela. Ver CORE-ROUND8-AUDIT.md.
