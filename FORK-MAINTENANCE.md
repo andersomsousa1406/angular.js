@@ -65,3 +65,29 @@ Para cada item: confirmar versões e módulos afetados, reproduzir no código or
 adicionar teste de regressão, aplicar uma correção pequena, executar testes e registrar
 eventuais impactos de compatibilidade. A prioridade também depende dos módulos e dos
 dados externos usados pelo sistema consumidor.
+
+
+## Imagens SVG: CVE-2025-0716 e CVE-2025-2336
+
+Investigacao independente baseada nos avisos publicos, sem usar codigo do NES.
+`image[href]` e `ng-href` passam a usar MEDIA_URL na interpolacao; `$set()` reaplica
+as regras de imagens para href/xlinkHref apos desempacotar o valor, inclusive
+quando foi confiado como RESOURCE_URL. `$sanitize` identifica href/xlink:href em
+`image` como fontes de imagem, preservando a politica de links em anchors SVG.
+
+Impacto intencional: URLs fora da politica de imagens deixam de ser exibidas,
+mesmo quando confiadas como RESOURCE_URL. `trustAsResourceUrl()` nao substitui
+`imgSrcSanitizationTrustedUrlList()` nesse caminho. SVG continua desabilitado por
+padrao no sanitizer; nao habilitamos SVG nem desabilitamos SCE ou debug.
+
+Testes cobrem URLs permitidas/bloqueadas, atualizacoes, valores confiados, href,
+ng-href, ng-attr-href e xlink:href; a matriz srcset confirma a protecao ja existente
+contra CVE-2024-8372 em img/source por srcset/ng-srcset/ng-attr-srcset/ng-prop-srcset.
+Validacao conjunta final: 26.621 testes em sete suites, lint dos arquivos alterados
+com terminadores de linha ignorados no Windows e whitespace aprovados. Onze
+verificacoes no Chrome aprovadas; o build anterior falhou em oito verificacoes SVG.
+
+Fontes:
+- https://www.herodevs.com/vulnerability-directory/cve-2025-0716
+- https://www.herodevs.com/vulnerability-directory/cve-2025-2336
+- https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9

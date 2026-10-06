@@ -598,7 +598,9 @@ function $SanitizeProvider() {
           out(tag);
           forEach(attrs, function(value, key) {
             var lkey = lowercase(key);
-            var isImage = (tag === 'img' && lkey === 'src') || (lkey === 'background');
+            var isImage = (tag === 'img' && lkey === 'src') ||
+                          (tag === 'image' && (lkey === 'href' || lkey === 'xlink:href')) ||
+                          (lkey === 'background');
             if (validAttrs[lkey] === true &&
               (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
               out(' ');

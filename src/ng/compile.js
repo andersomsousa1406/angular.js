@@ -2309,6 +2309,11 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
 
         nodeName = nodeName_(this.$$element);
 
+        // SVG image sources always follow the image policy, even after SCE unwrapping.
+        if (nodeName === 'image' && (key === 'href' || key === 'xlinkHref')) {
+          this[key] = value = $sce.getTrustedMediaUrl($sce.valueOf(value));
+        }
+
         // Sanitize img[srcset] and source[srcset] values (CVE-2024-8373).
         if ((nodeName === 'img' || nodeName === 'source') && key === 'srcset') {
           this[key] = value = sanitizeSrcset(value, '$set(\'srcset\', value)');
@@ -3864,6 +3869,9 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
 
 
     function getTrustedAttrContext(nodeName, attrNormalizedName) {
+      if (nodeName === 'image' && (attrNormalizedName === 'href' || attrNormalizedName === 'ngHref')) {
+        return $sce.MEDIA_URL;
+      }
       if (attrNormalizedName === 'srcdoc') {
         return $sce.HTML;
       }

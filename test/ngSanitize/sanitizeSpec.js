@@ -345,6 +345,23 @@ describe('HTML', function() {
       });
     }));
 
+
+    angular.forEach(['href', 'xlink:href'], function(attribute) {
+      it('should apply the image policy to SVG ' + attribute + ' (CVE-2025-2336)', function() {
+        module(function($compileProvider) {
+          $compileProvider.imgSrcSanitizationTrustedUrlList(/^https:\/\/allowed\.example\//);
+        });
+        inject(function($sanitize) {
+          var output = $sanitize('<svg><image ' + attribute + '="https://blocked.example/image.png"></image></svg>');
+          expect(output).not.toContain('blocked.example');
+          output = $sanitize('<svg><image ' + attribute + '="https://allowed.example/image.png"></image></svg>');
+          expect(output).toContain('https://allowed.example/image.png');
+          // Anchor URLs continue using the link policy.
+          expect($sanitize('<svg><a ' + attribute + '="https://blocked.example/page"></a></svg>'))
+            .toContain('https://blocked.example/page');
+        });
+      });
+    });
     it('should accept SVG tags', function() {
       expectHTML('<svg width="400px" height="150px" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"></svg>')
         .toBeOneOf('<svg width="400px" height="150px" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"></circle></svg>',

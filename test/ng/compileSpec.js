@@ -3,6 +3,66 @@
 /* eslint-disable no-script-url */
 
 describe('$compile', function() {
+  describe('srcset policy coverage (CVE-2024-8372)', function() {
+    beforeEach(module(function($compileProvider) {
+      $compileProvider.imgSrcSanitizationTrustedUrlList(/^https:\/\/allowed\.example\//);
+    }));
+    forEach(['img', 'source'], function(tag) {
+      forEach(['srcset', 'ng-srcset', 'ng-attr-srcset', 'ng-prop-srcset'], function(attribute) {
+        it('should apply the policy to each URL in ' + tag + '[' + attribute + ']', inject(function($compile, $rootScope) {
+          var binding = attribute === 'ng-prop-srcset' ? 'urls' : '{{urls}}';
+          var node = $compile('<' + tag + ' ' + attribute + '="' + binding + '">')($rootScope);
+          $rootScope.urls = 'https://allowed.example/a.png 1x, https://blocked.example/b.png 2x';
+          $rootScope.$digest();
+          expect(node.attr('srcset')).toBe('https://allowed.example/a.png 1x,unsafe:https://blocked.example/b.png 2x');
+          $rootScope.urls = 'https://blocked.example/c.png 1x, https://allowed.example/d.png 2x';
+          $rootScope.$digest();
+          expect(node.attr('srcset')).toBe('unsafe:https://blocked.example/c.png 1x,https://allowed.example/d.png 2x');
+          node.remove();
+        }));
+      });
+    });
+  });
+
+  describe('SVG image href policy (CVE-2025-0716)', function() {
+    beforeEach(module(function($compileProvider) {
+      $compileProvider.imgSrcSanitizationTrustedUrlList(/^https:\/\/allowed\.example\//);
+    }));
+    forEach(['href', 'ng-href', 'ng-attr-href', 'xlink:href', 'ng-attr-xlink:href'], function(attribute) {
+      it('should apply the image policy on updates through ' + attribute, inject(function($compile, $rootScope) {
+        var svg = $compile('<svg><image ' + attribute + '="{{url}}"></image></svg>')($rootScope);
+        var image = svg.find('image');
+        var actualName = attribute === 'ng-href' || attribute.indexOf('xlink') !== -1 ? 'xlink:href' : 'href';
+        $rootScope.url = 'https://allowed.example/image.png';
+        $rootScope.$digest();
+        expect(image.attr(actualName)).toBe($rootScope.url);
+        $rootScope.url = 'https://blocked.example/image.png';
+        $rootScope.$digest();
+        expect(image.attr(actualName)).toMatch(/^unsafe:/);
+        $rootScope.url = 'https://allowed.example/second.png';
+        $rootScope.$digest();
+        expect(image.attr(actualName)).toBe($rootScope.url);
+        svg.remove();
+      }));
+    });
+    forEach(['href', 'xlink:href'], function(attribute) {
+      it('should not bypass the image policy with a trusted resource in ' + attribute, inject(function($compile, $rootScope, $sce) {
+        var svg = $compile('<svg><image ' + attribute + '="{{url}}"></image></svg>')($rootScope);
+        $rootScope.url = $sce.trustAsResourceUrl('https://blocked.example/image.png');
+        $rootScope.$digest();
+        expect(svg.find('image').attr(attribute)).toMatch(/^unsafe:/);
+        svg.remove();
+      }));
+    });
+    it('should sanitize constant ng-attr-href values', inject(function($compile, $rootScope) {
+      var svg = $compile('<svg><image ng-attr-href="https://blocked.example/image.png"></image></svg>')($rootScope);
+      $rootScope.$digest();
+      expect(svg.find('image').attr('href')).toMatch(/^unsafe:/);
+      svg.remove();
+    }));
+  });
+
+
   it('should link queued template clones in order including reentrant additions', function() {
     var calls = [], template, pending = [], appended = false;
     module(function($compileProvider) {

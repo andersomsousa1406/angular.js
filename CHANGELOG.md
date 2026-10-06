@@ -6,6 +6,11 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **SVG images:** enforce the image URL policy for href bindings and sanitizer
+  output (CVE-2025-0716, CVE-2025-2336), including trusted resource URLs on bindings.
+  Disallowed sources are now blocked; applications relying on resource trust to
+  bypass image restrictions must update their image policy.
+
 - **$rootScope:** remove consecutive empty event listener slots in one splice
   during emit/broadcast, preserving nested dispatch and mutation ordering.
 
