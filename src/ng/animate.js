@@ -147,7 +147,9 @@ var $$CoreAnimateQueueProvider = /** @this */ function() {
 
 
     function addRemoveClassesPostDigest(element, add, remove) {
-      var data = postDigestQueue.get(element) || {};
+      var data = postDigestQueue.get(element);
+      var queued = !!data;
+      data = data || {};
 
       var classesAdded = updateData(data, add, true);
       var classesRemoved = updateData(data, remove, false);
@@ -155,10 +157,11 @@ var $$CoreAnimateQueueProvider = /** @this */ function() {
       if (classesAdded || classesRemoved) {
 
         postDigestQueue.set(element, data);
-        postDigestElements.push(element);
-
-        if (postDigestElements.length === 1) {
-          $rootScope.$$postDigest(handleCSSClassChanges);
+        if (!queued) {
+          postDigestElements.push(element);
+          if (postDigestElements.length === 1) {
+            $rootScope.$$postDigest(handleCSSClassChanges);
+          }
         }
       }
     }

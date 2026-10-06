@@ -839,3 +839,21 @@ Comparacao diferencial de 444 datas/formatos/timezones e um alias de locale
 alterado teve resultados iguais. Build, 26.814 execucoes unitarias e lint
 aprovados. Nao foi medida economia numerica de heap ou latencia de uma tela.
 Procedimento completo em CORE-ROUND4-AUDIT.md.
+
+## Fila padrao de classes: uma entrada por elemento (2026-10-06)
+
+Usar a presenca do elemento em postDigestQueue para evitar outra referencia
+em postDigestElements. As atualizacoes de status continuam sendo combinadas
+no mesmo objeto e o elemento conserva a posicao da primeira entrada. Depois
+do flush, pode ser enfileirado novamente. Teste cobre alteracoes intercaladas
+de dois elementos, add/remove repetidos e reentrada na fila em outro digest.
+Aplica-se a fila core; o modulo ngAnimate usa outra implementacao de fila.
+
+Chrome 154, quatro pares e 15 amostras: 100 lotes com 500 pares add/remove
+e um add final no mesmo elemento 31,95 -> 21,90 ms (31,5% menos tempo).
+Lotes pequenos 9,35 -> 8,25 ms. Ambos usam $$AnimateRunner simulado para
+isolar o custo de agrupamento; nao medem conclusao de animacoes nem rendering.
+Runners reais e timing continuam cobertos pelas 26.814 execucoes unitarias.
+Menos referencias repetidas enquanto a fila esta pendente; nenhuma reducao
+numerica de heap medida. Build, lint e estados finais diferenciais aprovados.
+Ver CORE-ROUND4-AUDIT.md.

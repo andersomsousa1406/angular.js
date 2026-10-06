@@ -404,6 +404,28 @@ describe('$animate', function() {
     var addClass;
     var removeClass;
 
+    it('should merge repeated element changes and requeue correctly on the next digest',
+        inject(function($rootScope, $animate) {
+      element = jqLite('<div><span></span></div>');
+      var child = element.children();
+      for (var i = 0; i < 40; i++) {
+        $animate.addClass(element, 'temporary');
+        $animate.addClass(child, 'child-class');
+        $animate.removeClass(element, 'temporary');
+      }
+      $animate.addClass(element, 'final');
+      expect(element).not.toHaveClass('final');
+      $rootScope.$digest();
+      expect(element).toHaveClass('final');
+      expect(element).not.toHaveClass('temporary');
+      expect(child).toHaveClass('child-class');
+      $animate.removeClass(element, 'final');
+      $animate.addClass(element, 'next');
+      $rootScope.$digest();
+      expect(element).not.toHaveClass('final');
+      expect(element).toHaveClass('next');
+    }));
+
     beforeEach(module(provideLog));
 
     afterEach(function() {

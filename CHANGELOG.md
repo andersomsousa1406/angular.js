@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$animate (core queue):** enqueue each element once per pending class batch,
+  preserving merged class changes and first-enqueue order.
+
 - **date:** append format tokens directly without copying previously collected
   tokens on every match, preserving dynamic locale formats and timezone handling.
 
