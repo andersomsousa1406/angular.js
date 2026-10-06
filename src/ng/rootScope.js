@@ -634,8 +634,8 @@ function $RootScopeProvider() {
         var trackVeryOldValue = (listener.length > 1);
         var changeDetected = 0;
         var changeDetector = $parse(obj, $watchCollectionInterceptor);
-        var internalArray = [];
-        var internalObject = {};
+        var internalArray;
+        var internalObject;
         var initRun = true;
         var oldLength = 0;
 
@@ -647,17 +647,17 @@ function $RootScopeProvider() {
           if (isUndefined(newValue)) return;
 
           if (!isObject(newValue)) { // if primitive
-            if (oldValue === internalArray) internalArray.length = 0;
-            if (oldValue === internalObject) internalObject = {};
+            if (internalArray && oldValue === internalArray) internalArray = undefined;
+            if (internalObject && oldValue === internalObject) internalObject = undefined;
             if (oldValue !== newValue) {
               oldValue = newValue;
               changeDetected++;
             }
           } else if (isArrayLike(newValue)) {
-            if (oldValue === internalObject) internalObject = {};
-            if (oldValue !== internalArray) {
+            if (internalObject && oldValue === internalObject) internalObject = undefined;
+            if (!internalArray || oldValue !== internalArray) {
               // we are transitioning from something which was not an array into array.
-              oldValue = internalArray;
+              oldValue = internalArray = [];
               oldLength = oldValue.length = 0;
               changeDetected++;
             }
@@ -682,8 +682,8 @@ function $RootScopeProvider() {
               }
             }
           } else {
-            if (oldValue === internalArray) internalArray.length = 0;
-            if (oldValue !== internalObject) {
+            if (internalArray && oldValue === internalArray) internalArray = undefined;
+            if (!internalObject || oldValue !== internalObject) {
               // we are transitioning from something which was not an object into object.
               oldValue = internalObject = {};
               oldLength = 0;

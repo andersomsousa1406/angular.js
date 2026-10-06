@@ -251,3 +251,20 @@ e agendamento do digest preservados. Detalhes em benchmarks/PERFORMANCE-AUDIT.md
 26.734 execucoes aprovadas; lint, whitespace e core build aprovados. Benchmark
 isolado de classes e limites documentados em benchmarks/PERFORMANCE-AUDIT.md.
 Debug e frequencia de digest preservados; tres commits separados.
+
+## Memoria de watchCollection e limite de chain (2026-10-06)
+
+- Copias internas de arrays/objetos sao liberadas ao mudar para outro tipo
+  definido; snapshots oldCollection entregues aos listeners sao independentes.
+  Mantido o comportamento especial de undefined para bindings one-time.
+- Buffers sao criados sob demanda, reduzindo registro de watchers escalares.
+  GC Chrome: 50.000 watchers, 16.034.991 -> 13.834.571 bytes. Ao abandonar uma
+  colecao com 1.000.000 valores, retencao caiu de aproximadamente 4 MB para
+  aproximadamente 11-17 KB. Sem alegar economia para toda aplicacao.
+- chain investigado e mantido: iteracao mudaria a ordem de codigo depois de
+  next() e a sincronizacao da conclusao. Limite de pilha continua pendente;
+  regressao e benchmarks/chain-order-audit.js documentam essa restricao.
+
+Validacao: 26.742 execucoes aprovadas, lint dos arquivos alterados, whitespace
+e builds atualizados. Dois commits de otimizacao e um de investigacao/regressao;
+nenhum debounce ou alteracao do debug. Medicoes e limites em PERFORMANCE-AUDIT.

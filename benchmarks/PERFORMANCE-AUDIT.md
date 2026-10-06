@@ -572,3 +572,19 @@ Trace atual: before, second, true, after. Fixture iterativa: before, after,
 second, true. Agendar por frames ou microtasks tambem mudaria a sincronizacao.
 Nao alterar chain nesta rodada, pois o requisito e preservar comportamento;
 adicionar regressao para sua ordem atual e registrar o limite conhecido.
+
+## Buffers sob demanda de watchCollection (2026-10-06)
+
+Watchers nao criam array e objeto internos no registro. O armazenamento e criado
+quando o valor exige aquele tipo; armazenamento inativo pode ser descartado e
+recriado numa transicao futura. Isso reduz alocacao inicial, sem prometer menos
+alocacoes em workloads que alternem tipos continuamente. Comparacao e snapshots
+para listeners continuam com a semantica anterior, inclusive NaN e one-time.
+
+Chrome 154, `collection-memory-audit.html?mode=registration`, 50.000 watchers
+escalares vivos antes do primeiro digest: heap retido 16.034.991 -> 13.834.571
+bytes comparando a versao com limpeza e buffers antecipados com a versao lazy.
+Uma execucao por versao, com GC explicito; nao extrapolar para toda aplicacao.
+Reverificacao das transicoes: array -> null reteve 16.911 bytes, objeto -> null
+10.595 bytes. Testes de transicoes e todas as suites existentes passaram:
+26.742 execucoes. Lint e whitespace aprovados.

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$watchCollection:** allocate array/object comparison buffers on demand,
+  avoiding unused buffers for scalar watchers.
+
 - **$watchCollection:** release inactive array/object copies after transitions
   to another defined value type while preserving listener oldCollection values.
 
