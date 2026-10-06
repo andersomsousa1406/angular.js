@@ -605,3 +605,16 @@ permanece igual. Nao medir heap numericamente nem extrapolar para renderizacao.
 traces de comparadores (ties, reverse, tipos mistos, NaN, um/dois criterios).
 Regressoes verificam criterio esparso, uma avaliacao por item e ties reversos.
 Validacao conjunta: 26.754 execucoes aprovadas; lint e whitespace aprovados.
+
+## ngOptions: variantes sem ganho demonstrado (2026-10-06)
+
+Prealocacao do getWatchables foi implementada experimentalmente com contagem
+de campos e fallback para comprimentos incomuns. Chrome 154: digest estavel com
+5.000 options passou de 0,131 para 0,144 ms. Variante com array denso e escrita
+por indice tambem nao melhorou (recheck 0,128 -> 0,136 ms). Variacao natural
+existe, mas nao houve evidencia suficiente para manter nenhum dos algoritmos.
+
+Fonte ngOptions restaurada; nenhuma otimizacao de runtime aplicada neste item.
+O benchmark versionado usa label, disable when e track by com 100/1.000/5.000
+options e permite investigar outros casos. Resultados nao medem renderizacao
+nem toda tela, e nao demonstram ausencia de outras oportunidades de melhoria.
