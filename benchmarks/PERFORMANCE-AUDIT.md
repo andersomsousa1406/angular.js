@@ -559,3 +559,16 @@ listener sem oldValue; coleção com 1.000.000 valores, depois substituida por n
 Estes deltas incluem infraestrutura; nao medem toda aplicacao. Testes verificam
 snapshots anteriores e notificacoes em transicoes array -> primitivo -> objeto
 -> array. Validacao desta etapa: 26.742 execucoes aprovadas.
+
+## Limite de chain e ordem sincrona (2026-10-06)
+
+`node benchmarks/chain-order-audit.js` confirma RangeError numa cadeia de 100.000
+etapas sincronas (Node 14: aproximadamente 3.588 etapas antes do erro; o limite
+varia com motor e pilha). Tambem demonstra a incompatibilidade de substituir a
+recursao por iteracao: uma etapa que chama next() e depois executa codigo observa
+as etapas seguintes e a conclusao ANTES desse codigo no algoritmo atual.
+
+Trace atual: before, second, true, after. Fixture iterativa: before, after,
+second, true. Agendar por frames ou microtasks tambem mudaria a sincronizacao.
+Nao alterar chain nesta rodada, pois o requisito e preservar comportamento;
+adicionar regressao para sua ordem atual e registrar o limite conhecido.

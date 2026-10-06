@@ -58,6 +58,14 @@ describe('$$animateAsyncRun', function() {
 });
 
 describe('$$AnimateRunner', function() {
+  it('should execute the next chain step before returning from its completion callback', inject(function($$AnimateRunner) {
+    var calls = [];
+    $$AnimateRunner.chain([
+      function(next) { calls.push('before'); next(); calls.push('after'); },
+      function(next) { calls.push('second'); next(); }
+    ], function(status) { calls.push(status); });
+    expect(calls).toEqual(['before', 'second', true, 'after']);
+  }));
   it('should finish remaining callbacks after an error and avoid reentrant resolution', inject(function($$AnimateRunner) {
     var runner = new $$AnimateRunner();
     var error = new Error('failed');
