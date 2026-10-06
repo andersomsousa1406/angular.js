@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngList:** scan fields by position for nonempty string separators, avoiding
+  the intermediate split array while preserving trim and empty-field rules.
+
 - **$parse (CSP):** construct three-element array literals directly and allocate
   other nonempty literal results at their known size, preserving fresh arrays.
 

@@ -56,6 +56,24 @@ describe('ngList', function() {
     expect($rootScope.list).toEqual([]);
   });
 
+  it('should preserve nonempty whitespace fields and skip empty multichar fields', function() {
+    helper.compileInput('<input ng-model="list" ng-list="::" />');
+    helper.changeInputValueTo('::a:::: ::b::');
+    expect($rootScope.list).toEqual(['a', '', 'b']);
+  });
+
+  it('should preserve spaces when trimming is disabled', function() {
+    helper.compileInput('<input ng-model="list" ng-list="::" ng-trim="false" />');
+    helper.changeInputValueTo(':: a :::: :: b ::');
+    expect($rootScope.list).toEqual([' a ', ' ', ' b ']);
+  });
+
+  it('should keep empty trimmed separators splitting UTF-16 code units', function() {
+    helper.compileInput('<input ng-model="list" ng-list=" " />');
+    helper.changeInputValueTo('a\ud83d\ude00b');
+    expect($rootScope.list).toEqual(['a', '\ud83d', '\ude00', 'b']);
+  });
+
 
   it('should be invalid if required and empty', function() {
     var inputElm = helper.compileInput('<input type="text" ng-list ng-model="list" required>');
@@ -138,4 +156,3 @@ describe('ngList', function() {
     });
   });
 });
-

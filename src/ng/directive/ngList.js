@@ -107,9 +107,18 @@ var ngListDirective = function() {
         var list = [];
 
         if (viewValue) {
-          forEach(viewValue.split(separator), function(value) {
-            if (value) list.push(trimValues ? trim(value) : value);
-          });
+          if (typeof viewValue === 'string' && typeof separator === 'string' && separator.length) {
+            for (var start = 0; start < viewValue.length; start = end + separator.length) {
+              var end = viewValue.indexOf(separator, start);
+              if (end === -1) end = viewValue.length;
+              var value = viewValue.substring(start, end);
+              if (value) list.push(trimValues ? trim(value) : value);
+            }
+          } else {
+            forEach(viewValue.split(separator), function(value) {
+              if (value) list.push(trimValues ? trim(value) : value);
+            });
+          }
         }
 
         return list;

@@ -1048,3 +1048,16 @@ Chrome 154, quatro pares e 15 amostras de 200.000 chamadas: tres elementos
 retornados nem afirmar bytes de heap economizados. Build/lint, 26.898 execucoes
 unitarias e outputs iguais. Beneficio de tempo medido restrito a tres elementos
 em CSP. Ver CORE-ROUND9-AUDIT.md.
+
+## ngList: parsing por posicao sem array intermediario (2026-10-06)
+
+Com entrada/separador strings e separador nao vazio, usar indexOf/substring
+para formar apenas a lista final. Filtrar campo vazio antes de trim, preservando
+campo com espacos como string vazia quando trim esta ativo. Separador vazio e
+entradas legadas mantem split/forEach. Testes cobrem multichar, consecutivos,
+limites, espacos, ngTrim false e UTF-16 no fallback. Chrome 154, quatro pares
+e 15 amostras de 5.000 chamadas: tres campos com trim 3,95 -> 2,15 ms (45,6%),
+100 campos 87,20 -> 67,65 ms (22,4%); sem trim 3,15 -> 1,85 ms (41,3%) e
+67,70 -> 51,75 ms (23,6%). Medir parser real isolado, nao eventos/rendering.
+Build/lint, 26.898 execucoes unitarias e outputs iguais. Array intermediario
+evitado no caminho string nao vazio, sem quantificar heap. CORE-ROUND9-AUDIT.md.

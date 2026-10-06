@@ -1,0 +1,72 @@
+<!doctype html>
+<html ng-csp="no-unsafe-eval">
+<meta charset="utf-8">
+<title>Date tokens, CSP arrays and list parsing audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var root = injector.get('$rootScope'), parse = injector.get('$parse');
+  var date = injector.get('$filter')('date'), locale = injector.get('$locale');
+  var compile = injector.get('$compile');
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  var instant = new Date(Date.UTC(2020, 0, 2, 3, 4, 5));
+  bench('dateRepeated', 10000, function() { return date(instant, 'yyyy-MM-dd HH:mm:ss Z', 'UTC'); });
+  bench('dateAlias', 10000, function() { return date(instant, 'mediumDate', 'UTC'); });
+  var formats = [];
+  for (var f = 0; f < 40; f++) formats.push("'label " + f + "' yyyy");
+  bench('dateChurn', 10000, function(i) { return date(instant, formats[i % 40], 'UTC'); });
+  formats.concat(['yyyy-MM-dd HH:mm:ss Z', "'' yyyy 'at' HH:mm", 'MMMM', 'mediumDate']).forEach(function(format) {
+    outputs.push(date(instant, format, 'UTC'), date(instant, format, '+0200'));
+  });
+  locale.DATETIME_FORMATS.auditAlias = 'yyyy'; outputs.push(date(instant, 'auditAlias', 'UTC'));
+  locale.DATETIME_FORMATS.auditAlias = 'MM'; outputs.push(date(instant, 'auditAlias', 'UTC'));
+  date(instant, 'MMMM', 'UTC'); locale.DATETIME_FORMATS.MONTH[0] = 'Changed';
+  outputs.push(date(instant, 'MMMM', 'UTC'));
+  var ctx = {a: 1, b: 2, c: 3};
+  [0, 3, 16].forEach(function(size) {
+    var args = [];
+    for (var i = 0; i < size; i++) args.push(['a', 'b', 'c'][i % 3]);
+    var fn = parse('[' + args.join(',') + ']');
+    bench('cspArray' + size, 200000, function() { return fn(ctx); });
+    var first = fn(ctx), second = fn(ctx);
+    outputs.push(first, first !== second, fn(ctx, {a: 4, b: 5, c: 6}));
+  });
+  [true, false].forEach(function(trimValues) {
+    var scope = root.$new();
+    var node = compile('<input ng-model="list" ng-list="::" ng-trim="' + trimValues + '">')(scope);
+    var model = node.controller('ngModel'), listParser = model.$parsers[model.$parsers.length - 1];
+    [3, 100].forEach(function(size) {
+      var values = [];
+      for (var i = 0; i < size; i++) values.push(' item ' + i + ' ');
+      var text = values.join('::');
+      bench('list' + size + (trimValues ? 'Trim' : 'Raw'), 5000, function() { return listParser(text); });
+      outputs.push(listParser(text), listParser('::a:::: ::b::'), listParser(''), listParser(undefined));
+    });
+    scope.$destroy(); node.remove();
+  });
+  var scope = root.$new(), node = compile('<input ng-model="list" ng-list=" ">')(scope);
+  var model = node.controller('ngModel'), fn = model.$parsers[model.$parsers.length - 1];
+  outputs.push(fn('a\ud83d\ude00b'));
+  scope.$destroy(); node.remove();
+  results.outputs = outputs;
+  return results;
+};
+</script>
+</html>
