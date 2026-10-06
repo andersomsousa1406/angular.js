@@ -940,3 +940,16 @@ itens, um criterio 14,60 -> 14,40 ms; dois criterios 26,00 -> 26,45 ms.
 Nenhum ganho consistente de tempo demonstrado. Mantido por reduzir alocacoes;
 controle custom 19,10 -> 18,15 ms mostra variacao fora do caminho otimizado.
 Build/lint, 26.838 execucoes unitarias e saidas iguais. CORE-ROUND6-AUDIT.md.
+
+## ngRepeat: reconciliacao sem delete no mapa anterior (2026-10-06)
+
+Manter lastBlockMap intacto, localizar reutilizados/duplicatas em nextBlockMap
+e remover somente blocos ausentes no mapa seguinte. Falhas de duplicata deixam
+o mapa anterior disponivel sem restauracao parcial. Teste verifica recuperacao
+de lista reordenada, identidade de todos os sobreviventes e remocao seguinte.
+Suite cobre track by, animacoes e removidos pendentes.
+Chrome 154, quatro pares, 15 amostras de 50 updates com 500 itens: substituicao
+de objetos preservando IDs 4,50 -> 4,05 ms (10%); rotacao 36,05 -> 35,25 ms
+(2,2%, sem ganho consistente). Lista de 50, rotacao 2,85 -> 2,90 ms.
+Mapas e array de ordem continuam alocados; nenhuma reducao de heap medida.
+Build/lint, 26.838 execucoes unitarias e outputs iguais. CORE-ROUND6-AUDIT.md.

@@ -1,0 +1,64 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Interpolation watchers, sorting and repeat audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var root = injector.get('$rootScope'), interpolate = injector.get('$interpolate');
+  var orderBy = injector.get('$filter')('orderBy'), compile = injector.get('$compile');
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  var scope = root.$new();
+  scope.a = 'a'; scope.b = 'b';
+  for (var w = 0; w < 1000; w++) scope.$watch(interpolate('pre{{a}}/{{b}}post'), angular.noop);
+  bench('interpolateChanged', 100, function(i) { scope.a = 'a' + i; scope.$digest(); });
+  bench('interpolateStable', 100, function() { scope.$digest(); });
+  outputs.push(interpolate('pre{{a}}/{{b}}post')(scope), scope.$$watchersCount);
+  scope.$destroy();
+  var items = [];
+  for (var j = 0; j < 1000; j++) items.push({id: j, key: j % 17, other: j % 7});
+  bench('sortSingle', 100, function() { return orderBy(items, 'key'); });
+  bench('sortMultiple', 100, function() { return orderBy(items, ['key', 'other']); });
+  function compare(a, b) { return a.value === b.value ? 0 : a.value < b.value ? -1 : 1; }
+  bench('sortCustom', 100, function() { return orderBy(items, 'key', false, compare); });
+  [false, true].forEach(function(reverse) {
+    ['key', ['key', 'other']].forEach(function(predicate) {
+      outputs.push(orderBy(items, predicate, reverse).map(function(item) { return item.id; }));
+      outputs.push(orderBy(items, predicate, reverse, compare).map(function(item) { return item.id; }));
+    });
+  });
+  [50, 500].forEach(function(size) {
+    var repeatScope = root.$new(), rows = items.slice(0, size);
+    var node = compile('<div><i ng-repeat="row in rows track by row.id" ng-bind="row.id"></i></div>')(repeatScope);
+    repeatScope.rows = rows.slice(); repeatScope.$digest();
+    bench('repeatRotate' + size, 50, function() {
+      var first = repeatScope.rows.shift(); repeatScope.rows.push(first); repeatScope.$digest();
+    });
+    bench('repeatReplace' + size, 50, function(i) {
+      repeatScope.rows = rows.map(function(row) { return {id: row.id, value: i}; }); repeatScope.$digest();
+    });
+    repeatScope.rows = rows.slice().reverse(); repeatScope.$digest();
+    outputs.push(node.text(), repeatScope.$$watchersCount, node[0].querySelectorAll('i').length);
+    repeatScope.rows = []; repeatScope.$digest(); outputs.push(node.text(), repeatScope.$$watchersCount);
+    repeatScope.$destroy(); node.remove();
+  });
+  results.outputs = outputs;
+  return results;
+};
+</script>

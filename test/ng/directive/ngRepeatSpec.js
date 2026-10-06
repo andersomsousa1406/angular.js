@@ -1178,6 +1178,23 @@ describe('ngRepeat', function() {
     });
 
 
+    it('should reuse every surviving block after a reordered duplicate failure', function() {
+      scope.items = [c, a, c];
+      scope.$digest();
+      expect($exceptionHandler.errors.length).toBe(1);
+      $exceptionHandler.errors.shift();
+      scope.items = [c, a, b];
+      scope.$digest();
+      var recovered = element.find('li');
+      expect(recovered[0]).toBe(lis[2]);
+      expect(recovered[1]).toBe(lis[0]);
+      expect(recovered[2]).toBe(lis[1]);
+      scope.items = [b, d];
+      scope.$digest();
+      expect(element.find('li')[0]).toBe(lis[1]);
+      expect(element.find('li').length).toBe(2);
+    });
+
     it('should throw error on adding existing duplicates and recover', function() {
       scope.items = [a, a, a];
       scope.$digest();

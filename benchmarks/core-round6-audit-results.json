@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-06",
+  "browser": "Chrome 154 / Windows",
+  "rounds": 4,
+  "samplesPerCase": 15,
+  "outputsEqual": true,
+  "summary": {
+    "interpolateChanged": {
+      "count": 100,
+      "baselineMs": 27.450000047683716,
+      "candidateMs": 23.549999952316284,
+      "timeReductionPercent": 14.207650595966106,
+      "baselineRounds": [
+        27.200000047683716,
+        27.700000047683716,
+        28.600000143051147,
+        26.600000143051147
+      ],
+      "candidateRounds": [
+        22.899999856948853,
+        23.800000190734863,
+        23.59999990463257,
+        23.5
+      ]
+    },
+    "interpolateStable": {
+      "count": 100,
+      "baselineMs": 4.200000047683716,
+      "candidateMs": 4.350000023841858,
+      "timeReductionPercent": -3.5714279632179173,
+      "baselineRounds": [
+        4.200000047683716,
+        4.200000047683716,
+        4.400000095367432,
+        4.099999904632568
+      ],
+      "candidateRounds": [
+        4.300000190734863,
+        4.3999998569488525,
+        5,
+        4
+      ]
+    },
+    "sortSingle": {
+      "count": 100,
+      "baselineMs": 14.600000023841858,
+      "candidateMs": 14.399999976158142,
+      "timeReductionPercent": 1.3698633380624312,
+      "baselineRounds": [
+        14.800000190734863,
+        14.100000143051147,
+        15,
+        14.399999856948853
+      ],
+      "candidateRounds": [
+        14.5,
+        13.900000095367432,
+        15.399999856948853,
+        14.299999952316284
+      ]
+    },
+    "sortMultiple": {
+      "count": 100,
+      "baselineMs": 26,
+      "candidateMs": 26.450000047683716,
+      "timeReductionPercent": -1.7307694141681378,
+      "baselineRounds": [
+        26.600000143051147,
+        25.799999952316284,
+        26,
+        26
+      ],
+      "candidateRounds": [
+        25.700000047683716,
+        25.5,
+        27.5,
+        27.200000047683716
+      ]
+    },
+    "sortCustom": {
+      "count": 100,
+      "baselineMs": 19.100000143051147,
+      "candidateMs": 18.149999976158142,
+      "timeReductionPercent": 4.9738228260622765,
+      "baselineRounds": [
+        19.899999856948853,
+        18.899999856948853,
+        19.100000143051147,
+        19.100000143051147
+      ],
+      "candidateRounds": [
+        18.09999990463257,
+        17.90000009536743,
+        20.200000047683716,
+        18.200000047683716
+      ]
+    },
+    "repeatRotate50": {
+      "count": 50,
+      "baselineMs": 2.8500001430511475,
+      "candidateMs": 2.8999998569488525,
+      "timeReductionPercent": -1.7543758381772037,
+      "baselineRounds": [
+        3,
+        2.8000001907348633,
+        2.9000000953674316,
+        2.799999952316284
+      ],
+      "candidateRounds": [
+        3,
+        2.8999998569488525,
+        2.8999998569488525,
+        2.8000001907348633
+      ]
+    },
+    "repeatReplace50": {
+      "count": 50,
+      "baselineMs": 0.5499999523162842,
+      "candidateMs": 0.5,
+      "timeReductionPercent": 9.090901209302487,
+      "baselineRounds": [
+        0.5999999046325684,
+        0.5,
+        0.5999999046325684,
+        0.5
+      ],
+      "candidateRounds": [
+        0.5,
+        0.40000009536743164,
+        0.5,
+        0.5
+      ]
+    },
+    "repeatRotate500": {
+      "count": 50,
+      "baselineMs": 36.050000071525574,
+      "candidateMs": 35.25,
+      "timeReductionPercent": 2.2191402772214173,
+      "baselineRounds": [
+        36.10000014305115,
+        42.40000009536743,
+        36,
+        35.5
+      ],
+      "candidateRounds": [
+        35.5,
+        34.10000014305115,
+        35,
+        35.700000047683716
+      ]
+    },
+    "repeatReplace500": {
+      "count": 50,
+      "baselineMs": 4.4999998807907104,
+      "candidateMs": 4.049999952316284,
+      "timeReductionPercent": 9.999998675452302,
+      "baselineRounds": [
+        4.200000047683716,
+        4.599999904632568,
+        4.3999998569488525,
+        4.599999904632568
+      ],
+      "candidateRounds": [
+        4,
+        4,
+        4.099999904632568,
+        4.099999904632568
+      ]
+    }
+  }
+}

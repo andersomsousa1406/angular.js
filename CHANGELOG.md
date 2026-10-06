@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngRepeat:** reconcile retained blocks without deleting previous-map entries,
+  preserving duplicate recovery, DOM identity, removals and animations.
+
 - **orderBy:** use numeric tie indices for the default comparator, avoiding one
   temporary object per item while preserving custom comparator tie objects.
 

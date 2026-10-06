@@ -571,17 +571,13 @@ var ngRepeatDirective = ['$parse', '$animate', '$compile', function($parse, $ani
             key = (collection === collectionKeys) ? index : collectionKeys[index];
             value = collection[key];
             trackById = trackByIdFn($scope, key, value, index);
-            if (lastBlockMap[trackById]) {
+            if (lastBlockMap[trackById] && !nextBlockMap[trackById]) {
               // found previously seen block
               block = lastBlockMap[trackById];
-              delete lastBlockMap[trackById];
               nextBlockMap[trackById] = block;
               nextBlockOrder[index] = block;
             } else if (nextBlockMap[trackById]) {
-              // if collision detected. restore lastBlockMap and throw an error
-              forEach(nextBlockOrder, function(block) {
-                if (block && block.scope) lastBlockMap[block.id] = block;
-              });
+              // The previous map stays intact, including when duplicate detection throws.
               throw ngRepeatMinErr('dupes',
                   'Duplicates in a repeater are not allowed. Use \'track by\' expression to specify unique keys. Repeater: {0}, Duplicate key: {1}, Duplicate value: {2}',
                   expression, trackById, value);
@@ -600,6 +596,7 @@ var ngRepeatDirective = ['$parse', '$animate', '$compile', function($parse, $ani
 
           // remove leftover items
           for (var blockKey in lastBlockMap) {
+            if (nextBlockMap[blockKey]) continue;
             block = lastBlockMap[blockKey];
             elementsToRemove = getBlockNodes(block.clone);
             $animate.leave(elementsToRemove);
