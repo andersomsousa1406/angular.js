@@ -91,3 +91,24 @@ Fontes:
 - https://www.herodevs.com/vulnerability-directory/cve-2025-0716
 - https://www.herodevs.com/vulnerability-directory/cve-2025-2336
 - https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9
+
+
+## linky: CVE-2025-4690
+
+O regex original tentava identificar emails a partir de cada sufixo de uma longa
+sequencia sem `@`, com crescimento superlinear. O leitor independente verifica
+inicio de protocolos e runs de caracteres de email; somente runs iniciados ou
+precedidos por mailto sao examinados como candidatos de email. Sufixos finais
+preservam a exclusao de pontuacao, e o resultado continua passando pelo `$sanitize`.
+
+100.000 entradas deterministicas produziram os mesmos links, indices e tipos
+que o regex anterior. A comparacao descobriu o caso `-www.@`, preservado em teste.
+Regressoes cobrem texto de 100.000 caracteres, emails longos e inicios concorrentes.
+
+Benchmark Chrome 154, mediana de tres amostras apos aquecimento para 4.000 letras
+sem @: 10,0 ms antes e 0,6 ms depois. Carga sintetica, nao latencia de telas reais.
+`benchmarks/nes-audit.html` reproduz o caso e os checks SVG. Suites conjuntas:
+26.621 testes aprovados; lint aprovado (somente a regra de terminadores de linha
+foi ignorada no Windows). O conjunto nao implica eliminacao de todas as CVEs.
+
+Fonte: https://www.herodevs.com/vulnerability-directory/cve-2025-4690

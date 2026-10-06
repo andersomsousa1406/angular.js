@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **linky:** scan link starts without retrying every email suffix (CVE-2025-4690),
+  preserving schemes, email addresses and trailing punctuation.
+
 - **SVG images:** enforce the image URL policy for href bindings and sanitizer
   output (CVE-2025-0716, CVE-2025-2336), including trusted resource URLs on bindings.
   Disallowed sources are now blocked; applications relying on resource trust to

@@ -9,6 +9,20 @@ describe('linky', function() {
     linky = $filter('linky');
   }));
 
+
+  it('should process long non-email input without retrying each email suffix (CVE-2025-4690)', function() {
+    var input = new Array(100001).join('a');
+    expect(linky(input)).toBe(input);
+    expect(linky(input + '@domain.example')).toContain('href="mailto:' + input + '@domain.example"');
+  });
+
+  it('should preserve competing scheme and email starts', function() {
+    expect(linky('mailto:www.name@domain.example')).toBe('<a href="mailto:www.name@domain.example">www.name@domain.example</a>');
+    expect(linky('prefixhttp://example.com')).toBe('prefix<a href="http://example.com">http://example.com</a>');
+    expect(linky('-www.@')).toBe('-<a href="http://www.@">www.@</a>');
+    expect(linky('www.name@domain.example')).toBe('<a href="http://www.name@domain.example">www.name@domain.example</a>');
+    expect(linky('mailto:bad.www.example')).toBe('mailto:bad.<a href="http://www.example">www.example</a>');
+  });
   it('should do basic filter', function() {
     expect(linky('http://ab/ (http://a/) <http://a/> http://1.2/v:~-123. c “http://example.com” ‘http://me.com’')).
       toEqual('<a href="http://ab/">http://ab/</a> ' +

@@ -128,9 +128,42 @@
    </example>
  */
 angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
-  var LINKY_URL_REGEXP =
-        /((s?ftp|https?):\/\/|(www\.)|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>"\u201d\u2019]/i,
-      MAILTO_REGEXP = /^mailto:/i;
+  var LINKY_SCHEME_REGEXP = /^(s?ftp|https?):\/\/|^(www\.)/i;
+  var EMAIL_CHAR_REGEXP = /[A-Za-z0-9._%+-]/;
+  var LINK_END_REGEXP = /[\s.;,(){}<>"\u201d\u2019]/;
+  var MAILTO_REGEXP = /^mailto:/i;
+
+  function findLink(text) {
+    for (var position = 0; position < text.length; position++) {
+      var scheme = LINKY_SCHEME_REGEXP.exec(text.substr(position, 8));
+      var prefixEnd, mailto = false;
+      if (scheme) {
+        prefixEnd = position + scheme[0].length;
+      } else {
+        var emailStart = position;
+        if (text.substr(position, 7).toLowerCase() === 'mailto:') {
+          emailStart += 7;
+          mailto = true;
+        } else if (position && EMAIL_CHAR_REGEXP.test(text.charAt(position - 1))) {
+          continue;
+        }
+        var emailEnd = emailStart;
+        while (emailEnd < text.length && EMAIL_CHAR_REGEXP.test(text.charAt(emailEnd))) emailEnd++;
+        if (emailEnd === emailStart || text.charAt(emailEnd) !== '@') continue;
+        prefixEnd = emailEnd + 1;
+      }
+      var end = prefixEnd;
+      while (end < text.length && !/\s/.test(text.charAt(end))) end++;
+      var linkEnd = end;
+      while (linkEnd > prefixEnd && LINK_END_REGEXP.test(text.charAt(linkEnd - 1))) linkEnd--;
+      if (linkEnd > prefixEnd) {
+        var match = [text.substring(position, linkEnd), null, scheme && scheme[1], scheme && scheme[2], mailto];
+        match.index = position;
+        return match;
+      }
+    }
+    return null;
+  }
 
   var linkyMinErr = angular.$$minErr('linky');
   var isDefined = angular.isDefined;
@@ -152,7 +185,7 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
     var html = [];
     var url;
     var i;
-    while ((match = raw.match(LINKY_URL_REGEXP))) {
+    while ((match = findLink(raw))) {
       // We can not end in these as they are sometimes found at the end of the sentence
       url = match[0];
       // if we did not match ftp/http/www/mailto then assume mailto

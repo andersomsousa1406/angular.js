@@ -18,3 +18,7 @@ after building the core. It checks task counts and reports seven-sample medians.
 For direct interpolation, HTTP interceptor setup and event listener compaction,
 open `benchmarks/internal-audit.html` after building the core. Synthetic cases
 check outputs and callback counts; results are seven-sample medians after warmup.
+
+For post-EOL SVG policy checks and pathological parser inputs, run
+`yarn.cmd grunt build:angular build:sanitize build:animate` and open
+`benchmarks/nes-audit.html`. This reports three-sample medians after warmup.
