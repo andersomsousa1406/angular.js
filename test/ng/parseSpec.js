@@ -1868,6 +1868,24 @@ describe('parser', function() {
 
   forEach([true, false], function(cspEnabled) {
     describe('csp: ' + cspEnabled, function() {
+      it('should read property chains once and preserve locals, receivers and assignment', inject(function($parse) {
+        var reads = 0;
+        var customer = {name: 'Maria', label: function() { return this.name; }};
+        var row = {};
+        Object.defineProperty(row, 'customer', {get: function() { reads++; return customer; }});
+        var expression = $parse('row.customer.name');
+        expect(expression({row: row})).toBe('Maria');
+        expect(reads).toBe(1);
+        customer.name = 'Ana';
+        expect(expression({row: null}, Object.create({row: row}))).toBe('Ana');
+        expect(reads).toBe(2);
+        expect(expression({row: null})).toBeUndefined();
+        expect($parse('row.customer.label()')({row: row})).toBe('Ana');
+        expect(reads).toBe(3);
+        var empty = {};
+        expression.assign(empty, 'Joao');
+        expect(empty).toEqual({row: {customer: {name: 'Joao'}}});
+      }));
       it('should preserve ordered and repeated inputs across binary expressions and containers', inject(function($parse) {
         var scope = {a: 2, b: 3, c: 4, key: 'value'};
         var expression = $parse('[a*b+c, {value: a*b, [key]: b+c}]');

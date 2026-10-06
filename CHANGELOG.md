@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse (CSP):** specialize property reads that do not need receiver metadata
+  or path creation, preserving live getters, locals and null-safe access.
+
 - **ngList:** scan fields by position for nonempty string separators, avoiding
   the intermediate split array while preserving trim and empty-field rules.
 

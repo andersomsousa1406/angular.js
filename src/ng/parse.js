@@ -1677,6 +1677,12 @@ ASTInterpreter.prototype = {
     };
   },
   nonComputedMember: function(left, right, context, create) {
+    if (!context && (!create || create === 1)) {
+      return function(scope, locals, assign, inputs) {
+        var lhs = left(scope, locals, assign, inputs);
+        return lhs != null ? lhs[right] : undefined;
+      };
+    }
     return function(scope, locals, assign, inputs) {
       var lhs = left(scope, locals, assign, inputs);
       if (create && create !== 1) {
