@@ -1408,10 +1408,24 @@ function tryDecodeURIComponent(value) {
  */
 function parseKeyValue(/**string*/keyValue) {
   var obj = {};
-  forEach((keyValue || '').split('&'), function(keyValue) {
+  var input = keyValue || '';
+  var hasPlus = typeof input !== 'string' || input.indexOf('+') !== -1;
+  if (!hasPlus) {
+    for (var start = 0; start < input.length; start = end + 1) {
+      var end = input.indexOf('&', start);
+      if (end === -1) end = input.length;
+      parsePair(input.substring(start, end));
+    }
+  } else {
+    // Retain native splitting when plus conversion is needed or for legacy callers.
+    forEach(input.split('&'), parsePair);
+  }
+  return obj;
+
+  function parsePair(keyValue) {
     var splitPoint, key, val;
     if (keyValue) {
-      key = keyValue = keyValue.replace(/\+/g,'%20');
+      key = keyValue = hasPlus ? keyValue.replace(/\+/g,'%20') : keyValue;
       splitPoint = keyValue.indexOf('=');
       if (splitPoint !== -1) {
         key = keyValue.substring(0, splitPoint);
@@ -1429,8 +1443,7 @@ function parseKeyValue(/**string*/keyValue) {
         }
       }
     }
-  });
-  return obj;
+  }
 }
 
 function toKeyValue(obj) {

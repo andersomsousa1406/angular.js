@@ -1207,6 +1207,16 @@ describe('angular', function() {
 
 
   describe('parseKeyValue', function() {
+    it('should keep flags independent of previous values across empty segments', function() {
+      expect(parseKeyValue('&a=one&&flag&flag=&a=two+words&invalid=%&last&')).toEqual({
+        a: ['one', 'two words'], flag: [true, ''], invalid: undefined, last: true
+      });
+      var values = [];
+      for (var i = 0; i < 100; i++) values.push('k=' + i);
+      expect(parseKeyValue(values.join('&')).k).toEqual(values.map(function(value, index) {
+        return '' + index;
+      }));
+    });
     it('should parse a string into key-value pairs', function() {
       expect(parseKeyValue('')).toEqual({});
       expect(parseKeyValue('simple=pair')).toEqual({simple: 'pair'});

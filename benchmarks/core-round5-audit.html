@@ -1,0 +1,78 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Numbers, class tokens and URL parsing audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var number = injector.get('$filter')('number');
+  var currency = injector.get('$filter')('currency');
+  var locale = injector.get('$locale');
+  var tokens = angular.$$auditTokenDifference;
+  var parseQuery = angular.$$auditParseKeyValue;
+  if (!tokens || !parseQuery) throw new Error('Expose the audit helpers in both test builds');
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  bench('numberSmall', 50000, function(i) { return number(i % 1000 + 0.125, 2); });
+  bench('numberLarge', 50000, function(i) { return number(123456789012.345 + i, 3); });
+  bench('currency', 50000, function(i) { return currency(-1234567.895 - i, '$', 2); });
+  var values = [0, -0, 0.0000001, -0.00001, 0.005, -0.005, 1.999, -99.999,
+    1e22, 1e-22, Infinity, -Infinity, NaN, '12.345', 'bad'];
+  for (var v = 0; v < 500; v++) values.push(((v * 7919) % 1000000 - 500000) / Math.pow(10, v % 7));
+  values.forEach(function(value) {
+    [0, 2, 4, -2].forEach(function(fraction) {
+      outputs.push(number(value, fraction), currency(value, 'EUR ', fraction));
+    });
+  });
+  var pattern = locale.NUMBER_FORMATS.PATTERNS[0];
+  var oldGroup = pattern.gSize, oldLast = pattern.lgSize;
+  [[2, 3], [3, 0], [1, 4]].forEach(function(sizes) {
+    pattern.gSize = sizes[0]; pattern.lgSize = sizes[1];
+    outputs.push(number(123456789.895, 2), number(-0.001, 2));
+  });
+  pattern.gSize = oldGroup; pattern.lgSize = oldLast;
+
+  [4, 100].forEach(function(size) {
+    var first = [], second = [];
+    for (var i = 0; i < size; i++) {
+      first.push('class' + i);
+      second.push('class' + (i + size / 2));
+    }
+    var a = first.join(' '), b = second.join(' ');
+    bench('tokens' + size, size === 4 ? 10000 : 1000, function() { return tokens(a, b); });
+    outputs.push(tokens(a, b), tokens(' ' + a + ' ', b));
+  });
+  [3, 100].forEach(function(size) {
+    [false, true].forEach(function(plus) {
+    var fields = [];
+    for (var i = 0; i < size; i++) fields.push('key' + i + '=value' + (plus ? '+' : '%20') + i);
+    var query = fields.join('&');
+    bench('query' + size + (plus ? 'Plus' : 'Plain'), size === 3 ? 10000 : 1000,
+      function() { return parseQuery(query); });
+    outputs.push(parseQuery(query));
+    });
+  });
+  ['&a=one&&flag&flag=&a=two+words&invalid=%&last&',
+    'toString=1&constructor=2', 'bad%=%&key=a=b', '=empty&&x&x=&x=last'].forEach(function(query) {
+    outputs.push(parseQuery(query));
+  });
+  results.outputs = outputs;
+  results.sink = typeof sink === 'object' ? Object.keys(sink).length : sink;
+  return results;
+};
+</script>

@@ -902,3 +902,19 @@ tokens passaram de 68,65 para 40,40 ms (41,2% menos tempo). Controle com quatro
 tokens: 9,65 para 9,55 ms. O mapa adiciona memoria temporaria; nao afirmar
 reducao de heap. Build, 26.826 execucoes unitarias, lint e comparacao de saidas
 aprovados. Medicao isola o helper, nao toda compilacao. Ver CORE-ROUND5-AUDIT.md.
+
+## URLs: parsing sem array para strings sem plus (2026-10-06)
+
+parseKeyValue percorre os pares por posicao quando a string nao contem +,
+evitando split('&') e replace sem correspondencia. Strings com + e callers
+legados mantem split/forEach e conversao original. Decodificacao de %20/%2B,
+chaves repetidas, flags, pares vazios e escapes invalidos continuam iguais.
+Teste adicional cobre mistura de flags, valores vazios, erros e 100 repeticoes.
+
+Chrome 154, quatro pares e 15 amostras: queries sem + com tres pares
+42,60 -> 33,80 ms (20,7%), com 100 pares 144,30 -> 127,75 ms (11,5%).
+Controles com + mantem o caminho anterior: 50,45 -> 46,30 e 166,10 -> 164,95 ms;
+essas variacoes nao demonstram ganho causado pelo cursor. Apenas o caminho sem
++ evita o array de pares; nenhuma reducao numerica de heap foi medida.
+Build, 26.826 execucoes unitarias, lint e saidas diferenciais aprovados.
+Harness, resultados e limites em CORE-ROUND5-AUDIT.md.

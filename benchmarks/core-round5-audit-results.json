@@ -1,0 +1,172 @@
+{
+  "date": "2026-10-06",
+  "browser": "Chrome 154 / Windows",
+  "rounds": 4,
+  "samplesPerCase": 15,
+  "privateHelpersExposedInBothLabCopies": true,
+  "outputsEqual": true,
+  "results": {
+    "numberSmall": {
+      "count": 50000,
+      "baselineMs": 62.5,
+      "candidateMs": 58.85,
+      "reductionPercent": 5.8,
+      "baselineRoundMediansMs": [
+        62.5,
+        59.299999952316284,
+        64.80000019073486,
+        62.5
+      ],
+      "candidateRoundMediansMs": [
+        60.799999952316284,
+        54.60000014305115,
+        60,
+        57.69999980926514
+      ]
+    },
+    "numberLarge": {
+      "count": 50000,
+      "baselineMs": 125.95,
+      "candidateMs": 116.55,
+      "reductionPercent": 7.5,
+      "baselineRoundMediansMs": [
+        125.29999995231628,
+        118.5,
+        128,
+        126.60000014305115
+      ],
+      "candidateRoundMediansMs": [
+        117.40000009536743,
+        107.30000019073486,
+        115.70000004768372,
+        117.79999995231628
+      ]
+    },
+    "currency": {
+      "count": 50000,
+      "baselineMs": 115.55,
+      "candidateMs": 107.2,
+      "reductionPercent": 7.2,
+      "baselineRoundMediansMs": [
+        114.09999990463257,
+        121.29999995231628,
+        117,
+        111.19999980926514
+      ],
+      "candidateRoundMediansMs": [
+        107.59999990463257,
+        104.5,
+        113.80000019073486,
+        106.80000019073486
+      ]
+    },
+    "tokens4": {
+      "count": 10000,
+      "baselineMs": 9.65,
+      "candidateMs": 9.55,
+      "reductionPercent": 1.0,
+      "baselineRoundMediansMs": [
+        9.299999952316284,
+        12.200000047683716,
+        8.900000095367432,
+        10
+      ],
+      "candidateRoundMediansMs": [
+        9.799999952316284,
+        9.700000047683716,
+        9.400000095367432,
+        9.200000047683716
+      ]
+    },
+    "tokens100": {
+      "count": 1000,
+      "baselineMs": 68.65,
+      "candidateMs": 40.4,
+      "reductionPercent": 41.2,
+      "baselineRoundMediansMs": [
+        68.90000009536743,
+        78.10000014305115,
+        68.40000009536743,
+        65.70000004768372
+      ],
+      "candidateRoundMediansMs": [
+        40.60000014305115,
+        39.30000019073486,
+        42.5,
+        40.200000047683716
+      ]
+    },
+    "query3Plain": {
+      "count": 10000,
+      "baselineMs": 42.6,
+      "candidateMs": 33.8,
+      "reductionPercent": 20.7,
+      "baselineRoundMediansMs": [
+        37.700000047683716,
+        47,
+        44.700000047683716,
+        40.5
+      ],
+      "candidateRoundMediansMs": [
+        32.10000014305115,
+        34.799999952316284,
+        34.5,
+        33.09999990463257
+      ]
+    },
+    "query3Plus": {
+      "count": 10000,
+      "baselineMs": 50.45,
+      "candidateMs": 46.3,
+      "reductionPercent": 8.2,
+      "baselineRoundMediansMs": [
+        48.700000047683716,
+        53.700000047683716,
+        52.200000047683716,
+        43.10000014305115
+      ],
+      "candidateRoundMediansMs": [
+        46.5,
+        44.59999990463257,
+        46.09999990463257,
+        46.799999952316284
+      ]
+    },
+    "query100Plain": {
+      "count": 1000,
+      "baselineMs": 144.3,
+      "candidateMs": 127.75,
+      "reductionPercent": 11.5,
+      "baselineRoundMediansMs": [
+        144.29999995231628,
+        138.69999980926514,
+        153.29999995231628,
+        144.30000019073486
+      ],
+      "candidateRoundMediansMs": [
+        134.29999995231628,
+        126.29999995231628,
+        120.90000009536743,
+        129.20000004768372
+      ]
+    },
+    "query100Plus": {
+      "count": 1000,
+      "baselineMs": 166.1,
+      "candidateMs": 164.95,
+      "reductionPercent": 0.7,
+      "baselineRoundMediansMs": [
+        160.09999990463257,
+        168.59999990463257,
+        180.20000004768372,
+        163.59999990463257
+      ],
+      "candidateRoundMediansMs": [
+        165.29999995231628,
+        160.30000019073486,
+        164.60000014305115,
+        167.20000004768372
+      ]
+    }
+  }
+}

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **URL parsing:** scan string query pairs by position when no raw plus needs
+  conversion, avoiding the split array and redundant replacements.
+
 - **$compile:** index large class token comparisons with a null-prototype map,
   preserving token order, duplicates and whitespace behavior.
 
