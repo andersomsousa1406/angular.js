@@ -4,7 +4,7 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 **Visit [angular.io](https://angular.io) for the actively supported Angular.**
 
-## Fork: unreleased
+## Fork: 1.8.4 (2026-10-06)
 
 - **ngClass:** compact object class keys in place, avoiding a second temporary
   array while preserving property-read order.
