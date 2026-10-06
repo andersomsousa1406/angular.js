@@ -805,3 +805,22 @@ Chrome 154: 500.000 avaliacoes diretas com duas expressoes
 Controles de uma/tres expressoes variaram 30,95 -> 30,60 e 173,80 -> 165,95 ms.
 Build, 26.806 execucoes unitarias, lint e comparacao de saidas aprovados.
 Nenhuma reducao numerica de heap medida. Ver CORE-ROUND3-AUDIT.md.
+
+## Eventos nativos jqLite: listas grandes (2026-10-06)
+
+Com 32 ou mais listeners, dispatch nativo usa a lista atual sem snapshot novo.
+on/off copiam listas ativas antes de altera-las. Contador suporta reentrancia;
+finally libera o estado apos excecoes. A copia mantem specialHandlerWrapper.
+Listas pequenas e triggerHandler continuam com snapshot, apos a estrategia
+compartilhada apresentar resultado pior em triggerHandler. Testes cobrem
+remocao/adicao durante disparo reentrante, excecoes e wrapper de mouseenter.
+Quando jQuery e integrado, este caminho jqLite nao e utilizado.
+
+Chrome 154, quatro pares e 15 amostras, Event novo por disparo: 10.000 eventos
+nativos com 64 listeners 48,40 -> 41,15 ms (15,0% menos tempo).
+Controles pequenos tambem variaram: dois listeners 29,10 -> 26,25 ms e oito
+30,05 -> 27,95 ms. Nao atribuir toda a variacao ao atalho, nem extrapolar para
+toda aplicacao. Um snapshot de array evitado por dispatch grande sem mutacao;
+nenhuma economia numerica de heap medida. Build, 26.806 execucoes unitarias,
+lint e contagens diferenciais de callbacks aprovados. Procedimento e resultados
+por rodada em CORE-ROUND3-AUDIT.md e core-round3-audit-results.json.

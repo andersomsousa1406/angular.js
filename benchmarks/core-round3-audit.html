@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Selections, interpolation and jqLite event audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var compile = injector.get('$compile');
+  var root = injector.get('$rootScope');
+  var interpolate = injector.get('$interpolate');
+  var results = {};
+  var outputs = [];
+  var sink;
+  function bench(name, n, action) {
+    for (var j = 0; j < n * 5; j++) sink = action(j);
+    var samples = [];
+    for (var k = 0; k < 15; k++) {
+      var start = performance.now();
+      for (var i = 0; i < n; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: n, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  [32, 1000].forEach(function(size) {
+    var scope = root.$new();
+    scope.items = [];
+    for (var i = 0; i < size; i++) scope.items.push({id: i});
+    scope.model = [];
+    var element = compile('<select multiple ng-model="model" ' +
+      'ng-options="item as item.id for item in items track by item.id"></select>')(scope);
+    document.body.appendChild(element[0]);
+    scope.$digest();
+    var controller = element.controller('select');
+    var first = scope.items.slice(0, size / 2);
+    var second = scope.items.slice(size / 2);
+    bench('selection' + size, size === 32 ? 1000 : 100, function(i) {
+      controller.writeValue(i % 2 ? first : second);
+      return element[0].selectedIndex;
+    });
+    outputs.push(Array.prototype.map.call(element[0].options, function(option) {
+      return option.selected;
+    }));
+    element.remove();
+    scope.$destroy();
+  });
+  ['{{a}}', 'prefix {{a}} / {{b}} suffix', '{{a}}{{b}}{{c}}'].forEach(function(text, index) {
+    var fn = interpolate(text);
+    var scope = {a: 'one', b: 'two', c: 'three'};
+    bench('interpolation' + index, 500000, function() { return fn(scope); });
+    outputs.push(fn(scope));
+  });
+  [2, 8, 64].forEach(function(count) {
+    var element = angular.element('<div></div>');
+    var calls = 0;
+    for (var i = 0; i < count; i++) element.on('audit', function() { calls++; });
+    bench('nativeEvents' + count, 10000, function() {
+      element[0].dispatchEvent(new Event('audit'));
+    });
+    bench('triggerEvents' + count, 10000, function() { element.triggerHandler('audit'); });
+    outputs.push(calls);
+    element.remove();
+  });
+  results.outputs = outputs;
+  results.sink = sink;
+  return results;
+};
+</script>

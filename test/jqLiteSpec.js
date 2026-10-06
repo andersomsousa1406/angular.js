@@ -3,6 +3,75 @@
 describe('jqLite', function() {
   var scope, a, b, c, document;
 
+  it('should preserve large listener snapshots through mutation and reentrant dispatch', function() {
+    if (!_jqLiteMode) return;
+    forEach([false, true], function(nativeEvent) {
+      var element = jqLite(a);
+      var changed = false;
+      var firstCalls = 0, middleCalls = 0, lastCalls = 0, addedCalls = 0;
+      function dispatch() {
+        if (nativeEvent) browserTrigger(a, 'click');
+        else element.triggerHandler('click');
+      }
+      function last() { lastCalls++; }
+      function added() { addedCalls++; }
+      element.on('click', function() {
+        firstCalls++;
+        if (!changed) {
+          changed = true;
+          element.off('click', last);
+          element.on('click', added);
+          dispatch();
+        }
+      });
+      for (var i = 0; i < 30; i++) element.on('click', function() { middleCalls++; });
+      element.on('click', last);
+      dispatch();
+      expect(firstCalls).toBe(2);
+      expect(middleCalls).toBe(60);
+      expect(lastCalls).toBe(1);
+      expect(addedCalls).toBe(1);
+      dispatch();
+      expect(lastCalls).toBe(1);
+      expect(addedCalls).toBe(2);
+      element.off('click');
+    });
+  });
+
+  it('should release large listener dispatch state after handler exceptions', function() {
+    if (!_jqLiteMode) return;
+    var element = jqLite(a);
+    function fail() { throw new Error('expected'); }
+    element.on('audit', fail);
+    for (var i = 0; i < 31; i++) element.on('audit', noop);
+    var handle = jqLite._data(a).handle;
+    expect(function() { handle(new window.Event('audit')); }).toThrow();
+    element.off('audit', fail);
+    expect(function() { handle(new window.Event('audit')); }).not.toThrow();
+  });
+
+  it('should preserve special mouse wrappers after cloning active listener lists', function() {
+    if (!_jqLiteMode) return;
+    var element = jqLite(a);
+    var calls = 0, changed = false;
+    function last() { calls++; }
+    element.on('mouseenter', function() {
+      calls++;
+      if (!changed) {
+        changed = true;
+        element.off('mouseenter', last);
+      }
+    });
+    for (var i = 0; i < 30; i++) element.on('mouseenter', function() { calls++; });
+    element.on('mouseenter', last);
+    browserTrigger(a, 'mouseover', {relatedTarget: b});
+    expect(calls).toBe(32);
+    browserTrigger(a, 'mouseover', {relatedTarget: a});
+    expect(calls).toBe(32);
+    browserTrigger(a, 'mouseover', {relatedTarget: b});
+    expect(calls).toBe(63);
+  });
+
   // Checks if jQuery 2.1 is used.
   function isJQuery21() {
     if (_jqLiteMode) return false;

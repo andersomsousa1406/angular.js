@@ -397,6 +397,9 @@ function jqLiteOff(element, type, fn, unsupported) {
     var removeHandler = function(type) {
       var listenerFns = events[type];
       if (isDefined(fn)) {
+        if (listenerFns && listenerFns.$$dispatching) {
+          listenerFns = copyEventListeners(events, type, listenerFns);
+        }
         arrayRemove(listenerFns || [], fn);
       }
       if (!(isDefined(fn) && listenerFns && listenerFns.length > 0)) {
@@ -855,6 +858,13 @@ forEach({
   };
 });
 
+function copyEventListeners(events, type, listeners) {
+  var copy = shallowCopy(listeners);
+  copy.specialHandlerWrapper = listeners.specialHandlerWrapper;
+  events[type] = copy;
+  return copy;
+}
+
 function createEventHandler(element, events) {
   var eventHandler = function(event, type) {
     // jQuery specific api
@@ -890,14 +900,21 @@ function createEventHandler(element, events) {
     var handlerWrapper = eventFns.specialHandlerWrapper || defaultHandlerWrapper;
 
     // Copy event handlers in case event handlers array is modified during execution.
-    if ((eventFnsLength > 1)) {
+    var shared = eventFnsLength >= 32;
+    if (shared) {
+      eventFns.$$dispatching = (eventFns.$$dispatching || 0) + 1;
+    } else if (eventFnsLength > 1) {
       eventFns = shallowCopy(eventFns);
     }
 
-    for (var i = 0; i < eventFnsLength; i++) {
-      if (!event.isImmediatePropagationStopped()) {
-        handlerWrapper(element, event, eventFns[i]);
+    try {
+      for (var i = 0; i < eventFnsLength; i++) {
+        if (!event.isImmediatePropagationStopped()) {
+          handlerWrapper(element, event, eventFns[i]);
+        }
       }
+    } finally {
+      if (shared) eventFns.$$dispatching--;
     }
   };
 
@@ -953,6 +970,9 @@ forEach({
 
     var addHandler = function(type, specialHandlerWrapper, noEventListener) {
       var eventFns = events[type];
+      if (eventFns && eventFns.$$dispatching) {
+        eventFns = copyEventListeners(events, type, eventFns);
+      }
 
       if (!eventFns) {
         eventFns = events[type] = [];

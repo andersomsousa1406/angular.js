@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **jqLite:** preserve native-event listener snapshots with copy on mutation
+  for lists of at least 32 listeners, including reentrant dispatch and errors.
+
 - **$interpolate:** concatenate two already converted strings directly during
   unprivileged evaluation, avoiding a temporary values array and join.
 
