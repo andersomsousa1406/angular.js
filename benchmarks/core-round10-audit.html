@@ -1,0 +1,55 @@
+<!doctype html>
+<html ng-csp="no-unsafe-eval">
+<meta charset="utf-8">
+<title>CSP property access and directive normalization</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var parse = injector.get('$parse'), compile = injector.get('$compile');
+  var normalize = compile('<div></div>');
+  var attributes;
+  angular.module('normalizationAudit', []).directive('capture', function() {
+    return {compile: function(element, attrs) { attributes = attrs; }};
+  });
+  injector = angular.injector(['ng', 'normalizationAudit']);
+  compile = injector.get('$compile');
+  compile('<div capture></div>');
+  normalize = attributes.$normalize;
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  var scope = {row: {customer: {name: 'Maria', amount: 123}}};
+  var expression = parse('row.customer.name');
+  bench('cspPropertyChain', 100000, function() { return expression(scope); });
+  outputs.push(expression(scope), expression({}, {row: scope.row}));
+  var method = parse('row.customer.name.toUpperCase()');
+  bench('cspMethodChain', 100000, function() { return method(scope); });
+  outputs.push(method(scope));
+  ['class', 'ngModel', 'data-ng-model', 'ng:model', 'x_ng_model', '-foo', 'foo-'].forEach(function(name) {
+    outputs.push(normalize(name));
+  });
+  bench('normalizePlain', 100000, function(i) { return normalize(i % 2 ? 'class' : 'title'); });
+  bench('normalizeDashed', 100000, function(i) { return normalize(i % 2 ? 'data-ng-model' : 'ng-repeat'); });
+  bench('compilePlainAttributes', 1000, function() {
+    return compile('<div title="a" class="b"><span id="c">text</span></div>');
+  });
+  results.outputs = outputs;
+  return results;
+};
+</script>
+</html>

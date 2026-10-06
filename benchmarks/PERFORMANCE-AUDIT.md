@@ -1061,3 +1061,21 @@ e 15 amostras de 5.000 chamadas: tres campos com trim 3,95 -> 2,15 ms (45,6%),
 67,70 -> 51,75 ms (23,6%). Medir parser real isolado, nao eventos/rendering.
 Build/lint, 26.898 execucoes unitarias e outputs iguais. Array intermediario
 evitado no caminho string nao vazio, sem quantificar heap. CORE-ROUND9-AUDIT.md.
+
+
+## Rodada 10: propriedades CSP, normalizacao e datas da tabela (2026-10-06)
+
+Parser CSP: escolher avaliador de leitura sem criacao/contexto quando possivel,
+preservando getters, locals, receivers e atribuicao. Cadeias de propriedades
+18% e chamadas de metodos 35% menos tempo no teste isolado. Nao altera o parser
+gerado usado por padrao no projeto. Compilacao: evitar substituicoes em nomes
+simples e prefixos impossiveis, compartilhando callback. Normalizacao simples
+77% e fixture de compilacao 6% menos tempo; nomes com separadores sem ganho.
+
+Tabela privada: patch para datas YYYY-MM-DD sem array intermediario, 22% menos
+tempo para datas e 15% para timestamps. Formatos alternativos aproximadamente
+4% mais lentos; mantido somente no laboratorio. Oitenta casos iguais, 26.910
+execucoes unitarias, 159 checks das tres versoes e 159 da tela passaram. Debug,
+element.scope e frequencia dos digests preservados. Minificados atualizados.
+Comparacao do projeto continua mista, sem ganho geral ou menor heap confirmado.
+Ver CORE-ROUND10-AUDIT.md, TABLE-DATE-AUDIT.md e round10-audit-summary.json.

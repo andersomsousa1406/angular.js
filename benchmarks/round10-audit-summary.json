@@ -1,0 +1,293 @@
+{
+  "date": "2026-10-06",
+  "browser": "Chrome 154 / Windows",
+  "coreSourceCommit": "e4fa3fee9",
+  "parserCommit": "3992f2295",
+  "tablePatchCommit": "622583c66",
+  "coreBaselineSourceCommit": "96e85519f",
+  "unitTestExecutions": 26910,
+  "coreMicrobenchmark": {
+    "cspPropertyChain": {
+      "beforeMs": 3.850000023841858,
+      "afterMs": 3.149999976158142,
+      "reductionPercent": 18.18181930776188
+    },
+    "cspMethodChain": {
+      "beforeMs": 10,
+      "afterMs": 6.550000071525574,
+      "reductionPercent": 34.49999928474426
+    },
+    "normalizePlain": {
+      "beforeMs": 9.849999904632568,
+      "afterMs": 2.299999952316284,
+      "reductionPercent": 76.64974645091553
+    },
+    "normalizeDashed": {
+      "beforeMs": 34,
+      "afterMs": 34.5,
+      "reductionPercent": -1.4705882352941124
+    },
+    "compilePlainAttributes": {
+      "beforeMs": 14.200000047683716,
+      "afterMs": 13.299999952316284,
+      "reductionPercent": 6.338028819332564
+    }
+  },
+  "tableMicrobenchmark": {
+    "date": {
+      "beforeMs": 14.75,
+      "afterMs": 11.5,
+      "reductionPercent": 22.033898305084744
+    },
+    "timestamp": {
+      "beforeMs": 20.700000047683716,
+      "afterMs": 17.549999952316284,
+      "reductionPercent": 15.217391730005868
+    },
+    "fallback": {
+      "beforeMs": 14.649999976158142,
+      "afterMs": 15.25000011920929,
+      "reductionPercent": -4.09556412305534
+    },
+    "text": {
+      "beforeMs": 2.9499999284744263,
+      "afterMs": 3.100000023841858,
+      "reductionPercent": -5.084749118790777
+    }
+  },
+  "project": {
+    "warmupDigestsPerVersion": 5000,
+    "checks": {
+      "snapshotsEqual": true,
+      "allTestsPassed": true,
+      "noErrors": true
+    },
+    "screenChecks": [
+      {
+        "version": "1.6.9",
+        "passed": 53,
+        "total": 53,
+        "errors": []
+      },
+      {
+        "version": "1.8.3",
+        "passed": 53,
+        "total": 53,
+        "errors": []
+      },
+      {
+        "version": "1.8.5-local+sha.e4fa3fee9",
+        "passed": 53,
+        "total": 53,
+        "errors": []
+      }
+    ],
+    "versions": {
+      "old": {
+        "version": "1.6.9",
+        "testsPassed": 53,
+        "testsTotal": 53,
+        "hashes": {
+          "angular.min.js": "a517e698e5a04e4f7b3314c5b00d1821dadcd1f6778fc9c3acd9b01cb833c26c",
+          "angular-animate.min.js": "8e6202b1330a469a61ccdeebbd1cb3a20d0ecdfc8d106f68da5b85e9b67a1cd5",
+          "angular-resource.min.js": "e4d7e454d47295f0da42cb4b7a0a77be22996626cf4963d4840fdfdc2fe81916",
+          "angular-sanitize.js": "fe27de9994d11038abd4691cee4ec4df880ec7410e7466c106458b651f81f805"
+        },
+        "tableHTMLMs": 0.5,
+        "steadyDigestMs": 11.399999976158142,
+        "dirtyDigest500Ms": 31.649999976158142,
+        "recompileWithWaitMs": 57.050000071525574,
+        "retainedHeapBytes": 8765486,
+        "roundMedians": [
+          {
+            "round": 0,
+            "tableHTMLMs": 0.2999999523162842,
+            "steadyDigestMs": 11.5,
+            "dirtyDigest500Ms": 31.700000047683716,
+            "recompileWithWaitMs": 56.40000009536743
+          },
+          {
+            "round": 1,
+            "tableHTMLMs": 0.5,
+            "steadyDigestMs": 10.900000095367432,
+            "dirtyDigest500Ms": 31.59999990463257,
+            "recompileWithWaitMs": 50.5
+          },
+          {
+            "round": 2,
+            "tableHTMLMs": 0.5,
+            "steadyDigestMs": 11.299999952316284,
+            "dirtyDigest500Ms": 30.100000143051147,
+            "recompileWithWaitMs": 57.700000047683716
+          },
+          {
+            "round": 3,
+            "tableHTMLMs": 0.7999999523162842,
+            "steadyDigestMs": 44.299999952316284,
+            "dirtyDigest500Ms": 109.20000004768372,
+            "recompileWithWaitMs": 86.09999990463257
+          }
+        ],
+        "watchers": [
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ]
+        ],
+        "globalEventsStable": true
+      },
+      "official": {
+        "version": "1.8.3",
+        "testsPassed": 53,
+        "testsTotal": 53,
+        "hashes": {
+          "angular.min.js": "396dc1a03d6cc02e9c51a80246e0db53c5c8df9bd07287e3b51bce4a29dab355",
+          "angular-animate.min.js": "8e6202b1330a469a61ccdeebbd1cb3a20d0ecdfc8d106f68da5b85e9b67a1cd5",
+          "angular-resource.min.js": "6486e67e18cca4dd013d50806e6a5b52b8b20d77270c453587f19513fcd7c7a1",
+          "angular-sanitize.js": "c84c65250afe5a1265f36a7e16c6010652e55c2ae3a779c351fb68536c42bf64"
+        },
+        "tableHTMLMs": 0.39999985694885254,
+        "steadyDigestMs": 11,
+        "dirtyDigest500Ms": 30.5,
+        "recompileWithWaitMs": 58.5,
+        "retainedHeapBytes": 8825286,
+        "roundMedians": [
+          {
+            "round": 0,
+            "tableHTMLMs": 0.2999999523162842,
+            "steadyDigestMs": 10.900000095367432,
+            "dirtyDigest500Ms": 29.699999809265137,
+            "recompileWithWaitMs": 56.59999990463257
+          },
+          {
+            "round": 1,
+            "tableHTMLMs": 0.40000009536743164,
+            "steadyDigestMs": 11,
+            "dirtyDigest500Ms": 30.799999952316284,
+            "recompileWithWaitMs": 58.799999952316284
+          },
+          {
+            "round": 2,
+            "tableHTMLMs": 0.39999985694885254,
+            "steadyDigestMs": 11.099999904632568,
+            "dirtyDigest500Ms": 30.200000047683716,
+            "recompileWithWaitMs": 58.200000047683716
+          },
+          {
+            "round": 3,
+            "tableHTMLMs": 0.39999985694885254,
+            "steadyDigestMs": 11,
+            "dirtyDigest500Ms": 105.5,
+            "recompileWithWaitMs": 88.10000014305115
+          }
+        ],
+        "watchers": [
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ]
+        ],
+        "globalEventsStable": true
+      },
+      "new": {
+        "version": "1.8.5-local+sha.e4fa3fee9",
+        "testsPassed": 53,
+        "testsTotal": 53,
+        "hashes": {
+          "angular.min.js": "046c1d7b97ecd8b2b321e0a1acc413858e8899faa90994a1fdf5e7066203a053",
+          "angular-animate.min.js": "10af0fb59406f5f82b9c45b339b85e58a0185d54b2734fb443429339f3fb5e13",
+          "angular-resource.min.js": "2801427f13e6165ca1f9c7d445cc95ec9b50fba7c0e6a70183896a52d085ec6b",
+          "angular-sanitize.js": "450202969abddb2a8284b5a6f73cb0d569dc03cb1f9128e3841d8bacc3454211"
+        },
+        "tableHTMLMs": 0.6499999761581421,
+        "steadyDigestMs": 11.449999928474426,
+        "dirtyDigest500Ms": 32.049999952316284,
+        "recompileWithWaitMs": 57,
+        "retainedHeapBytes": 8883382,
+        "roundMedians": [
+          {
+            "round": 0,
+            "tableHTMLMs": 0.3000001907348633,
+            "steadyDigestMs": 11.599999904632568,
+            "dirtyDigest500Ms": 30.700000047683716,
+            "recompileWithWaitMs": 57.59999990463257
+          },
+          {
+            "round": 1,
+            "tableHTMLMs": 0.7999999523162842,
+            "steadyDigestMs": 11.299999952316284,
+            "dirtyDigest500Ms": 33.39999985694885,
+            "recompileWithWaitMs": 59.299999952316284
+          },
+          {
+            "round": 2,
+            "tableHTMLMs": 1.2999999523162842,
+            "steadyDigestMs": 10.900000095367432,
+            "dirtyDigest500Ms": 30.09999990463257,
+            "recompileWithWaitMs": 52.59999990463257
+          },
+          {
+            "round": 3,
+            "tableHTMLMs": 0.5,
+            "steadyDigestMs": 15.5,
+            "dirtyDigest500Ms": 36,
+            "recompileWithWaitMs": 56.40000009536743
+          }
+        ],
+        "watchers": [
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ],
+          [
+            799,
+            799
+          ]
+        ],
+        "globalEventsStable": true
+      }
+    }
+  },
+  "tableFormatChecks": 80,
+  "tableFormatPassed": true,
+  "coreMicrobenchmarkHashes": {
+    "baseline": "c6172eb0f7141bf5b8037a9fe7e04f9f8aaa87558eeb38afa632f8a70c2ca5a5",
+    "candidate": "8abcb406937792a0d7469081ce9b6c593267df6392bde4bbf130c0919ae0454f"
+  },
+  "componentHashes": {
+    "before": "022e1a6a601c677357c34be8f13d4f09fccb097b8d2dd17409c34ab8265aed71",
+    "after": "969020d735447a08205e12261f61d50fadc25a256d2a150833ac2cd1e9b404ab"
+  }
+}
