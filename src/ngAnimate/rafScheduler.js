@@ -1,13 +1,23 @@
 'use strict';
 
 var $$rAFSchedulerFactory = ['$$rAF', function($$rAF) {
-  var queue, cancelFn;
+  var queue, cancelFn, queuePosition = 0;
 
   function scheduler(tasks) {
     // we make a copy since RAFScheduler mutates the state
     // of the passed in array variable and this would be difficult
     // to track down on the outside code
-    queue = queue.concat(tasks);
+    if (queuePosition > 1024 && queuePosition * 2 >= queue.length) {
+      queue = queue.slice(queuePosition);
+      queuePosition = 0;
+    }
+    if (queue === scheduler.queue) {
+      queue = queue.concat(tasks);
+    } else if (isArray(tasks)) {
+      for (var i = 0; i < tasks.length; i++) queue.push(tasks[i]);
+    } else {
+      queue.push(tasks);
+    }
     nextTick();
   }
 
@@ -34,9 +44,14 @@ var $$rAFSchedulerFactory = ['$$rAF', function($$rAF) {
   return scheduler;
 
   function nextTick() {
-    if (!queue.length) return;
+    if (queuePosition === queue.length) return;
 
-    var items = queue.shift();
+    var items = queue[queuePosition];
+    queue[queuePosition++] = null;
+    if (queuePosition === queue.length) {
+      queue = [];
+      queuePosition = 0;
+    }
     for (var i = 0; i < items.length; i++) {
       items[i]();
     }

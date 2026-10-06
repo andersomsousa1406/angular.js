@@ -4,6 +4,34 @@ describe('$$rAFScheduler', function() {
 
   beforeEach(module('ngAnimate'));
 
+  it('should preserve pending waves while compacting a continuously extended queue', inject(function($$rAFScheduler, $$rAF) {
+    var calls = 0;
+    function task() { calls++; }
+    var batches = [];
+    for (var i = 0; i < 2100; i++) batches.push([task]);
+    $$rAFScheduler(batches);
+    for (i = 0; i < 1100; i++) $$rAF.flush();
+    $$rAFScheduler([[task]]);
+    while ($$rAF.queue.length) $$rAF.flush();
+    expect(calls).toBe(2101);
+    expect(batches.length).toBe(2100);
+  }));
+
+  it('should preserve reentrant waves and leave the caller array unchanged', inject(function($$rAFScheduler, $$rAF) {
+    var calls = [];
+    var tasks = [[function() {
+      calls.push('first');
+      $$rAFScheduler([[function() { calls.push('nested'); }]]);
+    }], [function() { calls.push('second'); }]];
+    $$rAFScheduler(tasks);
+    expect(calls).toEqual(['first', 'second']);
+    expect(tasks.length).toBe(2);
+    expect(tasks[0].length).toBe(1);
+    $$rAF.flush();
+    expect(calls).toEqual(['first', 'second', 'nested']);
+  }));
+
+
   it('should accept an array of tasks and run the first task immediately',
     inject(function($$rAFScheduler) {
 

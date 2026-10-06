@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngAnimate:** drain animation waves with a cursor and compact pending queues,
+  reducing copying while preserving frame order and quiet scheduling.
+
 - **$rootScope:** preserve digest traversal when a getter or listener destroys
   its scope or an ancestor; skip destroyed watchers and stabilize surviving scopes.
 

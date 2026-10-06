@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<title>Retenção após cancelar stagger</title>
+<p>Chrome com --js-flags=--expose-gc --enable-precise-memory-info.
+Mede um elemento com 1.000.000 valores, removido após cancelar um stagger longo.</p>
+<p>Use <a href="?mode=scheduler">?mode=scheduler</a> para medir a fila com RAF determinístico,
+sem pintura nem passagem real de frames.</p>
+<pre id="results">Executando...</pre>
+<script src="../build/angular.js"></script>
+<script src="../build/angular-animate.js"></script>
+<script src="animation-memory-audit.js"></script>
+</html>

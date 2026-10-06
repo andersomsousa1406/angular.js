@@ -393,3 +393,27 @@ no digest; esta e uma correcao de estabilidade com verificacoes adicionais.
 Validacao conjunta: 26.689 execucoes aprovadas, mais nova execucao das suites de
 modulos apos ajuste no teste de drenagem de frames. Lint dos arquivos alterados
 e whitespace aprovados.
+
+## Fila de animacoes com cursor (2026-10-06)
+
+`animation-memory-audit.html?mode=scheduler` usa o scheduler real e RAF
+deterministico, sem pintura ou passagem real de frames. Cada mediana abaixo
+usa tres amostras apos uma de aquecimento, Chrome 154:
+
+| Lotes | Antes (ms) | Depois (ms) |
+| --- | ---: | ---: |
+| 1.000 | 0,2 | 0,3 |
+| 10.000 | 2,1 | 0,7 |
+| 50.000 | 118,1 | 1,7 |
+
+O ganho aparece em filas grandes; o caso pequeno esta perto da resolucao do
+relogio e nao demonstra ganho. Um cursor evita deslocar toda a fila por lote;
+append evita copiar todos os pendentes em cada chamada. Slots consumidos sao
+limpos, a fila vazia e substituida e filas continuamente estendidas sao
+compactadas de forma amortizada. Ordem de frames, reentrada e waitUntilQuiet
+continuam iguais em 100 cenarios diferenciais determinísticos.
+
+O benchmark Node `node benchmarks/raf-scheduler-audit.js [fonte-do-scheduler]`
+permite comparar fontes sem builds. Node 14, 50.000 lotes: 5.021,4 -> 12,5 ms;
+100.000 lotes: 17.821,8 -> 17,8 ms. Motores e harnesses diferentes produzem
+tempos muito diferentes; nao extrapolar estes numeros para FPS da aplicacao.
