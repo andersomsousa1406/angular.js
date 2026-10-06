@@ -775,3 +775,17 @@ nova rodada jqLite de 6.317 testes. Lint do core e runner Node aprovado;
 saidas diferenciais completas identicas. O runner agora espera a pagina
 terminar de carregar, em vez de assumir um atraso fixo de 300 ms.
 Ver CORE-NEXT-AUDIT.md e core-next-audit-results.json para todos os controles.
+
+## ngOptions: selecao multiple grande (2026-10-06)
+
+Com 64 ou mais opcoes e 16 ou mais entradas do modelo, indice temporario sem
+prototipo substitui as buscas repetidas em selectedOptions. Colisoes mantem
+comparacao por identidade; chaves incomuns e selecoes pequenas usam o loop
+anterior. Teste cobre track by, chave __proto__, duplicatas, valor ausente e
+limpeza da selecao. O indice aumenta memoria temporaria; nao afirmar reducao
+de heap neste item. Nao modifica getWatchables previamente medido sem ganho.
+
+Chrome 154, quatro pares e 15 amostras: 100 escritas alternando 500 valores
+selecionados em 1.000 opcoes 93,20 -> 75,75 ms (18,7% menos tempo).
+Controle de 32 opcoes 23,10 -> 22,05 ms. Build, 26.806 execucoes unitarias,
+lint e comparacao de estados finais aprovados. Ver CORE-ROUND3-AUDIT.md.

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngOptions:** index large multiple selections by option identity, preserving
+  duplicate model entries and using the original search for small selections.
+
 - **$parse (CSP):** specialize calls with zero or two arguments, preserving
   receivers, custom apply methods and separate arrays during reentrant calls.
 

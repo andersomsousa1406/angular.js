@@ -513,9 +513,42 @@ var ngOptionsDirective = ['$compile', '$document', '$parse', function($compile, 
           // Only set `<option>.selected` if necessary, in order to prevent some browsers from
           // scrolling to `<option>` elements that are outside the `<select>` element's viewport.
           var selectedOptions = values && values.map(getAndUpdateSelectedOption) || [];
+          var selectedLookup;
+          if (selectedOptions.length >= 16 && options.items.length >= 64) {
+            selectedLookup = createMap();
+            for (var i = 0; i < selectedOptions.length; i++) {
+              var selectedOption = selectedOptions[i];
+              if (!selectedOption) continue;
+              var key = selectedOption.selectValue;
+              if (typeof key !== 'string' && typeof key !== 'number') {
+                selectedLookup = null;
+                break;
+              }
+              if (hasOwnProperty.call(selectedLookup, key) && selectedLookup[key] !== selectedOption) {
+                // Preserve identity matching if distinct options share a key.
+                selectedLookup[key] = null;
+              } else {
+                selectedLookup[key] = selectedOption;
+              }
+            }
+          }
+          if (!selectedLookup) {
+            options.items.forEach(function(option) {
+              if (option.element.selected && !includes(selectedOptions, option)) {
+                option.element.selected = false;
+              }
+            });
+            return;
+          }
 
           options.items.forEach(function(option) {
-            if (option.element.selected && !includes(selectedOptions, option)) {
+            if (!option.element.selected) return;
+            var key = option.selectValue;
+            var selected = (typeof key === 'string' || typeof key === 'number') ?
+              selectedLookup[key] === option ||
+                (selectedLookup[key] === null && includes(selectedOptions, option)) :
+              includes(selectedOptions, option);
+            if (!selected) {
               option.element.selected = false;
             }
           });

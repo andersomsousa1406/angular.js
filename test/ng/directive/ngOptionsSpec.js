@@ -18,6 +18,21 @@ describe('ngOptions', function() {
     browserTrigger(element, 'change');
   }
 
+  it('should preserve large multiple selections with duplicate model entries and special keys', function() {
+    scope.items = [];
+    for (var i = 0; i < 100; i++) scope.items.push({id: i === 0 ? '__proto__' : '' + i});
+    scope.model = scope.items.slice(0, 32);
+    compile('<select multiple ng-model="model" ng-options="item as item.id for item in items track by item.id"></select>');
+    scope.model = [];
+    for (i = 0; i < 32; i += 2) scope.model.push(scope.items[i]);
+    scope.model.push(scope.items[0], {id: 'missing'});
+    scope.$digest();
+    for (i = 0; i < 100; i++) expect(element[0].options[i].selected).toBe(i < 32 && i % 2 === 0);
+    scope.model = [];
+    scope.$digest();
+    for (i = 0; i < 100; i++) expect(element[0].options[i].selected).toBe(false);
+  });
+
 
   beforeEach(function() {
     jasmine.addMatchers({
