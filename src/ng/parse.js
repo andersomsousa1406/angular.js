@@ -660,6 +660,22 @@ function isPure(node, parentIsPure) {
   return (undefined === parentIsPure) ? PURITY_RELATIVE : parentIsPure;
 }
 
+function appendWatchExpressions(target, expressions) {
+  if (isArray(expressions)) {
+    for (var index = 0; index < expressions.length; index++) target.push(expressions[index]);
+    return;
+  }
+  var pending = [expressions];
+  while (pending.length) {
+    var current = pending.pop();
+    if (isArray(current)) {
+      for (var i = 0; i < current.length; i++) target.push(current[i]);
+    } else {
+      pending.push(current.right, current.left);
+    }
+  }
+}
+
 function findConstantAndWatchExpressions(ast, $filter, parentIsPure) {
   var allConstants;
   var argsToWatch;
@@ -689,7 +705,11 @@ function findConstantAndWatchExpressions(ast, $filter, parentIsPure) {
     findConstantAndWatchExpressions(ast.left, $filter, astIsPure);
     findConstantAndWatchExpressions(ast.right, $filter, astIsPure);
     ast.constant = ast.left.constant && ast.right.constant;
-    ast.toWatch = ast.left.toWatch.concat(ast.right.toWatch);
+    var leftWatch = ast.left.toWatch;
+    var rightWatch = ast.right.toWatch;
+    ast.toWatch = !leftWatch.length ? rightWatch : !rightWatch.length ? leftWatch : {
+      left: leftWatch, right: rightWatch, length: leftWatch.length + rightWatch.length
+    };
     break;
   case AST.LogicalExpression:
     findConstantAndWatchExpressions(ast.left, $filter, astIsPure);
@@ -723,7 +743,7 @@ function findConstantAndWatchExpressions(ast, $filter, parentIsPure) {
     forEach(ast.arguments, function(expr) {
       findConstantAndWatchExpressions(expr, $filter, astIsPure);
       allConstants = allConstants && expr.constant;
-      argsToWatch.push.apply(argsToWatch, expr.toWatch);
+      appendWatchExpressions(argsToWatch, expr.toWatch);
     });
     ast.constant = allConstants;
     ast.toWatch = isStatelessFilter ? argsToWatch : [ast];
@@ -740,7 +760,7 @@ function findConstantAndWatchExpressions(ast, $filter, parentIsPure) {
     forEach(ast.elements, function(expr) {
       findConstantAndWatchExpressions(expr, $filter, astIsPure);
       allConstants = allConstants && expr.constant;
-      argsToWatch.push.apply(argsToWatch, expr.toWatch);
+      appendWatchExpressions(argsToWatch, expr.toWatch);
     });
     ast.constant = allConstants;
     ast.toWatch = argsToWatch;
@@ -751,12 +771,12 @@ function findConstantAndWatchExpressions(ast, $filter, parentIsPure) {
     forEach(ast.properties, function(property) {
       findConstantAndWatchExpressions(property.value, $filter, astIsPure);
       allConstants = allConstants && property.value.constant;
-      argsToWatch.push.apply(argsToWatch, property.value.toWatch);
+      appendWatchExpressions(argsToWatch, property.value.toWatch);
       if (property.computed) {
         //`{[key]: value}` implicitly does `key.toString()` which may be non-pure
         findConstantAndWatchExpressions(property.key, $filter, /*parentIsPure=*/false);
         allConstants = allConstants && property.key.constant;
-        argsToWatch.push.apply(argsToWatch, property.key.toWatch);
+        appendWatchExpressions(argsToWatch, property.key.toWatch);
       }
     });
     ast.constant = allConstants;
@@ -777,6 +797,10 @@ function getInputs(body) {
   if (body.length !== 1) return;
   var lastExpression = body[0].expression;
   var candidate = lastExpression.toWatch;
+  if (!isArray(candidate)) {
+    candidate = [];
+    appendWatchExpressions(candidate, lastExpression.toWatch);
+  }
   if (candidate.length !== 1) return candidate;
   return candidate[0] !== lastExpression ? candidate : undefined;
 }

@@ -1868,6 +1868,26 @@ describe('parser', function() {
 
   forEach([true, false], function(cspEnabled) {
     describe('csp: ' + cspEnabled, function() {
+      it('should preserve ordered and repeated inputs across binary expressions and containers', inject(function($parse) {
+        var scope = {a: 2, b: 3, c: 4, key: 'value'};
+        var expression = $parse('[a*b+c, {value: a*b, [key]: b+c}]');
+        expect(expression(scope)).toEqual([10, {value: 7}]);
+        expect(expression.inputs.map(function(input) { return input(scope); })).toEqual([2, 3, 4, 2, 3, 3, 4, 'value']);
+      }));
+
+      it('should collect every input in a long binary expression', inject(function($parse) {
+        var names = [];
+        var scope = {};
+        for (var i = 0; i < 500; i++) {
+          names.push('value' + i);
+          scope['value' + i] = i;
+        }
+        var expression = $parse(names.join('+'));
+        expect(expression(scope)).toBe(124750);
+        expect(expression.inputs.length).toBe(500);
+        for (i = 0; i < 500; i++) expect(expression.inputs[i](scope)).toBe(i);
+      }));
+
 
       beforeEach(module(function() {
         expect(csp().noUnsafeEval === true ||

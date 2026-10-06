@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse:** collect binary-expression watch dependencies without copying the
+  growing input list at every node; preserve input order and duplicates.
+
 - **ngAnimate:** cancel pending stagger-start timers when CSS animations end or
   are canceled, releasing references to removed elements before the delay expires.
 

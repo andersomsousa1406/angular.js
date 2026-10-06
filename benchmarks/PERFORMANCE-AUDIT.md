@@ -436,3 +436,27 @@ stagger e timeout final. O fechamento ja remove listeners de fim e o timer
 final; os callbacks done do runner ja sao limpos apos resolucao. Nao limpar o
 host de runners mantidos pela aplicacao, pois isso mudaria chamadas posteriores
 de end/cancel/pause/resume. Nenhuma alegacao de eliminar toda retencao de DOM.
+
+## Dependencias de expressoes binarias (2026-10-06)
+
+A analise de inputs usa uma estrutura intermediaria para concatenacoes binarias,
+materializada iterativamente apenas ao formar inputs ou listas de containers.
+Evita copiar todos os inputs anteriores em cada operador de uma cadeia longa.
+Mantem ordem, duplicatas, pureza, constantes e caminhos CSP/compilado.
+
+`node --expose-gc benchmarks/watch-analysis-audit.js [parse-source.js]` isola a
+analise, excluindo lexer e geracao de codigo. Node 14, sete amostras, medianas:
+
+| Inputs | Antes (ms) | Depois (ms) | Metadata antes (bytes) | Depois (bytes) |
+| --- | ---: | ---: | ---: | ---: |
+| 100 | 0,539 | 0,369 | 59.656 | 20.584 |
+| 500 | 1,695 | 1,557 | 1.094.632 | 97.344 |
+| 1.000 | 3,985 | 2,895 | 4.187.696 | 195.032 |
+
+O harness mantem o AST vivo apos GC para medir metadata; na compilacao normal
+essas estruturas sao temporarias. Isso nao mede memoria permanente do cache de
+$parse, nem velocidade de digest ou de compilacao completa de uma tela.
+10.000 ASTs diferenciais tiveram metadados e inputs iguais. Testes cobrem listas
+binarias longas e containers/computed keys nos modos CSP e compilado.
+Validacao conjunta: 26.718 execucoes aprovadas; lint dos arquivos alterados e
+git diff --check aprovados.
