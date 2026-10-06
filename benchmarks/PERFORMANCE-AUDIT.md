@@ -365,8 +365,31 @@ continuam sem link; scopes e DOM nao sao destruidos automaticamente. O ultimo
 watcher e liberado apenas ao terminar o digest ou atingir o limite de iteracoes,
 preservando a otimização de curto-circuito durante a travessia.
 
-Achado separado, pendente: destruir o proprio scope em seu listener pode causar
-TypeError na travessia quando o parent ja foi limpo. Nao incluido nesta rodada.
+Achado separado identificado nesta rodada: destruir o proprio scope em seu
+listener pode causar TypeError na travessia quando o parent ja foi limpo.
+Corrigido na rodada de travessia abaixo.
 
 Validacao desta rodada: 26.645 execucoes aprovadas nas suites jqLite, jQuery,
 modulos, ngAnimate e ngMock; ESLint dos arquivos alterados e git diff --check.
+
+## Digest com destruicao durante a travessia (2026-10-06)
+
+A continuacao fora do subtree destruido e salva antes de limpar seus vinculos.
+Isso permite destruir o scope ativo ou um ancestral, inclusive em getters e
+descendentes isolados. Watchers restantes do subtree destruido sao ignorados;
+scopes sobreviventes continuam e as alteracoes do evento de destruicao sao
+estabilizadas, incluindo scopes novos. Cleanup continua sincrono.
+
+Um contexto e alocado por digest, reutilizado entre scopes e removido ao limpar
+a fase; nao ha debounce nem mudanca de agendamento. Regressões cobrem alvo do
+digest, getter/listener, ancestral isolado, criacao de scopes e destruicao da
+continuacao salva pelo evento $destroy.
+
+Auditoria existente, Chrome 154, sete amostras: 50.000 watchers estaveis tiveram
+medianas de 0,182 ms antes e 0,181 ms depois; ngRepeat com 1.000 linhas e bindings
+ativos, 0,066 -> 0,064 ms. Outros cenarios variaram, sem demonstrar ganho geral
+no digest; esta e uma correcao de estabilidade com verificacoes adicionais.
+
+Validacao conjunta: 26.689 execucoes aprovadas, mais nova execucao das suites de
+modulos apos ajuste no teste de drenagem de frames. Lint dos arquivos alterados
+e whitespace aprovados.

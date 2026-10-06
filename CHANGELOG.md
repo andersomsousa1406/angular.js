@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$rootScope:** preserve digest traversal when a getter or listener destroys
+  its scope or an ancestor; skip destroyed watchers and stabilize surviving scopes.
+
 - **$compile:** release queued template links after rejection, preserving error
   reporting and ignoring subsequent links for the failed template.
 

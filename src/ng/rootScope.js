@@ -74,6 +74,7 @@ function $RootScopeProvider() {
   var $rootScopeMinErr = minErr('$rootScope');
   var lastDirtyWatch = null;
   var applyAsyncId = null;
+  var digestTraversal = null;
 
   this.digestTtl = function(value) {
     if (arguments.length) {
@@ -809,7 +810,8 @@ function $RootScopeProvider() {
             dirty, ttl = TTL,
             next, current, target = asyncQueue.length ? $rootScope : this,
             watchLog = [],
-            logIdx, asyncTask;
+            logIdx, asyncTask,
+            traversal = {current: null, target: target, destroyed: false, next: null};
 
         beginPhase('$digest');
         // Check for changes to browser url that happened in sync before the call to $digest
@@ -827,6 +829,7 @@ function $RootScopeProvider() {
         do { // "while dirty" loop
           dirty = false;
           current = target;
+          digestTraversal = null;
 
           // It's safe for asyncQueuePosition to be a local variable here because this loop can't
           // be reentered recursively. Calling $digest from a function passed to $evalAsync would
@@ -846,18 +849,24 @@ function $RootScopeProvider() {
 
           traverseScopesLoop:
           do { // "traverse the scopes" loop
+            digestTraversal = traversal;
+            traversal.current = current;
+            traversal.destroyed = false;
+            traversal.next = null;
             if ((watchers = !current.$$suspended && current.$$watchers)) {
               // process our watches
               if (watchers.$$removed) compactWatchers(watchers);
               watchers.$$digestWatchIndex = 0;
-              while (watchers.$$digestWatchIndex < watchers.length) {
+              while (!digestTraversal.destroyed && watchers.$$digestWatchIndex < watchers.length) {
                 try {
                   watch = watchers[watchers.$$digestWatchIndex++];
                   // Most common watches are on primitives, in which case we can short
                   // circuit it with === operator, only when === fails do we use .equals
                   if (watch) {
                     get = watch.get;
-                    if ((value = get(current)) !== (last = watch.last) &&
+                    value = get(current);
+                    if (digestTraversal.destroyed) break;
+                    if (value !== (last = watch.last) &&
                         !(watch.eq
                             ? equals(value, last)
                             : (isNumberNaN(value) && isNumberNaN(last)))) {
@@ -893,7 +902,10 @@ function $RootScopeProvider() {
             // this piece should be kept in sync with the traversal in $broadcast
             // (though it differs due to having the extra check for $$suspended and does not
             // check $$listenerCount)
-            if (!(next = ((!current.$$suspended && current.$$watchersCount && current.$$childHead) ||
+            if (digestTraversal.destroyed) {
+              dirty = true;
+              next = digestTraversal.next;
+            } else if (!(next = ((!current.$$suspended && current.$$watchersCount && current.$$childHead) ||
                 (current !== target && current.$$nextSibling)))) {
               while (current !== target && !(next = current.$$nextSibling)) {
                 current = current.$parent;
@@ -916,6 +928,7 @@ function $RootScopeProvider() {
 
         // The shortcut is only needed during traversal, not between digests.
         lastDirtyWatch = null;
+        digestTraversal = null;
         clearPhase();
 
         // postDigestQueuePosition isn't local here because this loop can be reentered recursively.
@@ -1064,6 +1077,21 @@ function $RootScopeProvider() {
         // We can't destroy a scope that has been already destroyed.
         if (this.$$destroyed) return;
         var parent = this.$parent;
+
+        if (digestTraversal) {
+          var traversed = digestTraversal.destroyed ? digestTraversal.next : digestTraversal.current;
+          while (traversed && traversed !== this) traversed = traversed.$parent;
+          if (traversed) {
+            // Save the continuation before cleanup severs the active traversal's ancestry.
+            var continuation = this;
+            while (continuation !== digestTraversal.target && !continuation.$$nextSibling && continuation.$parent) {
+              continuation = continuation.$parent;
+            }
+            digestTraversal.next = continuation === digestTraversal.target ? null : continuation.$$nextSibling;
+            digestTraversal.destroyed = true;
+            lastDirtyWatch = null;
+          }
+        }
 
         this.$broadcast('$destroy');
         this.$$destroyed = true;
@@ -1518,6 +1546,7 @@ function $RootScopeProvider() {
     }
 
     function clearPhase() {
+      digestTraversal = null;
       $rootScope.$$phase = null;
     }
 

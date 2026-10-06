@@ -1,6 +1,82 @@
 'use strict';
 
 describe('Scope', function() {
+  they('should continue digest after a watcher $prop destroys the active scope', ['get', 'listener'], function(method) {
+    inject(function($rootScope) {
+      var child = $rootScope.$new();
+      var sibling = $rootScope.$new();
+      var calls = [];
+      child.$watch(function() {
+        if (method === 'get') child.$destroy();
+        return 1;
+      }, function() {
+        calls.push('listener');
+        child.$destroy();
+      });
+      child.$watch(function() { calls.push('dead'); return 1; });
+      sibling.$watch(function() { return 1; }, function() { calls.push('sibling'); });
+      expect(function() { $rootScope.$digest(); }).not.toThrow();
+      expect(calls).toEqual(method === 'get' ? ['sibling'] : ['listener', 'sibling']);
+      expect(child.$parent).toBe(null);
+    });
+  });
+
+  it('should skip an ancestor destroyed by an isolated descendant and continue outside its subtree',
+    inject(function($rootScope) {
+      var parent = $rootScope.$new();
+      var child = parent.$new(true);
+      var deadSibling = parent.$new(true);
+      var surviving = $rootScope.$new();
+      var calls = [];
+      child.$watch(function() { return 1; }, function() { parent.$destroy(); });
+      deadSibling.$watch(function() { calls.push('dead'); return 1; });
+      surviving.$watch(function() { return 1; }, function() { calls.push('surviving'); });
+      expect(function() { $rootScope.$digest(); }).not.toThrow();
+      expect(calls).toEqual(['surviving']);
+    }));
+
+  it('should stop traversing when the digest target destroys itself', inject(function($rootScope) {
+    var child = $rootScope.$new();
+    child.$watch(function() { return 1; }, function() { child.$destroy(); });
+    expect(function() { child.$digest(); }).not.toThrow();
+    expect($rootScope.$$phase).toBe(null);
+  }));
+
+  it('should stabilize changes and new scopes created by destruction inside a clean getter',
+    inject(function($rootScope) {
+      var child = $rootScope.$new();
+      var destroy = false;
+      var values = [];
+      var created = jasmine.createSpy('created');
+      $rootScope.value = 1;
+      $rootScope.$watch('value', function(value) { values.push(value); });
+      child.$watch(function() {
+        if (destroy) child.$destroy();
+        return 1;
+      });
+      child.$on('$destroy', function() {
+        $rootScope.value = 2;
+        $rootScope.$new().$watch(function() { return 1; }, created);
+      });
+      $rootScope.$digest();
+      destroy = true;
+      $rootScope.$digest();
+      expect(values).toEqual([1, 2]);
+      expect(created).toHaveBeenCalledOnce();
+    }));
+
+  it('should recover when a destroy listener removes the saved continuation', inject(function($rootScope) {
+    var first = $rootScope.$new();
+    var second = $rootScope.$new();
+    var third = $rootScope.$new();
+    var survivor = jasmine.createSpy('survivor');
+    first.$on('$destroy', function() { second.$destroy(); });
+    first.$watch(function() { return 1; }, function() { first.$destroy(); });
+    third.$watch(function() { return 1; }, survivor);
+    expect(function() { $rootScope.$digest(); }).not.toThrow();
+    expect(survivor).toHaveBeenCalledOnce();
+  }));
+
   it('should stabilize remaining watchers when a listener destroys a child scope', inject(function($rootScope) {
     var child = $rootScope.$new();
     var calls = [];
