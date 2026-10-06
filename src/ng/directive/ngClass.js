@@ -141,9 +141,14 @@ function classDirective(name, selector) {
     if (isArray(classValue)) {
       classString = classValue.map(toClassString).join(' ');
     } else if (isObject(classValue)) {
-      classString = Object.keys(classValue).
-        filter(function(key) { return classValue[key]; }).
-        join(' ');
+      var keys = Object.keys(classValue);
+      var selected = 0;
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (classValue[key]) keys[selected++] = key;
+      }
+      keys.length = selected;
+      classString = keys.join(' ');
     } else if (!isString(classValue)) {
       classString = classValue + '';
     }

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngClass:** compact object class keys in place, avoiding a second temporary
+  array while preserving property-read order.
+
 - **$http:** index case-insensitive request header names after repeated searches,
   preserving overrides and header-function execution.
 

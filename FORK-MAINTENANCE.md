@@ -282,3 +282,18 @@ nenhum debounce ou alteracao do debug. Medicoes e limites em PERFORMANCE-AUDIT.
 26.754 execucoes aprovadas, lint e whitespace aprovados; builds atualizados.
 Dois commits de otimizacao e um de investigacao. Debug e agendamento do digest
 preservados. Tempos, harnesses e limites em benchmarks/PERFORMANCE-AUDIT.md.
+
+## ngClass e combinacao de headers (2026-10-06)
+
+- Diferencas grandes de classes usam lookup sem prototipo, preservando ordem,
+  duplicatas, tokens vazios e nomes semelhantes aos de Object.prototype.
+- Headers recebem indice case-insensitive apos trabalho acumulado, mantendo
+  sobrescritas e execucao das funcoes, inclusive remocao por retorno null.
+- Objetos ngClass compactam o snapshot de chaves no proprio array local; um
+  array de filter por conversao deixa de ser criado. Ordem de leitura mantida.
+
+10.000 casos comparativos por helper tiveram resultados iguais. Benchmarks
+Node isolaram helpers: ganho em diferencas grandes e muitos headers; tempos de
+conversao de objetos foram mistos, sem alegar ganho geral ou heap numerico.
+26.766 execucoes aprovadas; lint, whitespace e builds atualizados. Tres commits
+independentes. Debug e agendamento do digest preservados. Detalhes em PERFORMANCE-AUDIT.

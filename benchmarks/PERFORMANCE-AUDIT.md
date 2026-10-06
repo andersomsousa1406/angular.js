@@ -663,3 +663,16 @@ caso pequeno. No harness Node final, 1.000 merges de 50 headers:
 entre rodadas; nao afirmar ganho universal. 10.000 objetos combinados tiveram
 resultados iguais. Nao mede latencia HTTP ou rendering, e o indice usa memoria
 temporaria. Teste de headers com funcoes, casing e conjuntos grandes aprovado.
+
+## Conversao de objetos ngClass (2026-10-06)
+
+Object.keys continua capturando a lista de propriedades antes de ler valores.
+As chaves truthy sao compactadas na propria lista local, sem o segundo array de
+filter. A ordem de leitura e de classes permanece; o objeto original nao muda.
+10.000 objetos diferenciais tiveram saidas iguais, e teste de getters verificou
+ordem de leitura e classes selecionadas.
+
+Uma alocacao de array removida por conversao. Tempos Node foram mistos para
+1.000 conversoes de 1.000 chaves: primeira rodada 261,497 -> 223,633 ms; rodada
+final 219,541 -> 222,011 ms. Nao afirmar ganho geral de velocidade nem economia
+numerica de heap; o resultado demonstrado e a remocao do array intermediario.
