@@ -1,0 +1,145 @@
+{
+  "samplingIntervalUs": 100,
+  "digestIterations": 10000,
+  "note": "One diagnostic profile per version/workload. Self time, not inclusive time; sampling and JIT inlining affect attribution. Not a throughput comparison.",
+  "results": [
+    {
+      "mode": "old",
+      "workload": "digest",
+      "sampledSelfMs": {
+        "angular": 461.46,
+        "components": 532.981,
+        "jquery": 32.054,
+        "generated": 186.316,
+        "runtime": 346.118,
+        "idle": 0,
+        "harness": 0
+      },
+      "activeSampledMs": 1558.929,
+      "activeSharePercent": {
+        "angular": 29.6,
+        "components": 34.19,
+        "jquery": 2.06,
+        "generated": 11.95,
+        "runtime": 22.2,
+        "idle": null,
+        "harness": 0
+      }
+    },
+    {
+      "mode": "old",
+      "workload": "components",
+      "sampledSelfMs": {
+        "angular": 435.895,
+        "components": 172.937,
+        "jquery": 230.169,
+        "generated": 129.564,
+        "runtime": 293.269,
+        "idle": 471.537,
+        "harness": 96.747
+      },
+      "activeSampledMs": 1358.581,
+      "activeSharePercent": {
+        "angular": 32.08,
+        "components": 12.73,
+        "jquery": 16.94,
+        "generated": 9.54,
+        "runtime": 21.59,
+        "idle": null,
+        "harness": 7.12
+      }
+    },
+    {
+      "mode": "official",
+      "workload": "digest",
+      "sampledSelfMs": {
+        "angular": 504.309,
+        "components": 610.786,
+        "jquery": 30.501,
+        "generated": 208.125,
+        "runtime": 280.594,
+        "idle": 0.564,
+        "harness": 0
+      },
+      "activeSampledMs": 1634.315,
+      "activeSharePercent": {
+        "angular": 30.86,
+        "components": 37.37,
+        "jquery": 1.87,
+        "generated": 12.73,
+        "runtime": 17.17,
+        "idle": null,
+        "harness": 0
+      }
+    },
+    {
+      "mode": "official",
+      "workload": "components",
+      "sampledSelfMs": {
+        "angular": 423.019,
+        "components": 174.809,
+        "jquery": 236.157,
+        "generated": 100.259,
+        "runtime": 262.408,
+        "idle": 517.389,
+        "harness": 99.807
+      },
+      "activeSampledMs": 1296.459,
+      "activeSharePercent": {
+        "angular": 32.63,
+        "components": 13.48,
+        "jquery": 18.22,
+        "generated": 7.73,
+        "runtime": 20.24,
+        "idle": null,
+        "harness": 7.7
+      }
+    },
+    {
+      "mode": "new",
+      "workload": "digest",
+      "sampledSelfMs": {
+        "angular": 567.025,
+        "components": 651.336,
+        "jquery": 42.971,
+        "generated": 205.295,
+        "runtime": 310.535,
+        "idle": 0,
+        "harness": 0
+      },
+      "activeSampledMs": 1777.162,
+      "activeSharePercent": {
+        "angular": 31.91,
+        "components": 36.65,
+        "jquery": 2.42,
+        "generated": 11.55,
+        "runtime": 17.47,
+        "idle": null,
+        "harness": 0
+      }
+    },
+    {
+      "mode": "new",
+      "workload": "components",
+      "sampledSelfMs": {
+        "angular": 426.828,
+        "components": 181.304,
+        "jquery": 231.571,
+        "generated": 115.695,
+        "runtime": 256.33,
+        "idle": 498.517,
+        "harness": 80.479
+      },
+      "activeSampledMs": 1292.207,
+      "activeSharePercent": {
+        "angular": 33.03,
+        "components": 14.03,
+        "jquery": 17.92,
+        "generated": 8.95,
+        "runtime": 19.84,
+        "idle": null,
+        "harness": 6.23
+      }
+    }
+  ]
+}
