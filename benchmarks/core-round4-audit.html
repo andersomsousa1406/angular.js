@@ -1,0 +1,92 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Date formats, class batching and validation audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  // Isolate class batching from deferred runner completion. Production runner
+  // behavior is covered by the unit suites; both variants use this same stub.
+  var injector = angular.injector(['ng', function($provide) {
+    $provide.value('$$AnimateRunner', function() { this.complete = angular.noop; });
+  }]);
+  var root = injector.get('$rootScope');
+  var compile = injector.get('$compile');
+  var date = injector.get('$filter')('date');
+  var animate = injector.get('$animate');
+  var q = injector.get('$q');
+  var locale = injector.get('$locale');
+  var results = {};
+  var outputs = [];
+  var sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  var value = new Date('2026-10-06T12:34:56.123Z');
+  ['yyyy-MM-dd', "EEEE, MMMM d, yyyy 'at' HH:mm:ss.sss Z", 'mediumDate'].forEach(function(format, index) {
+    bench('date' + index, 10000, function() { return date(value, format, '+0300'); });
+  });
+  var formats = ['yyyy-MM-dd', "yyyy '' MM 'literal' dd", 'EEE MMM yyyy G ww HH:mm:ss.sss Z',
+    'mediumDate', 'yyyy-MM-ddTHH:mm:ss', "'unterminated", ''];
+  for (var i = 0; i < 30; i++) formats.push('yyyy' + " 'case " + i + "' " + 'MM/dd');
+  formats.forEach(function(format) {
+    [-86400000, 0, 1000000000000, value.getTime()].forEach(function(timestamp) {
+      ['+0300', '-0530', 'UTC'].forEach(function(zone) { outputs.push(date(timestamp, format, zone)); });
+    });
+  });
+  var original = locale.DATETIME_FORMATS.mediumDate;
+  locale.DATETIME_FORMATS.mediumDate = 'yyyy/MM/dd';
+  outputs.push(date(value, 'mediumDate', 'UTC'));
+  locale.DATETIME_FORMATS.mediumDate = original;
+
+  var element = angular.element('<div></div>');
+  [1, 500].forEach(function(repetitions) {
+    bench('animation' + repetitions, repetitions === 1 ? 1000 : 100, function() {
+      for (var j = 0; j < repetitions; j++) {
+        animate.addClass(element, 'temporary');
+        animate.removeClass(element, 'temporary');
+      }
+      animate.addClass(element, 'final');
+      root.$digest();
+      return element.attr('class');
+    });
+    outputs.push(element.attr('class'));
+  });
+  element.remove();
+
+  var scope = root.$new();
+  scope.model = 'valid';
+  var input = compile('<input ng-model="model">')(scope);
+  scope.$digest();
+  var ctrl = input.controller('ngModel');
+  ctrl.$validators.custom = function(model) { return model === 'valid'; };
+  var completed = 0;
+  function done(valid) { if (valid) completed++; }
+  bench('validationSync', 50000, function() { ctrl.$$runValidators('valid', 'valid', done); });
+  outputs.push(completed, ctrl.$valid, ctrl.$pending === undefined);
+  var asyncCompleted = 0;
+  ctrl.$asyncValidators.customAsync = function() { return q.when(true); };
+  bench('validationAsync', 1000, function() {
+    ctrl.$$runValidators('valid', 'valid', function(valid) { if (valid) asyncCompleted++; });
+    scope.$digest();
+  });
+  outputs.push(asyncCompleted, ctrl.$valid, ctrl.$pending === undefined);
+  input.remove();
+  scope.$destroy();
+  results.outputs = outputs;
+  results.sink = sink;
+  return results;
+};
+</script>

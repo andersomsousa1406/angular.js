@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngModel:** allocate the async validation promise list on demand, preserving
+  synchronous completion when no async validators run and existing pending rules.
+
 - **$animate (core queue):** enqueue each element once per pending class batch,
   preserving merged class changes and first-enqueue order.
 

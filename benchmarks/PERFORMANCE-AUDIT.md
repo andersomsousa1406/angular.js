@@ -857,3 +857,19 @@ Runners reais e timing continuam cobertos pelas 26.814 execucoes unitarias.
 Menos referencias repetidas enquanto a fila esta pendente; nenhuma reducao
 numerica de heap medida. Build, lint e estados finais diferenciais aprovados.
 Ver CORE-ROUND4-AUDIT.md.
+
+## ngModel: promises de validacao sob demanda (2026-10-06)
+
+O array validatorPromises e criado ao encontrar o primeiro validador async
+que retorna uma promise valida, depois de setValidity pending. A iteracao de
+validadores nao mudou: validadores adicionados pelo caminho sync continuam
+visiveis. Sem async, validationDone(true) continua sincrono; com async, $q.all
+e a protecao de runId continuam como antes. Teste cobre adicao/remocao dinamica,
+callback imediato/adiado e pending depois da conclusao.
+
+Chrome 154, quatro pares e 15 amostras: 50.000 validacoes sync
+99,45 -> 94,30 ms (5,2% menos tempo). Caso async 33,10 -> 31,00 ms tambem
+pode receber efeitos da fila de classes; nao atribuir apenas ao array lazy.
+Uma criacao de array vazio evitada por rodada sem async; nao afirmar economia
+numerica de heap. Build, 26.814 execucoes unitarias, lint e contagens/estados
+diferenciais aprovados. Procedimento em CORE-ROUND4-AUDIT.md.

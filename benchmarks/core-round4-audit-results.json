@@ -1,0 +1,136 @@
+{
+  "date": "2026-10-06",
+  "browser": "Chrome 154 / Windows",
+  "rounds": 4,
+  "samplesPerCase": 15,
+  "runnerCompletionStubbed": true,
+  "outputsEqual": true,
+  "results": {
+    "date0": {
+      "count": 10000,
+      "baselineMs": 64.5,
+      "candidateMs": 41.65,
+      "reductionPercent": 35.4,
+      "baselineRoundMediansMs": [
+        64.79999995231628,
+        63.30000019073486,
+        64.20000004768372,
+        64.90000009536743
+      ],
+      "candidateRoundMediansMs": [
+        42,
+        35.89999985694885,
+        43.60000014305115,
+        41.30000019073486
+      ]
+    },
+    "date1": {
+      "count": 10000,
+      "baselineMs": 198.2,
+      "candidateMs": 121.3,
+      "reductionPercent": 38.8,
+      "baselineRoundMediansMs": [
+        195.5,
+        185,
+        202.29999995231628,
+        200.90000009536743
+      ],
+      "candidateRoundMediansMs": [
+        118.20000004768372,
+        116.29999995231628,
+        128.60000014305115,
+        124.40000009536743
+      ]
+    },
+    "date2": {
+      "count": 10000,
+      "baselineMs": 70.8,
+      "candidateMs": 44.4,
+      "reductionPercent": 37.3,
+      "baselineRoundMediansMs": [
+        71.09999990463257,
+        69.40000009536743,
+        70.79999995231628,
+        70.79999995231628
+      ],
+      "candidateRoundMediansMs": [
+        43.40000009536743,
+        45.40000009536743,
+        52.700000047683716,
+        41.89999985694885
+      ]
+    },
+    "animation1": {
+      "count": 1000,
+      "baselineMs": 9.35,
+      "candidateMs": 8.25,
+      "reductionPercent": 11.8,
+      "baselineRoundMediansMs": [
+        8.799999952316284,
+        9.700000047683716,
+        10.400000095367432,
+        9
+      ],
+      "candidateRoundMediansMs": [
+        7.400000095367432,
+        8.5,
+        9.899999856948853,
+        8
+      ]
+    },
+    "animation500": {
+      "count": 100,
+      "baselineMs": 31.95,
+      "candidateMs": 21.9,
+      "reductionPercent": 31.5,
+      "baselineRoundMediansMs": [
+        30,
+        37.299999952316284,
+        29.800000190734863,
+        33.90000009536743
+      ],
+      "candidateRoundMediansMs": [
+        20.700000047683716,
+        20.90000009536743,
+        24.300000190734863,
+        22.90000009536743
+      ]
+    },
+    "validationSync": {
+      "count": 50000,
+      "baselineMs": 99.45,
+      "candidateMs": 94.3,
+      "reductionPercent": 5.2,
+      "baselineRoundMediansMs": [
+        96.79999995231628,
+        98,
+        105.89999985694885,
+        100.90000009536743
+      ],
+      "candidateRoundMediansMs": [
+        92.89999985694885,
+        94.40000009536743,
+        108.5,
+        94.20000004768372
+      ]
+    },
+    "validationAsync": {
+      "count": 1000,
+      "baselineMs": 33.1,
+      "candidateMs": 31.0,
+      "reductionPercent": 6.3,
+      "baselineRoundMediansMs": [
+        34.09999990463257,
+        32.299999952316284,
+        31.199999809265137,
+        33.89999985694885
+      ],
+      "candidateRoundMediansMs": [
+        30.899999856948853,
+        30.300000190734863,
+        31.299999952316284,
+        31.09999990463257
+      ]
+    }
+  }
+}

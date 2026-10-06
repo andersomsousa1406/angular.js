@@ -653,7 +653,7 @@ NgModelController.prototype = {
     }
 
     function processAsyncValidators() {
-      var validatorPromises = [];
+      var validatorPromises;
       var allValid = true;
       forEach(that.$asyncValidators, function(validator, name) {
         var promise = validator(modelValue, viewValue);
@@ -662,6 +662,7 @@ NgModelController.prototype = {
             'Expected asynchronous validator to return a promise but got \'{0}\' instead.', promise);
         }
         setValidity(name, undefined);
+        if (!validatorPromises) validatorPromises = [];
         validatorPromises.push(promise.then(function() {
           setValidity(name, true);
         }, function() {
@@ -669,7 +670,7 @@ NgModelController.prototype = {
           setValidity(name, false);
         }));
       });
-      if (!validatorPromises.length) {
+      if (!validatorPromises) {
         validationDone(true);
       } else {
         that.$$q.all(validatorPromises).then(function() {

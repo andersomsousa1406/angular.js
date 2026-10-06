@@ -37,6 +37,31 @@ describe('ngModel', function() {
     });
 
 
+    it('should preserve completion timing when sync validators register async validators', inject(function($q) {
+      var deferred = $q.defer();
+      var registerAsync = false;
+      var completed = [];
+      ctrl.$$parserValid = true;
+      ctrl.$validators.register = function() {
+        if (registerAsync) ctrl.$asyncValidators.added = function() { return deferred.promise; };
+        return true;
+      };
+      ctrl.$$runValidators('value', 'value', function(valid) { completed.push(valid); });
+      expect(completed).toEqual([true]);
+      registerAsync = true;
+      ctrl.$$runValidators('value', 'value', function(valid) { completed.push(valid); });
+      expect(completed).toEqual([true]);
+      expect(ctrl.$pending.added).toBe(true);
+      deferred.resolve();
+      scope.$digest();
+      expect(completed).toEqual([true, true]);
+      registerAsync = false;
+      delete ctrl.$asyncValidators.added;
+      ctrl.$$runValidators('value', 'value', function(valid) { completed.push(valid); });
+      expect(completed).toEqual([true, true, true]);
+      expect(ctrl.$pending).toBeUndefined();
+    }));
+
     it('should init the properties', function() {
       expect(ctrl.$untouched).toBe(true);
       expect(ctrl.$touched).toBe(false);
