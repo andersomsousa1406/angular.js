@@ -3678,6 +3678,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
         $rootElement, childTranscludeFn, preLinkFns, postLinkFns, previousCompileContext) {
       var linkQueue = [],
           linkQueuePosition = 0,
+          templateFailed = false,
           afterTemplateNodeLinkFn,
           afterTemplateChildLinkFn,
           beforeTemplateCompileNode = $compileNode[0],
@@ -3778,6 +3779,8 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
           }
           linkQueue = null;
         }).catch(function(error) {
+          templateFailed = true;
+          linkQueue = null;
           if (isError(error)) {
             $exceptionHandler(error);
           }
@@ -3785,7 +3788,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
 
       return function delayedNodeLinkFn(ignoreChildLinkFn, scope, node, rootElement, boundTranscludeFn) {
         var childBoundTranscludeFn = boundTranscludeFn;
-        if (scope.$$destroyed) return;
+        if (scope.$$destroyed || templateFailed) return;
         if (linkQueue) {
           linkQueue.push(scope,
                          node,

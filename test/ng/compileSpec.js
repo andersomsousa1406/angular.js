@@ -3,6 +3,72 @@
 /* eslint-disable no-script-url */
 
 describe('$compile', function() {
+  describe('failed asynchronous templates', function() {
+    var deferred;
+    beforeEach(module(function($provide, $compileProvider, $exceptionHandlerProvider) {
+      $exceptionHandlerProvider.mode('log');
+      $provide.factory('$templateRequest', function($q) {
+        deferred = $q.defer();
+        return function() { return deferred.promise; };
+      });
+      $compileProvider.directive('failedTemplate', function() {
+        return {templateUrl: 'failed.html'};
+      });
+    }));
+
+    it('should leave queued and subsequent clones unlinked after rejection',
+      inject(function($compile, $rootScope, $exceptionHandler) {
+        var link = $compile('<div failed-template></div>');
+        var first = $rootScope.$new();
+        var clone = link(first, noop);
+        first.$destroy();
+        clone.remove();
+        deferred.reject('unavailable');
+        $rootScope.$digest();
+        var second = $rootScope.$new();
+        expect(function() { clone = link(second, noop); }).not.toThrow();
+        expect(clone.html()).toBe('');
+        expect(second.$$destroyed).toBe(false);
+        expect($exceptionHandler.errors).toEqual([]);
+        clone.remove();
+        second.$destroy();
+      }));
+
+    it('should report template processing errors and allow subsequent clones',
+      inject(function($compile, $rootScope, $exceptionHandler) {
+        var link = $compile('<div failed-template></div>');
+        var clone = link($rootScope.$new(), noop);
+        var error = new Error('template unavailable');
+        deferred.reject(error);
+        $rootScope.$digest();
+        expect($exceptionHandler.errors).toEqual([error]);
+        clone.remove();
+        expect(function() { clone = link($rootScope.$new(), noop); }).not.toThrow();
+        clone.remove();
+      }));
+
+    it('should allow reentrant linking from the exception handler after rejection', function() {
+      var link;
+      var scope;
+      var clone;
+      var handler = jasmine.createSpy('handler').and.callFake(function() {
+        clone = link(scope, noop);
+      });
+      module(function($provide) { $provide.value('$exceptionHandler', handler); });
+      inject(function($compile, $rootScope) {
+        scope = $rootScope.$new();
+        link = $compile('<div failed-template></div>');
+        var error = new Error('unavailable');
+        deferred.reject(error);
+        $rootScope.$digest();
+        expect(handler).toHaveBeenCalledOnceWith(error);
+        expect(clone.html()).toBe('');
+        clone.remove();
+        scope.$destroy();
+      });
+    });
+  });
+
   describe('srcset policy coverage (CVE-2024-8372)', function() {
     beforeEach(module(function($compileProvider) {
       $compileProvider.imgSrcSanitizationTrustedUrlList(/^https:\/\/allowed\.example\//);
