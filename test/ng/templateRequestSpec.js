@@ -245,6 +245,26 @@ describe('$templateRequest', function() {
     expect($templateRequest.totalPendingRequests).toBe(0);
   }));
 
+  it('should restore the pending count when resource validation throws',
+    inject(function($templateRequest, $httpBackend) {
+      $httpBackend.expectGET('pending.html').respond('ok');
+      $templateRequest('pending.html');
+      expect(function() {
+        $templateRequest('https://blocked.example/template.html');
+      }).toThrow();
+      expect($templateRequest.totalPendingRequests).toBe(1);
+      $httpBackend.flush();
+      expect($templateRequest.totalPendingRequests).toBe(0);
+  }));
+
+  it('should rethrow the original synchronous HTTP error and restore the pending count',
+    inject(function($templateRequest, $http) {
+      var error = new Error('request setup failed');
+      spyOn($http, 'get').and.throwError(error);
+      expect(function() { $templateRequest('template.html'); }).toThrow(error);
+      expect($templateRequest.totalPendingRequests).toBe(0);
+  }));
+
   it('should not try to parse a response as JSON',
     inject(function($templateRequest, $httpBackend) {
       var spy = jasmine.createSpy('success');

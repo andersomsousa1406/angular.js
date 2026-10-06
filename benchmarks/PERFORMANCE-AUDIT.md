@@ -342,3 +342,31 @@ amostra para impedir que o cache esconda o custo da inferencia.
 comentarios e matches/grupos de diretivas. Suites finais: 26.621 testes aprovados.
 Nenhuma medicao de heap foi feita nesta rodada. Detalhes, fontes, compatibilidade
 SVG e itens sem mudanca em [FORK-MAINTENANCE.md](../FORK-MAINTENANCE.md).
+
+## Retencao no ciclo de vida (2026-10-06)
+
+`lifecycle-memory-audit.html` mede heap apos GC explicito no Chrome 154.
+Comparacao com o build anterior, em processos separados; valores em bytes:
+
+| Cenario | Antes | Depois |
+| --- | ---: | ---: |
+| Template rejeitado, 500 scopes destruidos com 5.000 valores cada | 10.364.952 | 171.032 |
+| Ultimo watcher, scope destruido com 1.000.000 valores | 4.045.862 | 45.470 |
+
+O primeiro modo mantem a funcao de link viva para detectar a fila retida apos
+falha. O segundo mantem o injector vivo, sem executar outro digest antes da
+medicao. Os deltas incluem infraestrutura, e variam entre execucoes; nao sao
+estimativas de economia para toda aplicacao. O campo `afterRelease` remove a
+referencia explicita ao link e executa outro digest, sem garantir que outras
+referencias internas ao compilador sejam liberadas.
+
+Filas rejeitadas agora sao liberadas antes de reportar o erro. Clones posteriores
+continuam sem link; scopes e DOM nao sao destruidos automaticamente. O ultimo
+watcher e liberado apenas ao terminar o digest ou atingir o limite de iteracoes,
+preservando a otimização de curto-circuito durante a travessia.
+
+Achado separado, pendente: destruir o proprio scope em seu listener pode causar
+TypeError na travessia quando o parent ja foi limpo. Nao incluido nesta rodada.
+
+Validacao desta rodada: 26.645 execucoes aprovadas nas suites jqLite, jQuery,
+modulos, ngAnimate e ngMock; ESLint dos arquivos alterados e git diff --check.

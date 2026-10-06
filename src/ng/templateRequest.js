@@ -72,29 +72,37 @@ function $TemplateRequestProvider() {
       function handleRequestFn(tpl, ignoreRequestError) {
         handleRequestFn.totalPendingRequests++;
 
-        // We consider the template cache holds only trusted templates, so
-        // there's no need to go through adding the template again to the trusted
-        // resources for keys that already are included in there. This also makes
-        // AngularJS accept any script directive, no matter its name. However, we
-        // still need to unwrap trusted types.
-        if (!isString(tpl) || isUndefined($templateCache.get(tpl))) {
-          tpl = $sce.getTrustedResourceUrl(tpl);
+        var request;
+        try {
+          // We consider the template cache holds only trusted templates, so
+          // there's no need to go through adding the template again to the trusted
+          // resources for keys that already are included in there. This also makes
+          // AngularJS accept any script directive, no matter its name. However, we
+          // still need to unwrap trusted types.
+          if (!isString(tpl) || isUndefined($templateCache.get(tpl))) {
+            tpl = $sce.getTrustedResourceUrl(tpl);
+          }
+
+          var transformResponse = $http.defaults && $http.defaults.transformResponse;
+
+          if (isArray(transformResponse)) {
+            transformResponse = transformResponse.filter(function(transformer) {
+              return transformer !== defaultHttpResponseTransform;
+            });
+          } else if (transformResponse === defaultHttpResponseTransform) {
+            transformResponse = null;
+          }
+
+          request = $http.get(tpl, extend({
+              cache: $templateCache,
+              transformResponse: transformResponse
+            }, httpOptions));
+        } catch (error) {
+          handleRequestFn.totalPendingRequests--;
+          throw error;
         }
 
-        var transformResponse = $http.defaults && $http.defaults.transformResponse;
-
-        if (isArray(transformResponse)) {
-          transformResponse = transformResponse.filter(function(transformer) {
-            return transformer !== defaultHttpResponseTransform;
-          });
-        } else if (transformResponse === defaultHttpResponseTransform) {
-          transformResponse = null;
-        }
-
-        return $http.get(tpl, extend({
-            cache: $templateCache,
-            transformResponse: transformResponse
-          }, httpOptions))
+        return request
           .finally(function() {
             handleRequestFn.totalPendingRequests--;
           })

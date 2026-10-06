@@ -6,6 +6,15 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$compile:** release queued template links after rejection, preserving error
+  reporting and ignoring subsequent links for the failed template.
+
+- **$rootScope:** release the last dirty watcher after digest completion and
+  iteration-limit errors, avoiding retention of destroyed scope data.
+
+- **$templateRequest:** restore totalPendingRequests when validation or HTTP
+  setup throws synchronously, preserving the original error.
+
 - **ngAnimate:** normalize animation-duration lists beginning with auto to numeric
   durations for time-driven CSS animations (CSS Animations Level 2).
 
