@@ -1101,6 +1101,25 @@ describe('ngAnimate $animateCss', function() {
           }
         }));
 
+        they('should cancel the stagger timer when the runner is $prop', ['cancel', 'end'], function(method) {
+          inject(function($animateCss, $document, $rootElement, $timeout) {
+            angular.element($document[0].body).append($rootElement);
+            var element = angular.element('<div></div>');
+            $rootElement.append(element);
+            var done = jasmine.createSpy('done');
+            var runner = $animateCss(element, {
+              addClass: 'red', duration: 5, stagger: 100, staggerIndex: 3, onDone: done
+            }).start();
+            triggerAnimationStartFrame();
+            spyOn($timeout, 'cancel').and.callThrough();
+            runner[method]();
+            expect($timeout.cancel).toHaveBeenCalledOnce();
+            expect(done).toHaveBeenCalledOnce();
+            expect(element).toHaveClass('red');
+            expect(function() { $timeout.verifyNoPendingTasks('$timeout'); }).not.toThrow();
+          });
+        });
+
         it('should only add/remove classes once the stagger timeout has passed',
           inject(function($animateCss, $document, $rootElement, $timeout) {
 

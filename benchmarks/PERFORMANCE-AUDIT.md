@@ -417,3 +417,22 @@ O benchmark Node `node benchmarks/raf-scheduler-audit.js [fonte-do-scheduler]`
 permite comparar fontes sem builds. Node 14, 50.000 lotes: 5.021,4 -> 12,5 ms;
 100.000 lotes: 17.821,8 -> 17,8 ms. Motores e harnesses diferentes produzem
 tempos muito diferentes; nao extrapolar estes numeros para FPS da aplicacao.
+
+## Timer de stagger apos cancelamento (2026-10-06)
+
+O fechamento de $animateCss nao cancelava o timer de inicio do stagger. A
+checagem animationClosed evitava animar mais tarde, mas o callback continuava
+retendo o elemento e estado capturado ate vencer o atraso. Agora end/cancel
+cancelam esse timer, e o inicio normal limpa a referencia ao handle.
+
+`animation-memory-audit.html`, Chrome 154 com GC explicito: um elemento removido
+com 1.000.000 valores, stagger de 600 segundos e indice 3, reteve 4.045.724 bytes
+antes e 44.157 depois do cancelamento. O injector permanece vivo; o runner e
+o elemento nao sao mantidos pelo harness. A fila de RAF e deterministica.
+
+Testes conferem ausencia de $timeout pendente apos end/cancel, classes finais e
+onDone executado uma vez. Os testes existentes cobrem inicio normal, pausas,
+stagger e timeout final. O fechamento ja remove listeners de fim e o timer
+final; os callbacks done do runner ja sao limpos apos resolucao. Nao limpar o
+host de runners mantidos pela aplicacao, pois isso mudaria chamadas posteriores
+de end/cancel/pause/resume. Nenhuma alegacao de eliminar toda retencao de DOM.

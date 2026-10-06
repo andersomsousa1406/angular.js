@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngAnimate:** cancel pending stagger-start timers when CSS animations end or
+  are canceled, releasing references to removed elements before the delay expires.
+
 - **ngAnimate:** drain animation waves with a cursor and compact pending queues,
   reducing copying while preserving frame order and quiet scheduling.
 

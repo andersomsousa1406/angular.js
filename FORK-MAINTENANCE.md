@@ -194,3 +194,25 @@ foi medida nesta rodada. Politicas de imagens mais estritas podem exigir ajustes
 na aplicacao consumidora; os demais leitores preservam o comportamento anterior.
 
 Fonte da lista: https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9
+
+## Digest e ciclo de vida das animacoes (2026-10-06)
+
+Correcoes proprias, sem atribuir equivalencia a patches NES:
+
+- $digest preserva a continuacao antes que $destroy remova os vinculos do scope
+  ativo ou ancestral; ignora watchers removidos e estabiliza scopes sobreviventes.
+- $$rAFScheduler consome lotes por cursor, limpa slots e compacta armazenamento;
+  reentrada e waitUntilQuiet mantiveram traces iguais em 100 cenarios comparativos.
+- $animateCss cancela o timeout de inicio de stagger em end/cancel. Antes, o
+  callback nao animava depois de fechado, mas mantinha elementos ate vencer o
+  atraso. Heap do caso sintetico: 4.045.724 -> 44.157 bytes apos remover o elemento.
+
+Auditoria de fechamento: listeners de fim e timeout final ja sao removidos;
+callbacks done ja sao esvaziados. Hosts de runners explicitamente mantidos pelo
+consumidor continuam acessiveis para preservar seus metodos. Isso nao demonstra
+ausencia de todas as retencoes ou vazamentos possiveis.
+
+Validacao: 26.689 execucoes aprovadas, suites de modulos repetidas apos ajuste do
+teste de drenagem; lint, whitespace e builds core/ngAnimate aprovados. Debug
+permanece habilitado e a frequencia de digest nao muda. Medicoes, limites e
+harnesses estao em benchmarks/PERFORMANCE-AUDIT.md.

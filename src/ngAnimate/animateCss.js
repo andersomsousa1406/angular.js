@@ -441,6 +441,7 @@ var $AnimateCssProvider = ['$animateProvider', /** @this */ function($animatePro
       var animationCompleted;
       var runner;
       var runnerHost;
+      var staggerTimer;
       var maxDelay;
       var maxDelayTime;
       var maxDuration;
@@ -690,6 +691,10 @@ var $AnimateCssProvider = ['$animateProvider', /** @this */ function($animatePro
         if (animationClosed || (animationCompleted && animationPaused)) return;
         animationClosed = true;
         animationPaused = false;
+        if (staggerTimer) {
+          $timeout.cancel(staggerTimer);
+          staggerTimer = null;
+        }
 
         if (preparationClasses && !options.$$skipPreparationClasses) {
           $$jqLite.removeClass(element, preparationClasses);
@@ -847,7 +852,7 @@ var $AnimateCssProvider = ['$animateProvider', /** @this */ function($animatePro
                             (timings.animationDuration && stagger.animationDuration === 0))
                          && Math.max(stagger.animationDelay, stagger.transitionDelay);
         if (maxStagger) {
-          $timeout(triggerAnimationStart,
+          staggerTimer = $timeout(triggerAnimationStart,
                    Math.floor(maxStagger * itemIndex * ONE_SECOND),
                    false);
         } else {
@@ -864,6 +869,7 @@ var $AnimateCssProvider = ['$animateProvider', /** @this */ function($animatePro
         };
 
         function triggerAnimationStart() {
+          staggerTimer = null;
           // just incase a stagger animation kicks in when the animation
           // itself was cancelled entirely
           if (animationClosed) return;
