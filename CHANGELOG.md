@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **filter:** cache the last normalized string expectation within one filter
+  call, preserving changing criteria, negation and custom comparators.
+
 - **$interpolate:** return an already converted primitive string directly for
   an expression without surrounding text, avoiding redundant array joining in
   direct evaluation and watched interpolation. Preserve SCE and conversion rules.

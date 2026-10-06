@@ -198,16 +198,16 @@ function createPredicateFn(expression, comparator, anyPropertyKey, matchAgainstA
       }
 
       actual = lowercase('' + actual);
-      // Cache only immutable primitive expectations, after converting actual.
+      // Cache only immutable string expectations, after converting actual.
       // Its custom toString may change the next expected value in the predicate.
-      if (typeof expected !== 'string' && typeof expected !== 'number' && typeof expected !== 'boolean') {
-        expected = lowercase('' + expected);
-      } else {
-        if (expected !== lastExpected || isUndefined(lastExpectedLowercase)) {
+      if (typeof expected === 'string') {
+        if (expected !== lastExpected) {
           lastExpectedLowercase = lowercase('' + expected);
           lastExpected = expected;
         }
         expected = lastExpectedLowercase;
+      } else {
+        expected = lowercase('' + expected);
       }
       return actual.indexOf(expected) !== -1;
     };

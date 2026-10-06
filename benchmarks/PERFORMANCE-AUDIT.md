@@ -720,3 +720,19 @@ um arquivo JSON numa pasta existente. Executar
 instancia; usar um perfil exclusivo de testes. Para isolar esta melhoria,
 criar baseline a partir do mesmo candidato substituindo os dois retornos novos
 por `return concat.join('');`, sem outras diferencas entre os arquivos.
+
+## Busca filter: expectativa textual (2026-10-06)
+
+Normalizacao da ultima string esperada reutilizada somente dentro de uma
+chamada do filtro. Conversao de actual permanece antes da normalizacao;
+criterios diferentes invalidam o cache. Outros tipos e comparadores customizados
+mantem o comportamento anterior. Teste cobre getter alterado pelo toString do
+valor atual e negacoes simples e duplas. A versao inicial de ce8caff66 foi
+refinada para cachear apenas strings, reduzindo verificacoes no caminho comum.
+
+Chrome 154, quatro pares alternados, 15 amostras e 5.000 registros: mediana
+das medianas para 30 buscas de texto 92,95 -> 76,15 ms (18,1% menos tempo);
+por campo 34,85 -> 33,15 ms; negacao 98,85 -> 90,85 ms. Tempos variam entre
+rodadas. Nao extrapolar para telas completas nem afirmar economia de heap.
+Build, 26.786 execucoes unitarias e lint aprovados. Harness e resultados
+completos em CORE-NEXT-AUDIT.md e core-next-audit-results.json.
