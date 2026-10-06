@@ -873,3 +873,19 @@ pode receber efeitos da fila de classes; nao atribuir apenas ao array lazy.
 Uma criacao de array vazio evitada por rodada sem async; nao afirmar economia
 numerica de heap. Build, 26.814 execucoes unitarias, lint e contagens/estados
 diferenciais aprovados. Procedimento em CORE-ROUND4-AUDIT.md.
+
+## number/currency: loops de digitos e grupos (2026-10-06)
+
+Propagacao de carry continua da direita para esquerda com a mesma aritmetica,
+usando loop em vez de reduceRight. Deteccao de zero percorre digitos internos
+e encerra no primeiro nao-zero. Decimais nao recebem um array vazio descartado.
+Grupos usam push/reverse no lugar de unshift, mantendo leituras de gSize/lgSize,
+splice e join. Teste cobre getters de agrupamento e lgSize zero; os testes
+existentes e 4.120 resultados diferenciais cobrem arredondamento e formatos.
+
+Chrome 154, quatro pares, 15 amostras de 50.000 chamadas: numeros pequenos
+62,50 -> 58,85 ms; grandes 125,95 -> 116,55 ms; currency 115,55 -> 107,20 ms.
+Reducao de tempo de 5,8% a 7,5% nesses casos. Build, 26.826 execucoes unitarias,
+lint e saidas diferenciais aprovados. Nao afirmar economia numerica de heap ou
+ganho total de tela. Arrays de grupos/splice continuam existindo.
+Ver CORE-ROUND5-AUDIT.md.

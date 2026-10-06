@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **number/currency:** use direct digit loops for carry and zero detection,
+  build groups with push/reverse and avoid an unused empty decimals array.
+
 - **ngModel:** allocate the async validation promise list on demand, preserving
   synchronous completion when no async validators run and existing pending rules.
 

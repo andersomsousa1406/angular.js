@@ -260,11 +260,12 @@ function roundNumber(parsedNumber, fractionSize, minFrac, maxFrac) {
 
 
     // Do any carrying, e.g. a digit was rounded up to 10
-    var carry = digits.reduceRight(function(carry, d, i, digits) {
-      d = d + carry;
-      digits[i] = d % 10;
-      return Math.floor(d / 10);
-    }, 0);
+    var carry = 0;
+    for (var digitIndex = digits.length - 1; digitIndex >= 0; digitIndex--) {
+      var digitWithCarry = digits[digitIndex] + carry;
+      digits[digitIndex] = digitWithCarry % 10;
+      carry = Math.floor(digitWithCarry / 10);
+    }
     if (carry) {
       digits.unshift(carry);
       parsedNumber.i++;
@@ -309,8 +310,14 @@ function formatNumber(number, pattern, groupSep, decimalSep, fractionSize) {
     var digits = parsedNumber.d;
     var integerLen = parsedNumber.i;
     var exponent = parsedNumber.e;
-    var decimals = [];
-    isZero = digits.reduce(function(isZero, d) { return isZero && !d; }, true);
+    var decimals;
+    isZero = true;
+    for (var zeroIndex = 0; zeroIndex < digits.length; zeroIndex++) {
+      if (digits[zeroIndex]) {
+        isZero = false;
+        break;
+      }
+    }
 
     // pad zeros for small numbers
     while (integerLen < 0) {
@@ -329,15 +336,15 @@ function formatNumber(number, pattern, groupSep, decimalSep, fractionSize) {
     // format the integer digits with grouping separators
     var groups = [];
     if (digits.length >= pattern.lgSize) {
-      groups.unshift(digits.splice(-pattern.lgSize, digits.length).join(''));
+      groups.push(digits.splice(-pattern.lgSize, digits.length).join(''));
     }
     while (digits.length > pattern.gSize) {
-      groups.unshift(digits.splice(-pattern.gSize, digits.length).join(''));
+      groups.push(digits.splice(-pattern.gSize, digits.length).join(''));
     }
     if (digits.length) {
-      groups.unshift(digits.join(''));
+      groups.push(digits.join(''));
     }
-    formattedText = groups.join(groupSep);
+    formattedText = groups.reverse().join(groupSep);
 
     // append the decimal digits
     if (decimals.length) {

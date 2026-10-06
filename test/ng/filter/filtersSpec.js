@@ -33,6 +33,20 @@ describe('filters', function() {
                   lgSize: 3 };
     });
 
+    it('should preserve grouping configuration read order and zero-sized last groups', function() {
+      var reads = [];
+      Object.defineProperty(pattern, 'gSize', {
+        configurable: true, get: function() { reads.push('regular'); return 3; }
+      });
+      Object.defineProperty(pattern, 'lgSize', {
+        configurable: true, get: function() { reads.push('last'); return 3; }
+      });
+      expect(formatNumber(1234567.89, pattern, ',', '.', 2)).toBe('1,234,567.89');
+      expect(reads).toEqual(['last', 'last', 'regular', 'regular', 'regular']);
+      Object.defineProperty(pattern, 'lgSize', {configurable: true, value: 0});
+      expect(formatNumber(1234567.89, pattern, ',', '.', 2)).toBe('1234567.89');
+    });
+
     it('should format according to different patterns', function() {
       pattern.gSize = 2;
       var num = formatNumber(99, pattern, ',', '.');
