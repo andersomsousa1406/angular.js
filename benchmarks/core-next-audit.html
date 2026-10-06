@@ -1,0 +1,63 @@
+<!doctype html>
+<html ng-csp="no-unsafe-eval">
+<meta charset="utf-8">
+<title>Filter, sorting and CSP interpreter audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var filter = injector.get('$filter')('filter');
+  var orderBy = injector.get('$filter')('orderBy');
+  var parse = injector.get('$parse');
+  var results = {};
+  var rows = [];
+  var sink;
+  for (var i = 0; i < 5000; i++) {
+    rows.push({id: i, name: 'Name ' + i, group: 'Group ' + (i % 13), rank: i % 37});
+  }
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action();
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var n = 0; n < count; n++) sink = action();
+      samples.push(performance.now() - start);
+    }
+    results[name] = {
+      count: count,
+      medianMs: samples.slice().sort(function(a, b) { return a - b; })[7],
+      samples: samples
+    };
+  }
+  bench('filterText', 30, function() { return filter(rows, 'GROUP 12'); });
+  bench('filterField', 30, function() { return filter(rows, {name: 'NAME 12'}); });
+  bench('filterNegated', 30, function() { return filter(rows, '!GROUP 12'); });
+  bench('sortMultiple', 20, function() { return orderBy(rows, ['group', '-rank', 'name']); });
+  bench('sortSingleControl', 20, function() { return orderBy(rows, 'name'); });
+  var scope = {a: 1, b: 2, c: 3, d: 4, receiver: {fn: function() {
+    var sum = 0;
+    for (var j = 0; j < arguments.length; j++) sum += arguments[j];
+    return sum;
+  }}};
+  var expressions = ['receiver.fn()', 'receiver.fn(a)', 'receiver.fn(a,b)',
+    'receiver.fn(a,b,c,d,a,b,c,d)', 'a | limitTo:1'];
+  expressions.forEach(function(expression, index) {
+    var fn = parse(expression);
+    bench('csp' + index, 200000, function() { return fn(scope); });
+  });
+  results.outputs = [
+    filter(rows, 'GROUP 12').map(function(row) { return row.id; }),
+    filter(rows, {name: 'NAME 12'}).map(function(row) { return row.id; }),
+    filter(rows, '!GROUP 12').map(function(row) { return row.id; }),
+    orderBy(rows, ['group', '-rank', 'name']).map(function(row) { return row.id; }),
+    expressions.map(function(expression) { return parse(expression)(scope); })
+  ];
+  results.sink = sink;
+  return results;
+};
+</script>
+</html>

@@ -597,15 +597,20 @@ function orderByFilter($parse) {
     }
 
     function getComparisonObject(value, index) {
+      var predicateValues = new Array(predicates.length);
+      for (var i = 0, length = predicates.length; i < length; i++) {
+        // Like map, preserve sparse predicate slots, including inherited slots.
+        if (i in predicates) {
+          predicateValues[i] = getPredicateValue(predicates[i].get(value), index);
+        }
+      }
       // NOTE: We are adding an extra `tieBreaker` value based on the element's index.
       // This will be used to keep the sort stable when none of the input predicates can
       // distinguish between two elements.
       return {
         value: value,
         tieBreaker: {value: index, type: 'number', index: index},
-        predicateValues: predicates.map(function(predicate) {
-          return getPredicateValue(predicate.get(value), index);
-        })
+        predicateValues: predicateValues
       };
     }
 

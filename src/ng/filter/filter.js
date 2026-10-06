@@ -181,6 +181,8 @@ function createPredicateFn(expression, comparator, anyPropertyKey, matchAgainstA
   if (comparator === true) {
     comparator = equals;
   } else if (!isFunction(comparator)) {
+    var lastExpected;
+    var lastExpectedLowercase;
     comparator = function(actual, expected) {
       if (isUndefined(actual)) {
         // No substring matching against `undefined`
@@ -196,7 +198,17 @@ function createPredicateFn(expression, comparator, anyPropertyKey, matchAgainstA
       }
 
       actual = lowercase('' + actual);
-      expected = lowercase('' + expected);
+      // Cache only immutable primitive expectations, after converting actual.
+      // Its custom toString may change the next expected value in the predicate.
+      if (typeof expected !== 'string' && typeof expected !== 'number' && typeof expected !== 'boolean') {
+        expected = lowercase('' + expected);
+      } else {
+        if (expected !== lastExpected || isUndefined(lastExpectedLowercase)) {
+          lastExpectedLowercase = lowercase('' + expected);
+          lastExpected = expected;
+        }
+        expected = lastExpectedLowercase;
+      }
       return actual.indexOf(expected) !== -1;
     };
   }

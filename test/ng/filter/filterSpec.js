@@ -28,6 +28,20 @@ describe('Filter: filter', function() {
     expect(filter(items, 'I don\'t exist').length).toBe(0);
   });
 
+  it('should observe expected getters changed by actual string conversion', function() {
+    var expected = 'FIRST';
+    var expression = {};
+    Object.defineProperty(expression, 'name', {
+      enumerable: true,
+      get: function() { return expected; }
+    });
+    var first = {name: {toString: function() { expected = 'SECOND'; return 'first'; }}};
+    var second = {name: 'second'};
+    expect(filter([first, second], expression)).toEqual([first, second]);
+    expect(filter(['First', 'second'], '!FIRST')).toEqual(['second']);
+    expect(filter(['First', 'second'], '!!FIRST')).toEqual(['First']);
+  });
+
 
   it('should not read $ properties', function() {
     expect(''.charAt(0)).toBe(''); // assumption

@@ -1388,9 +1388,9 @@ ASTInterpreter.prototype = {
       if (!ast.filter) right = this.recurse(ast.callee, true);
       return ast.filter ?
         function(scope, locals, assign, inputs) {
-          var values = [];
+          var values = new Array(args.length);
           for (var i = 0; i < args.length; ++i) {
-            values.push(args[i](scope, locals, assign, inputs));
+            values[i] = args[i](scope, locals, assign, inputs);
           }
           var value = right.apply(undefined, values, inputs);
           return context ? {context: undefined, name: undefined, value: value} : value;
@@ -1399,9 +1399,9 @@ ASTInterpreter.prototype = {
           var rhs = right(scope, locals, assign, inputs);
           var value;
           if (rhs.value != null) {
-            var values = [];
+            var values = new Array(args.length);
             for (var i = 0; i < args.length; ++i) {
-              values.push(args[i](scope, locals, assign, inputs));
+              values[i] = args[i](scope, locals, assign, inputs);
             }
             value = rhs.value.apply(rhs.context, values);
           }

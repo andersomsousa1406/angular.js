@@ -8,6 +8,20 @@ describe('Filter: orderBy', function() {
 
 
   describe('(Arrays)', function() {
+    it('should evaluate multiple predicates in item order and allow reentrant sorting', function() {
+      var calls = [];
+      var values = [{id: 1, a: 2, b: 0}, {id: 2, a: 1, b: 2}, {id: 3, a: 1, b: 1}];
+      var result = orderBy(values, [function(value) {
+        calls.push('a' + value.id);
+        expect(orderBy([2, 1], ['+', '-'])).toEqual([1, 2]);
+        return value.a;
+      }, function(value) {
+        calls.push('b' + value.id);
+        return value.b;
+      }]);
+      expect(calls).toEqual(['a1', 'b1', 'a2', 'b2', 'a3', 'b3']);
+      expect(result).toEqual([values[2], values[1], values[0]]);
+    });
     it('should keep sparse predicates valid when sorting a single value', function() {
       expect(orderBy([3], new Array(1))).toEqual([3]);
     });

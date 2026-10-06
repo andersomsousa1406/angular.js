@@ -1909,6 +1909,29 @@ describe('parser', function() {
         expect(scope.$eval('1/2*3')).toEqual(1 / 2 * 3);
       });
 
+      it('should preserve arguments and receiver during reentrant calls', inject(function($parse) {
+        var expression = $parse('receiver.fn(first(), second())');
+        var nested = false;
+        var calls = [];
+        scope.receiver = {fn: function(a, b) {
+          expect(this).toBe(scope.receiver);
+          return [a, b];
+        }};
+        scope.first = function() {
+          calls.push('first');
+          if (!nested) {
+            nested = true;
+            expect(expression(scope)).toEqual(['inner', 'second']);
+            nested = false;
+            return 'outer';
+          }
+          return 'inner';
+        };
+        scope.second = function() { calls.push('second'); return 'second'; };
+        expect(expression(scope)).toEqual(['outer', 'second']);
+        expect(calls).toEqual(['first', 'first', 'second', 'second']);
+      }));
+
       it('should parse unary', function() {
         expect(scope.$eval('+1')).toEqual(+1);
         expect(scope.$eval('-1')).toEqual(-1);
