@@ -147,3 +147,50 @@ resolucao de aproximadamente 0,1 ms depois. Nao mede compilacao de uma tela real
 Suites conjuntas: 26.621 testes aprovados; lint e whitespace aprovados.
 
 Fonte de triagem: https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9
+
+
+## CSS Animations Level 2
+
+`animation-duration` pode come?ar com `auto`. O codigo anterior deixava a lista
+como string e perdia duracoes numericas posteriores, por exemplo `auto, 2s`.
+Agora sempre normaliza animationDuration usando o leitor de tempos existente;
+`auto` equivale a zero em animacoes dirigidas pelo tempo. Testes cobrem auto
+isolado, listas mistas e duracoes numericas anteriores. Nao introduzir suporte
+completo a scroll timelines, nem mudar transitionProperty/animationName.
+Fonte: https://www.w3.org/TR/css-animations-2/#animation-duration
+
+## Resultado da triagem NES em 2026-10-06
+
+Esta rodada investigou os itens identificados nos registros publicos citados
+na conversa, com implementacoes proprias, sem copiar patches comerciais.
+
+| Item | Resultado |
+| --- | --- |
+| SVG no compile, CVE-2025-0716 | Corrigido, incluindo RESOURCE_URL confiado |
+| SVG no sanitize, CVE-2025-2336 | Corrigido, sem habilitar SVG por padrao |
+| linky, CVE-2025-4690 | Leitor linear e regressao |
+| Comentarios no injector | Busca linear e regressao |
+| Diretivas em comentarios | Sobreposicao de whitespace removida |
+| ngAnimate / animation-duration auto | Normalizacao de listas mistas corrigida |
+| srcset, CVE-2024-8372 | Coberto pelas correcoes existentes; matriz de oito caminhos aprovada |
+| srcset, CVE-2024-8373 / CVE-2024-21490 | Correcoes existentes mantidas; leitores ja otimizados |
+| SCE, CVE-2026-11998 | Correcao existente mantida |
+| Barras finais do ngMocks | Sem alteracao: routeToRegExp escapa cada barra antes do regex; nao ha run longo de barras consecutivas no padrao |
+| Vazamento de memoria NES | Nenhum item especifico identificado no changelog publico consultado; sem alegar reproduzir um patch nao identificado |
+
+Validacao final: 26.621 execucoes aprovadas nas sete suites ChromeHeadless.
+Comparacao diferencial: 100.000 entradas para links, remocao de comentarios e
+matches de diretivas em comentarios, com resultados iguais aos anteriores.
+O harness local esta em `tmp/nes-differential.js` (nao versionado). O benchmark
+versionado `benchmarks/nes-audit.html` passou em 11 checks; a copia do build
+anterior falhou em oito checks de politica SVG. Lint dos arquivos modificados
+aprovado com a regra de terminadores de linha desativada no Windows; whitespace
+aprovado. Core, sanitizer e animate regenerados com debug habilitado.
+
+Limites: validacao no Chrome 154, sem certificacao NES e sem demonstrar eliminacao
+de todas as vulnerabilidades conhecidas. As CVEs do inventario inicial que nao
+constam como corrigidas acima continuam pendentes de triagem. Memoria total nao
+foi medida nesta rodada. Politicas de imagens mais estritas podem exigir ajustes
+na aplicacao consumidora; os demais leitores preservam o comportamento anterior.
+
+Fonte da lista: https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9

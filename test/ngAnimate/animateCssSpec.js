@@ -1,5 +1,21 @@
 'use strict';
 
+/* global computeCssStyles */
+describe('CSS animation duration normalization', function() {
+  it('should normalize auto and mixed durations to numeric seconds', function() {
+    var element = angular.element('<div></div>');
+    function duration(value) {
+      return computeCssStyles({getComputedStyle: function() { return {animationDuration: value}; }},
+        element, {animationDuration: 'animationDuration'}).animationDuration;
+    }
+    expect(duration('auto')).toBe(null);
+    expect(duration('auto, 2s')).toBe(2);
+    expect(duration('3s, auto')).toBe(3);
+    expect(duration('0s')).toBe(null);
+    expect(duration('1s, 2s')).toBe(2);
+  });
+});
+
 describe('ngAnimate $animateCss', function() {
 
   beforeEach(module('ngAnimate'));

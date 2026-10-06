@@ -256,8 +256,9 @@ function computeCssStyles($window, element, properties) {
     if (val) {
       var c = val.charAt(0);
 
-      // only numerical-based values have a negative sign or digit as the first value
-      if (c === '-' || c === '+' || c >= 0) {
+      // CSS Animations Level 2 also permits auto in animation-duration lists.
+      // Other numerical values start with a negative sign or digit.
+      if (c === '-' || c === '+' || c >= 0 || actualStyleName === 'animationDuration') {
         val = parseMaxTime(val);
       }
 

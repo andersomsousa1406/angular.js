@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **ngAnimate:** normalize animation-duration lists beginning with auto to numeric
+  durations for time-driven CSS animations (CSS Animations Level 2).
+
 - **$compile:** prevent whitespace overlap in comment directive matching while
   preserving captured directive names and values.
 

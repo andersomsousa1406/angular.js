@@ -315,3 +315,30 @@ visitados, flags retornadas e estado final das listas. Harness e snapshots locai
 em `tmp/events-differential.html` (nao versionados). Testes novos cobrem trechos
 cancelados e reentrada nos dois metodos. Validacao conjunta: 26.520 testes em sete
 suites e 6.253 na repeticao final jqLite, lint e whitespace aprovados.
+
+
+## Investigacao de itens publicos do NES
+
+Resultados independentes, sem patches comerciais. Gerar core/sanitize/animate e
+abrir `nes-audit.html`. Alem dos 11 checks SVG/debug, mede tres entradas adversas
+em tamanhos 1.000/2.000/4.000, mediana de tres amostras apos aquecimento, Chrome 154.
+Snapshot anterior salvo antes das alteracoes; fontes de ambos os builds iguais
+exceto pelas correcoes desta rodada.
+
+| Carga de tamanho 4.000 | Antes | Depois |
+| --- | ---: | ---: |
+| linky, letras sem @ | 10,0 ms | 0,6 ms |
+| annotate, marcadores /*a sem fechamento em string | 62,8 ms | cerca de 0,1 ms |
+| compile, espacos antes de valor multiline em comentario | 6,7 ms | abaixo de cerca de 0,1 ms |
+
+O texto permanece sem links; a dependencia inferida permanece a mesma e o
+comentario multiline continua invalido. Os resultados representam casos de
+crescimento excessivo, nao velocidade de templates comuns. Valores perto da
+resolucao do relogio nao devem ser usados para calcular fatores de aceleracao.
+Nao medir criacao de funcao no tempo de annotate; remover $inject antes de cada
+amostra para impedir que o cache esconda o custo da inferencia.
+
+100.000 entradas diferenciais confirmaram links/posicoes/tipos, texto sem
+comentarios e matches/grupos de diretivas. Suites finais: 26.621 testes aprovados.
+Nenhuma medicao de heap foi feita nesta rodada. Detalhes, fontes, compatibilidade
+SVG e itens sem mudanca em [FORK-MAINTENANCE.md](../FORK-MAINTENANCE.md).
