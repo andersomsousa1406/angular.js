@@ -1,9 +1,23 @@
 'use strict';
-/* global tokenDifference: false */
+/* global tokenDifference: false, directiveNormalize: false */
 
 /* eslint-disable no-script-url */
 
 describe('$compile', function() {
+  it('should preserve directive prefixes, separator offsets and boxed strings', function() {
+    expect(directiveNormalize('title')).toBe('title');
+    expect(directiveNormalize('ngModel')).toBe('ngModel');
+    expect(directiveNormalize('data-ng-model')).toBe('ngModel');
+    expect(directiveNormalize('DATA:ng_model')).toBe('ngModel');
+    expect(directiveNormalize('x_ng_model')).toBe('ngModel');
+    expect(directiveNormalize('data--foo')).toBe('foo');
+    expect(directiveNormalize('-foo')).toBe('foo');
+    expect(directiveNormalize('ng-')).toBe('ng-');
+    // eslint-disable-next-line no-new-wrappers
+    expect(directiveNormalize(new String('ng-model'))).toBe('ngModel');
+    expect(function() { directiveNormalize(null); }).toThrow();
+    expect(function() { directiveNormalize(42); }).toThrow();
+  });
   it('should preserve token difference order, duplicates and whitespace for large lists', function() {
     var first = ['__proto__', 'keep', 'keep', 'constructor'];
     var second = [];

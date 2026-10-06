@@ -4309,17 +4309,27 @@ SimpleChange.prototype.isFirstChange = function() { return this.previousValue ==
 
 var PREFIX_REGEXP = /^((?:x|data)[:\-_])/i;
 var SPECIAL_CHARS_REGEXP = /[:\-_]+(.)/g;
+var DIRECTIVE_SEPARATOR_REGEXP = /[:\-_]/;
 
 /**
  * Converts all accepted directives format into proper directive name.
  * @param name Name to normalize
  */
 function directiveNormalize(name) {
+  if (isString(name)) {
+    if (!DIRECTIVE_SEPARATOR_REGEXP.test(name)) return name;
+    var first = name.charAt(0);
+    if (first !== 'x' && first !== 'X' && first !== 'd' && first !== 'D') {
+      return name.replace(SPECIAL_CHARS_REGEXP, directiveNormalizeLetter);
+    }
+  }
   return name
     .replace(PREFIX_REGEXP, '')
-    .replace(SPECIAL_CHARS_REGEXP, function(_, letter, offset) {
-      return offset ? letter.toUpperCase() : letter;
-    });
+    .replace(SPECIAL_CHARS_REGEXP, directiveNormalizeLetter);
+}
+
+function directiveNormalizeLetter(_, letter, offset) {
+  return offset ? letter.toUpperCase() : letter;
 }
 
 /**

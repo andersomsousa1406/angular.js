@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$compile:** skip normalization replacements for plain directive names,
+  skip impossible prefix removals and share the separator callback.
+
 - **$parse (CSP):** specialize property reads that do not need receiver metadata
   or path creation, preserving live getters, locals and null-safe access.
 
