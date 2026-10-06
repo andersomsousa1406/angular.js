@@ -62,6 +62,19 @@ describe('$compile', function() {
     }));
   });
 
+  it('should reject comment directives with long whitespace before multiline values', function() {
+    var called = false;
+    module(function($compileProvider) {
+      $compileProvider.directive('commentAudit', function() {
+        return {restrict: 'M', link: function() { called = true; }};
+      });
+    });
+    inject(function($compile, $rootScope) {
+      var comment = document.createComment('directive: comment-audit ' + new Array(50001).join(' ') + 'x\ny');
+      $compile(comment)($rootScope);
+      expect(called).toBe(false);
+    });
+  });
 
   it('should link queued template clones in order including reentrant additions', function() {
     var calls = [], template, pending = [], appended = false;

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$compile:** prevent whitespace overlap in comment directive matching while
+  preserving captured directive names and values.
+
 - **$injector:** strip comments with a linear scanner, retaining annotation results
   without repeatedly searching for absent block-comment terminators.
 

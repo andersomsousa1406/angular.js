@@ -131,3 +131,19 @@ Nenhum ganho foi demonstrado para toda criacao de injectors ou aplicacao.
 Suites conjuntas: 26.621 testes aprovados; lint e whitespace aprovados.
 
 Fonte de triagem: https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9
+
+
+## Diretivas em comentarios
+
+O regex permitia que o whitespace separador tambem fosse consumido pelo grupo
+que captura o valor, causando retrocesso excessivo em valores multiline invalidos.
+O grupo de valor agora comeca em um caractere nao whitespace ou fica vazio,
+preservando a escolha gulosa anterior do separador e a semantica de fim de linha.
+
+100.000 entradas deterministicas produziram os mesmos matches e grupos que o
+regex anterior. Um teste com 50.000 espacos confirma rejeicao de valor multiline.
+Chrome 154: 4.000 espacos, mediana de tres amostras, 6,7 ms antes e abaixo da
+resolucao de aproximadamente 0,1 ms depois. Nao mede compilacao de uma tela real.
+Suites conjuntas: 26.621 testes aprovados; lint e whitespace aprovados.
+
+Fonte de triagem: https://docs.herodevs.com/angularjs/release-notes/angularjs-1-9
