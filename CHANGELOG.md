@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$q.race:** construct the result promise directly, avoiding an unused
+  Deferred wrapper and notify callback while retaining settlement scheduling.
+
 - **filter:** scan nested arrays directly for the standard some method, preserving
   sparse slots, mutation, early matches and custom method behavior.
 

@@ -1011,3 +1011,14 @@ match final 72,75 -> 64,00 ms (12%); sem match 63,50 -> 52,65 ms (17,1%).
 Controle plano 14,75 -> 14,40 ms mostra variacao fora do caminho alvo.
 Quatro pares/15 amostras, outputs iguais. Build/lint e 26.870 execucoes unitarias
 aprovados. Nao medir heap ou ganho total de tela. Ver CORE-ROUND8-AUDIT.md.
+
+## q.race: resultado sem Deferred completo (2026-10-06)
+
+Criar Promise e callbacks resolve/reject diretamente. Evitar wrapper Deferred e
+callback notify inutilizado, mantendo when/then e scheduling por entrada.
+Teste cobre valor simples assincrono e thenable com resolucao/rejeicao repetida.
+Chrome 154: 50.000 races vazios 4,75 -> 3,80 ms (20%); 1.000 races com valores
+e digest 8,25 -> 8,75 ms (6,1% mais lento). Nao demonstrar ganho universal:
+mantido pela reducao conhecida de estruturas, sem medicao numerica de heap.
+Quatro pares/15 amostras, outputs iguais. Build/lint e 26.870 execucoes unitarias
+aprovados. Ver CORE-ROUND8-AUDIT.md para controles e procedimento.

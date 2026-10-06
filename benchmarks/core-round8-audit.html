@@ -1,0 +1,66 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Object graphs, nested filtering and promise race audit</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var root = injector.get('$rootScope'), q = injector.get('$q');
+  var filter = injector.get('$filter')('filter');
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  [16, 256, 2000].forEach(function(size) {
+    var graph = {items: []};
+    for (var i = 0; i < size; i++) graph.items.push({id: i, text: 'item ' + i});
+    graph.self = graph; graph.alias = graph.items[0];
+    graph.items[size - 1].first = graph.items[0];
+    bench('copy' + size, size === 16 ? 1000 : size === 256 ? 100 : 20,
+      function() { return angular.copy(graph); });
+    var copied = angular.copy(graph);
+    outputs.push([copied.items.length, copied.self === copied, copied.alias === copied.items[0],
+      copied.items[size - 1].first === copied.items[0], copied.items[0] !== graph.items[0]]);
+    var destination = {$$hashKey: 'keep'};
+    angular.copy(graph, destination);
+    outputs.push(destination.self === destination, destination.$$hashKey);
+  });
+  var flat = [], nested = [];
+  for (var n = 0; n < 100; n++) {
+    flat.push('alpha ' + n);
+    nested.push([[['alpha ' + n, 'beta', 'gamma', 'delta', 'match']]]);
+  }
+  bench('filterNestedHit', 1000, function() { return filter(nested, 'match'); });
+  bench('filterNestedMiss', 1000, function() { return filter(nested, 'absent'); });
+  bench('filterFlat', 1000, function() { return filter(flat, 'alpha'); });
+  outputs.push(filter(nested, 'match').length, filter(nested, 'absent').length, filter(flat, 'alpha').length);
+  var sparse = new Array(4); sparse[2] = 'match';
+  outputs.push(filter([sparse], 'match').length);
+  var custom = ['original']; custom.some = function(fn) { return fn('custom'); };
+  outputs.push(filter([custom], 'custom').length);
+  bench('raceEmpty', 50000, function() { return q.race([]); });
+  bench('raceValues', 1000, function() { var result = q.race([1, 2]); root.$digest(); return result.$$state.value; });
+  var observed = [];
+  q.race([1, 2]).then(function(value) { observed.push(value); });
+  outputs.push(observed.length); root.$digest(); outputs.push(observed.slice());
+  var first = q.defer(), second = q.defer();
+  q.race([first.promise, second.promise]).then(angular.noop, function(reason) { observed.push(reason); });
+  second.reject('rejected'); root.$digest(); first.resolve('late'); root.$digest();
+  outputs.push(observed.slice(), q.race([]).$$state.status);
+  results.outputs = outputs;
+  return results;
+};
+</script>

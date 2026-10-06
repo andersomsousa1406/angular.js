@@ -2019,6 +2019,19 @@ describe('q', function() {
   });
 
   describe('race (array)', function() {
+    it('should keep plain-value settlement asynchronous and ignore later thenable outcomes', function() {
+      var seen = [];
+      var thenable = {then: function(resolve, reject) {
+        resolve('thenable');
+        reject('later');
+      }};
+      var result = q.race(['plain', thenable]);
+      result.then(function(value) { seen.push(value); });
+      expect(seen).toEqual([]);
+      mockNextTick.flush();
+      expect(seen).toEqual(['plain']);
+      expect(result.$$state.status).toBe(1);
+    });
     it('should do nothing if given an empty array', function() {
       q.race([]).then(success(), error());
       expect(mockNextTick.queue.length).toBe(0);
