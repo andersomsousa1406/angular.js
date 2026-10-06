@@ -965,3 +965,14 @@ Chrome 154, quatro pares e 15 amostras de 1.000 chamadas: arrays de 10 valores
 Controle escalar 0,90 -> 0,90 ms. Array unitario tem outliers, sem ganho
 atribuivel a reutilizacao. Build/lint, 26.854 execucoes unitarias e saidas iguais.
 Nenhuma reducao numerica de heap medida. Ver CORE-ROUND7-AUDIT.md.
+
+## Parser CSP: varias instrucoes sem callback de iteracao (2026-10-06)
+
+ASTInterpreter percorre a lista privada de funcoes com loop e chamada por
+variavel local. Ordem, ultimo resultado, locals e chamada sem receptor continuam
+iguais. Teste roda com/sem CSP, cobre reentrada e interrompe na primeira excecao.
+Chrome 154, quatro pares e 15 amostras de 200.000 chamadas: tres statements
+21,50 -> 16,55 ms (23,0%). Controle uma expressao 1,10 -> 1,10 ms.
+Beneficio restrito ao interpretador CSP com varias instrucoes. Um callback de
+iteracao evitado por avaliacao, sem medicao numerica de heap. Build/lint,
+26.854 execucoes unitarias e saidas iguais. Ver CORE-ROUND7-AUDIT.md.

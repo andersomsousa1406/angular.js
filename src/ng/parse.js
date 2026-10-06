@@ -1326,9 +1326,10 @@ ASTInterpreter.prototype = {
              ast.body.length === 1 ? expressions[0] :
              function(scope, locals) {
                var lastValue;
-               forEach(expressions, function(exp) {
-                 lastValue = exp(scope, locals);
-               });
+               for (var i = 0; i < expressions.length; i++) {
+                 var expression = expressions[i];
+                 lastValue = expression(scope, locals);
+               }
                return lastValue;
              };
     if (assign) {

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse (CSP):** evaluate multiple statements with a direct loop, avoiding
+  a per-evaluation callback while preserving order, locals and exceptions.
+
 - **$httpParamSerializer:** reuse the encoded string key across array entries,
   preserving lazy encoding for empty/sparse arrays and the scalar path.
 

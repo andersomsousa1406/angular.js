@@ -2360,6 +2360,21 @@ describe('parser', function() {
         expect(scope.$eval(';;1;;')).toEqual(1);
       });
 
+      it('should preserve statement order, locals, reentry and early exceptions', inject(function($parse) {
+        var calls = [];
+        var fn = $parse('first(); second(); result');
+        var locals = {result: 'outer', first: function() {
+          calls.push('first');
+          expect(fn({}, {first: noop, second: noop, result: 'inner'})).toBe('inner');
+        }, second: function() { calls.push('second'); }};
+        expect(fn({}, locals)).toBe('outer');
+        expect(calls).toEqual(['first', 'second']);
+        calls.length = 0;
+        locals.first = function() { throw new Error('stop'); };
+        expect(function() { fn({}, locals); }).toThrowError('stop');
+        expect(calls).toEqual([]);
+      }));
+
       it('should evaluate object methods in correct context (this)', function() {
         function C() {
           this.a = 123;
