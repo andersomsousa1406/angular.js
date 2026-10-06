@@ -2303,6 +2303,22 @@ describe('parser', function() {
         expect(scope.$eval('[1, 2,]').length).toEqual(2);
       });
 
+      it('should create fresh literal arrays during reentry and preserve locals', inject(function($parse) {
+        var fn = $parse('[first(), second(), local]');
+        var calls = [];
+        var locals = {local: 'outer', first: function() {
+          calls.push('first');
+          expect(fn({}, {first: function() { return 1; }, second: function() { return 2; }, local: 3})).toEqual([1, 2, 3]);
+          return 'a';
+        }, second: function() { calls.push('second'); return 'b'; }};
+        var result = fn({}, locals);
+        expect(result).toEqual(['a', 'b', 'outer']);
+        expect(calls).toEqual(['first', 'second']);
+        result[0] = 'mutated';
+        expect(fn({}, locals)).toEqual(['a', 'b', 'outer']);
+        expect(fn({}, locals)).not.toBe(result);
+      }));
+
       it('should evaluate array access', function() {
         expect(scope.$eval('[1][0]')).toEqual(1);
         expect(scope.$eval('[[1]][0][0]')).toEqual(1);

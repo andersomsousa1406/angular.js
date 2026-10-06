@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse (CSP):** construct three-element array literals directly and allocate
+  other nonempty literal results at their known size, preserving fresh arrays.
+
 - **date:** reuse resolved-format tokens in a bounded cache, requiring repeated
   misses before replacement at capacity and observing live locale values.
 

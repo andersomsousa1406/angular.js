@@ -1446,10 +1446,21 @@ ASTInterpreter.prototype = {
       forEach(ast.elements, function(expr) {
         args.push(self.recurse(expr));
       });
+      if (!args.length) {
+        return function() { return context ? {value: []} : []; };
+      }
+      if (args.length === 3) {
+        return function(scope, locals, assign, inputs) {
+          var value = [args[0](scope, locals, assign, inputs),
+                       args[1](scope, locals, assign, inputs),
+                       args[2](scope, locals, assign, inputs)];
+          return context ? {value: value} : value;
+        };
+      }
       return function(scope, locals, assign, inputs) {
-        var value = [];
+        var value = new Array(args.length);
         for (var i = 0; i < args.length; ++i) {
-          value.push(args[i](scope, locals, assign, inputs));
+          value[i] = args[i](scope, locals, assign, inputs);
         }
         return context ? {value: value} : value;
       };

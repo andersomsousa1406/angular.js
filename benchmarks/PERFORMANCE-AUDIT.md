@@ -1035,3 +1035,16 @@ repetido 83,35 -> 52,20 ms (37,4%), alias 46,30 -> 29,90 ms (35,4%).
 Rotacao de 40 formatos 37,15 -> 35,25 ms (5,1%). Cache retém memoria limitada;
 nao afirmar reducao numerica de heap. Build/lint, 26.898 execucoes unitarias e
 outputs iguais. Ver CORE-ROUND9-AUDIT.md.
+
+## CSP: construcao de arrays literais (2026-10-06)
+
+Tres elementos usam literal direto; demais nao vazios predefinem tamanho e
+preenchem por indice. Vazio mantem literal [] em funcao especifica. Cada chamada
+continua criando seu proprio resultado e avaliando elementos da esquerda para
+direita. Teste nos dois modos verifica locals, reentrada e mutacao do resultado.
+Chrome 154, quatro pares e 15 amostras de 200.000 chamadas: tres elementos
+37,15 -> 29,35 ms (21%). Controle vazio 7,55 -> 7,35 ms; 16 elementos
+134,45 -> 135,35 ms, sem ganho consistente. Nao reduzir a quantidade de arrays
+retornados nem afirmar bytes de heap economizados. Build/lint, 26.898 execucoes
+unitarias e outputs iguais. Beneficio de tempo medido restrito a tres elementos
+em CSP. Ver CORE-ROUND9-AUDIT.md.
