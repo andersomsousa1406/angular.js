@@ -2638,6 +2638,23 @@ describe('parser', function() {
       });
 
       describe('one-time binding', function() {
+        it('should queue one cleanup while checking the final value and retry in a later digest', inject(function($rootScope) {
+          spyOn($rootScope, '$$postDigest').and.callThrough();
+          $rootScope.value = 1;
+          $rootScope.$watch('::value');
+          var reset = true;
+          $rootScope.$watch(function() {
+            if (reset) { reset = false; $rootScope.value = undefined; }
+            return 1;
+          });
+          $rootScope.$digest();
+          expect($rootScope.$$postDigest.calls.count()).toBe(1);
+          expect($rootScope.$$watchersCount).toBe(2);
+          $rootScope.value = 2;
+          $rootScope.$digest();
+          expect($rootScope.$$postDigest.calls.count()).toBe(2);
+          expect($rootScope.$$watchersCount).toBe(1);
+        }));
         it('should always use the cache', inject(function($parse) {
           expect($parse('foo')).toBe($parse('foo'));
           expect($parse('::foo')).toBe($parse('::foo'));

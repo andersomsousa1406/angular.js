@@ -488,3 +488,14 @@ chamadas por amostra: 11,7 -> 6,6 ms. Checksums das chaves consumidas iguais:
 execucao completa de animacoes. Nao demonstrar ganho geral de FPS ou economia
 numerica de memoria; a alocacao de array no caminho comum foi removida.
 Testes de conversao e suites de bundles isolados aprovados.
+
+## Bindings one-time e cleanup (2026-10-06)
+
+Cada watcher :: agora mantem apenas um callback unwatchIfDone pendente. O valor
+continua sendo atualizado em cada avaliacao e conferido no postDigest. A flag
+e limpa antes dessa verificacao, permitindo nova tentativa se o valor voltou a
+undefined durante o ciclo. Testes CSP/compilado verificam fila, valor final e
+tentativa no digest seguinte. Nao muda o agendamento ou a frequencia de digest.
+
+Validacao conjunta desta rodada: 26.734 execucoes aprovadas nas sete suites;
+lint dos arquivos alterados e git diff --check aprovados.

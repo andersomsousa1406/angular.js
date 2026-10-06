@@ -1926,7 +1926,7 @@ function $ParseProvider() {
 
     function oneTimeWatchDelegate(scope, listener, objectEquality, parsedExpression, prettyPrintExpression) {
       var isDone = parsedExpression.literal ? isAllDefined : isDefined;
-      var unwatch, lastValue;
+      var unwatch, lastValue, unwatchScheduled = false;
 
       var exp = parsedExpression.$$intercepted || parsedExpression;
       var post = parsedExpression.$$interceptor || identity;
@@ -1947,6 +1947,7 @@ function $ParseProvider() {
       return unwatch;
 
       function unwatchIfDone() {
+        unwatchScheduled = false;
         if (isDone(lastValue)) {
           unwatch();
         }
@@ -1954,7 +1955,8 @@ function $ParseProvider() {
 
       function oneTimeWatch(scope, locals, assign, inputs) {
         lastValue = useInputs && inputs ? inputs[0] : exp(scope, locals, assign, inputs);
-        if (isDone(lastValue)) {
+        if (!unwatchScheduled && isDone(lastValue)) {
+          unwatchScheduled = true;
           scope.$$postDigest(unwatchIfDone);
         }
         return post(lastValue);

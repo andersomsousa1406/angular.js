@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse:** schedule one post-digest cleanup per one-time watcher while still
+  checking its final value and allowing retry in later digests.
+
 - **ngAnimate:** construct common animation cache keys without temporary arrays,
   preserving legacy conversion for non-string arguments.
 
