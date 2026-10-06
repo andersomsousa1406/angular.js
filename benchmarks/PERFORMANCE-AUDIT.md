@@ -889,3 +889,16 @@ Reducao de tempo de 5,8% a 7,5% nesses casos. Build, 26.826 execucoes unitarias,
 lint e saidas diferenciais aprovados. Nao afirmar economia numerica de heap ou
 ganho total de tela. Arrays de grupos/splice continuam existindo.
 Ver CORE-ROUND5-AUDIT.md.
+
+## $compile: indice para listas grandes de classes (2026-10-06)
+
+tokenDifference usa um mapa sem prototype quando a segunda lista tem pelo menos
+16 tokens e o produto dos tamanhos chega a 1.024, apenas para entradas string.
+Listas menores mantem a busca original. Ordem, duplicatas, tokens vazios e nomes
+como __proto__/constructor continuam iguais; teste cobre esses casos.
+
+Chrome 154, quatro pares e 15 amostras: 1.000 comparacoes de listas com 100
+tokens passaram de 68,65 para 40,40 ms (41,2% menos tempo). Controle com quatro
+tokens: 9,65 para 9,55 ms. O mapa adiciona memoria temporaria; nao afirmar
+reducao de heap. Build, 26.826 execucoes unitarias, lint e comparacao de saidas
+aprovados. Medicao isola o helper, nao toda compilacao. Ver CORE-ROUND5-AUDIT.md.

@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$compile:** index large class token comparisons with a null-prototype map,
+  preserving token order, duplicates and whitespace behavior.
+
 - **number/currency:** use direct digit loops for carry and zero detection,
   build groups with push/reverse and avoid an unused empty decimals array.
 

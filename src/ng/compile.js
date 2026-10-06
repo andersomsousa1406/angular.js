@@ -4387,6 +4387,17 @@ function tokenDifference(str1, str2) {
       tokens1 = str1.split(/\s+/),
       tokens2 = str2.split(/\s+/);
 
+  if (tokens2.length >= 16 && tokens1.length * tokens2.length >= 1024 &&
+      typeof str1 === 'string' && typeof str2 === 'string') {
+    var lookup = createMap();
+    for (var k = 0; k < tokens2.length; k++) lookup[tokens2[k]] = true;
+    for (var index = 0; index < tokens1.length; index++) {
+      var current = tokens1[index];
+      if (!lookup[current]) values += (values.length > 0 ? ' ' : '') + current;
+    }
+    return values;
+  }
+
   outer:
   for (var i = 0; i < tokens1.length; i++) {
     var token = tokens1[i];

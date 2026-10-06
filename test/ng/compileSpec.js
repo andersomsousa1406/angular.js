@@ -1,8 +1,22 @@
 'use strict';
+/* global tokenDifference: false */
 
 /* eslint-disable no-script-url */
 
 describe('$compile', function() {
+  it('should preserve token difference order, duplicates and whitespace for large lists', function() {
+    var first = ['__proto__', 'keep', 'keep', 'constructor'];
+    var second = [];
+    for (var i = 0; i < 40; i++) {
+      first.push('first' + i);
+      second.push('second' + i);
+    }
+    second.push('__proto__', 'constructor', 'first1');
+    expect(tokenDifference(first.join(' '), second.join(' '))).toBe(
+      first.filter(function(value) { return second.indexOf(value) === -1; }).join(' '));
+    expect(tokenDifference(' ' + first.join(' ') + ' ', second.join(' '))).toBe(
+      'keep keep ' + first.slice(4).filter(function(value) { return value !== 'first1'; }).join(' ') + ' ');
+  });
   describe('failed asynchronous templates', function() {
     var deferred;
     beforeEach(module(function($provide, $compileProvider, $exceptionHandlerProvider) {
