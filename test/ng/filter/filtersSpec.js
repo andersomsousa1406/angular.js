@@ -320,6 +320,29 @@ describe('filters', function() {
   });
 
   describe('date', function() {
+    it('should observe locale alias and month changes after repeated formatting', inject(function($locale, $filter) {
+      var filter = $filter('date'), value = new Date(Date.UTC(2020, 0, 2));
+      $locale.DATETIME_FORMATS.auditAlias = 'yyyy';
+      expect(filter(value, 'auditAlias', 'UTC')).toBe('2020');
+      expect(filter(value, 'auditAlias', 'UTC')).toBe('2020');
+      $locale.DATETIME_FORMATS.auditAlias = 'MM';
+      expect(filter(value, 'auditAlias', 'UTC')).toBe('01');
+      expect(filter(value, 'MMMM', 'UTC')).toBe($locale.DATETIME_FORMATS.MONTH[0]);
+      $locale.DATETIME_FORMATS.MONTH[0] = 'Changed';
+      expect(filter(value, 'MMMM', 'UTC')).toBe('Changed');
+    }));
+
+    it('should preserve literals, timezone and reused formats after many distinct formats', inject(function($filter) {
+      var filter = $filter('date'), value = new Date(Date.UTC(2020, 0, 2, 3));
+      for (var i = 0; i < 40; i++) {
+        expect(filter(value, '\'label ' + i + '\' yyyy', 'UTC')).toBe('label ' + i + ' 2020');
+      }
+      expect(filter(value, '\'label 0\' yyyy', 'UTC')).toBe('label 0 2020');
+      expect(filter(value, 'HH:mm Z', '+0200')).toBe('05:00 +0200');
+      expect(filter(value, 'HH:mm Z', '-0200')).toBe('01:00 -0200');
+      var literal = new Array(300).join('x');
+      expect(filter(value, '\'' + literal + '\'', 'UTC')).toBe(literal);
+    }));
     var morning    = new angular.mock.TzDate(+5, '2010-09-03T12:05:08.001Z'); //7am
     var noon       = new angular.mock.TzDate(+5, '2010-09-03T17:05:08.012Z'); //12pm
     var midnight   = new angular.mock.TzDate(+5, '2010-09-03T05:05:08.123Z'); //12am

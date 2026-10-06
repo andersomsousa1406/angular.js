@@ -1022,3 +1022,16 @@ e digest 8,25 -> 8,75 ms (6,1% mais lento). Nao demonstrar ganho universal:
 mantido pela reducao conhecida de estruturas, sem medicao numerica de heap.
 Quatro pares/15 amostras, outputs iguais. Build/lint e 26.870 execucoes unitarias
 aprovados. Ver CORE-ROUND8-AUDIT.md para controles e procedimento.
+
+## date: cache limitado de tokens (2026-10-06)
+
+Reter ate 16 formatos string de ate 256 caracteres e uma chave de miss. Resolver
+aliases a cada chamada e guardar so tokens, lendo nomes do locale/timezone ao
+formatar. Ao atingir capacidade, substituir o mais antigo apenas quando a chave
+repete o ultimo miss; evitar expulsao continua sob rotacao de formatos.
+Testes cobrem troca de alias/mes, muitos formatos, literais, formatos longos e
+timezone. Chrome 154, quatro pares e 15 amostras de 10.000 chamadas: formato
+repetido 83,35 -> 52,20 ms (37,4%), alias 46,30 -> 29,90 ms (35,4%).
+Rotacao de 40 formatos 37,15 -> 35,25 ms (5,1%). Cache retém memoria limitada;
+nao afirmar reducao numerica de heap. Build/lint, 26.898 execucoes unitarias e
+outputs iguais. Ver CORE-ROUND9-AUDIT.md.

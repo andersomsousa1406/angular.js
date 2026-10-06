@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **date:** reuse resolved-format tokens in a bounded cache, requiring repeated
+  misses before replacement at capacity and observing live locale values.
+
 - **$q.race:** construct the result promise directly, avoiding an unused
   Deferred wrapper and notify callback while retaining settlement scheduling.
 

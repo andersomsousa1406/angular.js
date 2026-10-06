@@ -586,7 +586,10 @@ var DATE_FORMATS_SPLIT = /((?:[^yMLdHhmsaZEwG']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+
  */
 dateFilter.$inject = ['$locale'];
 function dateFilter($locale) {
-
+  var formatCache = createMap();
+  var formatCacheKeys = [];
+  var formatCachePosition = 0;
+  var lastMissedFormat;
 
   var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
                      // 1        2       3         4          5          6          7          8  9     10      11
@@ -617,7 +620,7 @@ function dateFilter($locale) {
 
   return function(date, format, timezone) {
     var text = '',
-        parts = [],
+        parts,
         fn, match;
 
     format = format || 'mediumDate';
@@ -634,14 +637,32 @@ function dateFilter($locale) {
       return date;
     }
 
-    while (format) {
-      match = DATE_FORMATS_SPLIT.exec(format);
-      if (match) {
-        parts.push(match[1]);
-        format = match[2];
-      } else {
-        parts.push(format);
-        format = null;
+    // Bound retained formats and their length; resolve locale aliases on every call.
+    var cacheKey = typeof format === 'string' && format.length <= 256 ? format : undefined;
+    parts = cacheKey !== undefined ? formatCache[cacheKey] : undefined;
+    if (!parts) {
+      parts = [];
+      while (format) {
+        match = DATE_FORMATS_SPLIT.exec(format);
+        if (match) {
+          parts.push(match[1]);
+          format = match[2];
+        } else {
+          parts.push(format);
+          format = null;
+        }
+      }
+      if (cacheKey !== undefined) {
+        // At capacity, require a repeated miss to avoid churning unique formats.
+        if (formatCacheKeys.length < 16 || cacheKey === lastMissedFormat) {
+          if (formatCacheKeys.length === 16) {
+            delete formatCache[formatCacheKeys[formatCachePosition]];
+          }
+          formatCacheKeys[formatCachePosition] = cacheKey;
+          formatCachePosition = (formatCachePosition + 1) % 16;
+          formatCache[cacheKey] = parts;
+        }
+        lastMissedFormat = cacheKey;
       }
     }
 
