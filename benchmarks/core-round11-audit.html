@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<meta charset="utf-8">
+<title>Generated parser, linked node snapshots and interpolation construction</title>
+<script>
+document.write('<script src="' +
+  (location.search.indexOf('candidate') !== -1 ? 'candidate' : 'baseline') +
+  '.js"><\/script>');
+</script>
+<script>
+window.run = function() {
+  var injector = angular.injector(['ng']);
+  var root = injector.get('$rootScope'), parse = injector.get('$parse');
+  var compile = injector.get('$compile'), interpolate = injector.get('$interpolate');
+  var results = {}, outputs = [], sink;
+  function bench(name, count, action) {
+    for (var warm = 0; warm < count * 5; warm++) sink = action(warm);
+    var samples = [];
+    for (var sample = 0; sample < 15; sample++) {
+      var start = performance.now();
+      for (var i = 0; i < count; i++) sink = action(i);
+      samples.push(performance.now() - start);
+    }
+    results[name] = {count: count, medianMs: samples.slice().sort(function(a, b) {
+      return a - b;
+    })[7], samples: samples};
+  }
+  var scope = {row: {customer: {name: 'Maria', value: 0}}};
+  var expression = parse('row.customer.value');
+  results.generatedCodeLength = expression.toString().length;
+  bench('generatedPropertyChain', 100000, function(i) { scope.row.customer.value = i; return expression(scope); });
+  var call = parse('row.customer.name.toUpperCase()');
+  bench('generatedMethodChain', 100000, function() { return call(scope); });
+  outputs.push(expression(scope), expression({}), call(scope));
+  outputs.push(expression.toString(), call.toString());
+  var assignment = parse('row.customer.value = 42');
+  outputs.push(assignment(scope));
+  var computed = parse('row[key].value');
+  outputs.push(computed(scope, {key: 'customer'}));
+  bench('compile500Expressions', 20, function() {
+    var localParse = angular.injector(['ng']).get('$parse');
+    var length = 0;
+    for (var i = 0; i < 500; i++) length += localParse('rows.item' + i + '.value').toString().length;
+    return length;
+  });
+  outputs.push(sink);
+  var watched = root.$new();
+  watched.row = {customer: {value: 0}};
+  for (var watchIndex = 0; watchIndex < 1000; watchIndex++) watched.$watch('row.customer.value', function() {});
+  bench('generatedPropertyDigest1000', 100, function(i) { watched.row.customer.value = i; watched.$digest(); });
+  watched.$destroy();
+  [1, 4, 16].forEach(function(size) {
+    var template = '';
+    for (var i = 0; i < size; i++) template += 'before{{value' + i + '}}after';
+    bench('constructInterpolation' + size, 5000, function() { return interpolate(template, true); });
+    outputs.push(interpolate(template)({value0: 'A'}));
+  });
+  [1, 100].forEach(function(linked) {
+    var template = '';
+    for (var i = 0; i < 100; i++) template += i < linked ? '<span ng-bind="name"></span>' : '<span></span>';
+    var link = compile(template);
+    bench('link' + linked + 'Of100Nodes', 100, function() {
+      var child = root.$new(); child.name = 'Maria';
+      var clone = link(child, function() {});
+      child.$digest();
+      var text = clone[0].textContent;
+      child.$destroy(); clone.remove();
+      return text;
+    });
+    outputs.push(sink);
+  });
+  var attrLink = compile('<div title="hello {{name}}" data-label="{{name}}"></div>');
+  bench('compileInterpolatedAttributes', 1000, function() {
+    return compile('<div title="hello {{name}}" data-label="{{name}}" aria-label="{{name}}"></div>');
+  });
+  bench('linkInterpolatedAttributes', 1000, function() {
+    var child = root.$new(); child.name = 'Maria';
+    var clone = attrLink(child, function() {}); child.$digest();
+    var title = clone.attr('title'); child.$destroy(); clone.remove(); return title;
+  });
+  outputs.push(sink, root.$$watchersCount);
+  root.$destroy();
+  results.outputs = outputs;
+  return results;
+};
+</script>
+</html>

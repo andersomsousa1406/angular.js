@@ -1079,3 +1079,20 @@ execucoes unitarias, 159 checks das tres versoes e 159 da tela passaram. Debug,
 element.scope e frequencia dos digests preservados. Minificados atualizados.
 Comparacao do projeto continua mista, sem ganho geral ou menor heap confirmado.
 Ver CORE-ROUND10-AUDIT.md, TABLE-DATE-AUDIT.md e round10-audit-summary.json.
+
+
+## Rodada 11: somente AngularJS (2026-10-07)
+
+Parser: criar regex de escape somente para nomes que exigem colchetes;
+codigo gerado permanece identico. Compilacao de expressoes sem ganho relevante
+confirmado (0,7%). Vinculacao: snapshot denso, sem array para uma unica entrada.
+Em 100 irmaos com um no vinculado, evitar snapshot de 100 posicoes; com dois,
+reservar duas. Fixture esparso 34,15 -> 32,15 ms (5,9%); denso sem ganho.
+Atributos: reutilizar nome normalizado e nome do elemento na interpolacao;
+compilar 1.000 fixtures 59,65 -> 54,95 ms (7,9%), link isolado sem ganho robusto.
+
+26.930 execucoes unitarias ChromeHeadless passaram, buildall/minall e lint.
+159 checks do minificado 1.8.5-local+sha.c99191bb7 passaram nas tres versoes.
+Componentes intactos: 75 arquivos privados verificados. Sem alteracao de debug,
+element.scope ou frequencia de digests. Sem reducao de heap total demonstrada.
+Ver CORE-ROUND11-AUDIT.md e round11-audit-summary.json.

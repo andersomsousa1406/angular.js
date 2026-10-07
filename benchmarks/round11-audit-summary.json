@@ -1,0 +1,285 @@
+{
+  "date": "2026-10-07",
+  "browser": "Chrome 154 / Windows",
+  "sourceCommits": [
+    "3d399de7d",
+    "f36e82254",
+    "c99191bb7"
+  ],
+  "unitTestExecutions": 26930,
+  "metrics": {
+    "generatedPropertyChain": {
+      "beforeMs": 0.6500000953674316,
+      "afterMs": 0.5500000715255737,
+      "reductionPercent": 15.384616795376004,
+      "baselineRoundMedians": [
+        1,
+        0.5999999046325684,
+        0.7000000476837158,
+        0.6000001430511475
+      ],
+      "candidateRoundMedians": [
+        1,
+        0.40000009536743164,
+        0.5,
+        0.6000001430511475
+      ]
+    },
+    "generatedMethodChain": {
+      "beforeMs": 14,
+      "afterMs": 13.25000011920929,
+      "reductionPercent": 5.35714200564793,
+      "baselineRoundMedians": [
+        15.899999856948853,
+        13.799999952316284,
+        14.200000047683716,
+        13.200000047683716
+      ],
+      "candidateRoundMedians": [
+        13.900000095367432,
+        13.600000143051147,
+        12.900000095367432,
+        12.800000190734863
+      ]
+    },
+    "compile500Expressions": {
+      "beforeMs": 281.85000002384186,
+      "afterMs": 279.9499999284744,
+      "reductionPercent": 0.6741174721329513,
+      "baselineRoundMedians": [
+        280.5,
+        285.7999999523163,
+        271.2000000476837,
+        283.2000000476837
+      ],
+      "candidateRoundMedians": [
+        280.7999999523163,
+        290.39999985694885,
+        271.19999980926514,
+        279.09999990463257
+      ]
+    },
+    "generatedPropertyDigest1000": {
+      "beforeMs": 8.649999976158142,
+      "afterMs": 8.549999952316284,
+      "reductionPercent": 1.1560696429767203,
+      "baselineRoundMedians": [
+        9.799999952316284,
+        8.799999952316284,
+        8,
+        8.5
+      ],
+      "candidateRoundMedians": [
+        8.800000190734863,
+        8.400000095367432,
+        8.699999809265137,
+        7.900000095367432
+      ]
+    },
+    "constructInterpolation1": {
+      "beforeMs": 9.600000023841858,
+      "afterMs": 9.150000095367432,
+      "reductionPercent": 4.687499243300408,
+      "baselineRoundMedians": [
+        8.400000095367432,
+        9.599999904632568,
+        9.799999952316284,
+        9.600000143051147
+      ],
+      "candidateRoundMedians": [
+        9.400000095367432,
+        8.700000047683716,
+        9.300000190734863,
+        9
+      ]
+    },
+    "constructInterpolation4": {
+      "beforeMs": 20.350000143051147,
+      "afterMs": 20.600000023841858,
+      "reductionPercent": -1.2285006340704063,
+      "baselineRoundMedians": [
+        20.800000190734863,
+        20.300000190734863,
+        20.199999809265137,
+        20.40000009536743
+      ],
+      "candidateRoundMedians": [
+        20.5,
+        20.90000009536743,
+        20.5,
+        20.700000047683716
+      ]
+    },
+    "constructInterpolation16": {
+      "beforeMs": 66.89999997615814,
+      "afterMs": 66.5,
+      "reductionPercent": 0.5979072889397474,
+      "baselineRoundMedians": [
+        68.70000004768372,
+        69.5,
+        65.09999990463257,
+        63.200000047683716
+      ],
+      "candidateRoundMedians": [
+        65.5,
+        68.40000009536743,
+        67.5,
+        62.89999985694885
+      ]
+    },
+    "link1Of100Nodes": {
+      "beforeMs": 34.14999985694885,
+      "afterMs": 32.14999997615814,
+      "reductionPercent": 5.8565150488097295,
+      "baselineRoundMedians": [
+        35,
+        34.19999980926514,
+        32.40000009536743,
+        34.09999990463257
+      ],
+      "candidateRoundMedians": [
+        31.600000143051147,
+        34.200000047683716,
+        31.40000009536743,
+        32.69999980926514
+      ]
+    },
+    "link100Of100Nodes": {
+      "beforeMs": 64.35000002384186,
+      "afterMs": 64.80000007152557,
+      "reductionPercent": -0.6993007731421752,
+      "baselineRoundMedians": [
+        65.29999995231628,
+        64.70000004768372,
+        64,
+        63.19999980926514
+      ],
+      "candidateRoundMedians": [
+        60.19999980926514,
+        66.20000004768372,
+        63.40000009536743,
+        67.59999990463257
+      ]
+    },
+    "compileInterpolatedAttributes": {
+      "beforeMs": 59.64999997615814,
+      "afterMs": 54.949999928474426,
+      "reductionPercent": 7.879295975795952,
+      "baselineRoundMedians": [
+        60.09999990463257,
+        60.5,
+        56.89999985694885,
+        59.200000047683716
+      ],
+      "candidateRoundMedians": [
+        54.799999952316284,
+        56.5,
+        51.80000019073486,
+        55.09999990463257
+      ]
+    },
+    "linkInterpolatedAttributes": {
+      "beforeMs": 31.5,
+      "afterMs": 31.09999990463257,
+      "reductionPercent": 1.2698415725950207,
+      "baselineRoundMedians": [
+        31.90000009536743,
+        33.60000014305115,
+        30.700000047683716,
+        31.09999990463257
+      ],
+      "candidateRoundMedians": [
+        31.799999952316284,
+        31.59999990463257,
+        29.799999952316284,
+        30.59999990463257
+      ]
+    }
+  },
+  "outputsEqual": true,
+  "snapshotSlotsFromSource": {
+    "singleOf100": {
+      "before": 100,
+      "after": 0
+    },
+    "twoOf100": {
+      "before": 100,
+      "after": 2
+    },
+    "dense100": {
+      "before": 100,
+      "after": 100
+    }
+  },
+  "generatedCodeLengths": [
+    {
+      "mode": "baseline",
+      "round": 0,
+      "length": 196
+    },
+    {
+      "mode": "candidate",
+      "round": 0,
+      "length": 196
+    },
+    {
+      "mode": "candidate",
+      "round": 1,
+      "length": 196
+    },
+    {
+      "mode": "baseline",
+      "round": 1,
+      "length": 196
+    },
+    {
+      "mode": "baseline",
+      "round": 2,
+      "length": 196
+    },
+    {
+      "mode": "candidate",
+      "round": 2,
+      "length": 196
+    },
+    {
+      "mode": "candidate",
+      "round": 3,
+      "length": 196
+    },
+    {
+      "mode": "baseline",
+      "round": 3,
+      "length": 196
+    }
+  ],
+  "hashes": {
+    "baseline": "8abcb406937792a0d7469081ce9b6c593267df6392bde4bbf130c0919ae0454f",
+    "candidate": "e7a871d8b0b33b6a8cd798a6b96056bd592b0016f308e75d8f2abb00c2b267a0",
+    "minified": "47178cae02e816d62c099c6e61162fc67ac6c405f23cb5498b3329a7a679f983"
+  },
+  "integrationChecks": [
+    {
+      "version": "1.6.9",
+      "passed": 53,
+      "total": 53,
+      "errors": []
+    },
+    {
+      "version": "1.8.3",
+      "passed": 53,
+      "total": 53,
+      "errors": []
+    },
+    {
+      "version": "1.8.5-local+sha.c99191bb7",
+      "passed": 53,
+      "total": 53,
+      "errors": []
+    }
+  ],
+  "componentFiles": {
+    "checkedFiles": 75,
+    "unchanged": true
+  }
+}
