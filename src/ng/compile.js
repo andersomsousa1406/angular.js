@@ -2622,26 +2622,26 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
 
       function compositeLinkFn(scope, nodeList, $rootElement, parentBoundTranscludeFn) {
         var nodeLinkFn, childLinkFn, node, childScope, i, ii, idx, childBoundTranscludeFn;
-        var stableNodeList;
+        var stableNodeList, needsSnapshot = nodeLinkFnFound && linkFns.length > 3;
 
 
-        if (nodeLinkFnFound) {
+        if (needsSnapshot) {
           // copy nodeList so that if a nodeLinkFn removes or adds an element at this DOM level our
           // offsets don't get screwed up
-          var nodeListLength = nodeList.length;
-          stableNodeList = new Array(nodeListLength);
+          stableNodeList = new Array(linkFns.length / 3);
 
-          // create a sparse array by only copying the elements which have a linkFn
+          // Capture only linked nodes, densely, before any linking can mutate the DOM.
           for (i = 0; i < linkFns.length; i += 3) {
             idx = linkFns[i];
-            stableNodeList[idx] = nodeList[idx];
+            stableNodeList[i / 3] = nodeList[idx];
           }
         } else {
           stableNodeList = nodeList;
         }
 
         for (i = 0, ii = linkFns.length; i < ii;) {
-          node = stableNodeList[linkFns[i++]];
+          node = stableNodeList[needsSnapshot ? i / 3 : linkFns[i]];
+          i++;
           nodeLinkFn = linkFns[i++];
           childLinkFn = linkFns[i++];
 

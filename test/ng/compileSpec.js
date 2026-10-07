@@ -4,6 +4,35 @@
 /* eslint-disable no-script-url */
 
 describe('$compile', function() {
+  describe('linked node snapshots', function() {
+    var seen;
+    beforeEach(module(function($compileProvider) {
+      seen = [];
+      $compileProvider.directive('removeFollowing', function() {
+        return function(scope, element) { element[0].parentNode.removeChild(element[0].nextSibling); };
+      });
+      $compileProvider.directive('recordNode', function() {
+        return function(scope, element) { seen.push(element[0].nodeName); };
+      });
+    }));
+    it('should link the captured nodes after removing an unlinked sibling', inject(function($compile, $rootScope) {
+      var element = $compile('<div><i remove-following></i><span></span><b record-node></b></div>')($rootScope);
+      expect(seen).toEqual(['B']);
+      expect(element[0].childNodes.length).toBe(2);
+      element.remove();
+    }));
+    it('should still link a captured node removed by an earlier sibling', inject(function($compile, $rootScope) {
+      var element = $compile('<div><i remove-following></i><b record-node></b></div>')($rootScope);
+      expect(seen).toEqual(['B']);
+      expect(element[0].childNodes.length).toBe(1);
+      element.remove();
+    }));
+    it('should link a single directive after unlinked nodes', inject(function($compile, $rootScope) {
+      var element = $compile('<span></span><span></span><b record-node></b>')($rootScope);
+      expect(seen).toEqual(['B']);
+      element.remove();
+    }));
+  });
   it('should preserve directive prefixes, separator offsets and boxed strings', function() {
     expect(directiveNormalize('title')).toBe('title');
     expect(directiveNormalize('ngModel')).toBe('ngModel');
