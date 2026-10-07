@@ -1227,10 +1227,10 @@ ASTCompiler.prototype = {
 
   nonComputedMember: function(left, right) {
     var SAFE_IDENTIFIER = /^[$_a-zA-Z][$_a-zA-Z0-9]*$/;
-    var UNSAFE_CHARACTERS = /[^$_a-zA-Z0-9]/g;
     if (SAFE_IDENTIFIER.test(right)) {
       return left + '.' + right;
     } else {
+      var UNSAFE_CHARACTERS = /[^$_a-zA-Z0-9]/g;
       return left  + '["' + right.replace(UNSAFE_CHARACTERS, this.stringEscapeFn) + '"]';
     }
   },

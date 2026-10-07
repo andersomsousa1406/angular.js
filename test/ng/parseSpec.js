@@ -4408,6 +4408,24 @@ describe('parser', function() {
 
   forEach([true, false], function(cspEnabled) {
     describe('custom identifiers (csp: ' + cspEnabled + ')', function() {
+      it('should preserve repeated escaped names without caching property values', inject(function($parse) {
+        var reads = 0;
+        var value = 3;
+        var object = {};
+        Object.defineProperty(object, '#value-part', {
+          get: function() { reads++; return value; },
+          set: function(newValue) { value = newValue; }
+        });
+        var localScope = {'#row-part': object};
+        var expression = $parse('#row-part.#value-part + #row-part.#value-part');
+        expect(expression(localScope)).toBe(6);
+        expect(reads).toBe(2);
+        $parse('#row-part.#value-part').assign(localScope, 5);
+        expect(expression(localScope)).toBe(10);
+        expect(reads).toBe(5);
+        expect($parse('#other-part.#value-part')({'#other-part': object})).toBe(5);
+        expect(reads).toBe(6);
+      }));
       var isIdentifierStartRe = /[#a-z]/;
       var isIdentifierContinueRe = /[-a-z]/;
       var isIdentifierStartFn;

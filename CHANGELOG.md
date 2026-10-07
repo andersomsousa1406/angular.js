@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$parse:** instantiate the property-escaping regex only for names that
+  require bracket notation, preserving the generated evaluator code.
+
 - **$compile:** skip normalization replacements for plain directive names,
   skip impossible prefix removals and share the separator callback.
 
