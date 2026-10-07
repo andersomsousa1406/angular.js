@@ -6,6 +6,9 @@ and [read the end of life announcement](https://goo.gle/angularjs-end-of-life).*
 
 ## Fork: unreleased
 
+- **$compile:** reuse unchanged normalized attribute names and the collected
+  element name while preparing attribute interpolation directives.
+
 - **$compile:** capture linked nodes in a dense snapshot and avoid the
   snapshot entirely when only one node requires linking.
 

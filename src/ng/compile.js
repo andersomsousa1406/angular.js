@@ -2804,7 +2804,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
             } else {
               // Update nName for cases where a prefix was removed
               // NOTE: the .toLowerCase() is unnecessary and causes https://github.com/angular/angular.js/issues/16624 for ng-attr-*
-              nName = directiveNormalize(name.toLowerCase());
+              if (isNgAttr || attrStartName) nName = directiveNormalize(name.toLowerCase());
               attrsMap[nName] = name;
 
               if (isNgAttr || !attrs.hasOwnProperty(nName)) {
@@ -2814,7 +2814,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
                 }
               }
 
-              addAttrInterpolateDirective(node, directives, value, nName, isNgAttr);
+              addAttrInterpolateDirective(node, directives, value, nName, isNgAttr, nodeName);
               addDirective(directives, nName, 'A', maxPriority, ignoreDirective, attrStartName,
                             attrEndName);
             }
@@ -3960,8 +3960,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
       );
     }
 
-    function addAttrInterpolateDirective(node, directives, value, name, isNgAttr) {
-      var nodeName = nodeName_(node);
+    function addAttrInterpolateDirective(node, directives, value, name, isNgAttr, nodeName) {
       var trustedContext = getTrustedAttrContext(nodeName, name);
       var mustHaveExpression = !isNgAttr;
       var allOrNothing = ALL_OR_NOTHING_ATTRS[name] || isNgAttr;
